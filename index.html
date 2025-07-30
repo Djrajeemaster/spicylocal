@@ -10,13 +10,20 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header><h1>Welcome to SpicyBeats</h1></header>
+  <header>
+    <div class="header-top">
+      <h1>Welcome to SpicyBeats</h1>
+      <nav class="auth-links">
+        <a href="login.php" class="button">Login</a>
+        <a href="register.php" class="button">Register</a>
+      </nav>
+    </div>
+    <div id="location">Detecting location...</div>
+  </header>
+
+  <section id="categories-container" class="categories-grid"></section>
 
   <div class="filter-bar">
-    <label for="category-select">Category:</label>
-    <select id="category-select">
-      <option value="">All</option>
-    </select>
     <input type="text" id="search-input" placeholder="Search deals" />
     <button id="search-btn">Search</button>
   </div>

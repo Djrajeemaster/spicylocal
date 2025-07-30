@@ -1,5 +1,6 @@
 const dealsContainer = document.getElementById('deals-container');
-const categorySelect = document.getElementById('category-select');
+const categoriesContainer = document.getElementById('categories-container');
+const locationEl = document.getElementById('location');
 const searchInput = document.getElementById('search-input');
 const searchBtn = document.getElementById('search-btn');
 const loadMoreBtn = document.getElementById('load-more');
@@ -7,23 +8,66 @@ let currentPage = 1;
 let lastCategory = '';
 let lastSearch = '';
 
-// Load categories into dropdown
+function displayLocation() {
+  if ('geolocation' in navigator) {
+    navigator.geolocation.getCurrentPosition(pos => {
+      const { latitude, longitude } = pos.coords;
+      fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`)
+        .then(res => res.json())
+        .then(data => {
+          const addr = data.address || {};
+          const city = addr.city || addr.town || addr.village || data.display_name;
+          locationEl.textContent = 'Current Location: ' + city;
+        })
+        .catch(() => {
+          locationEl.textContent = `Lat: ${latitude.toFixed(2)}, Lon: ${longitude.toFixed(2)}`;
+        });
+    }, () => {
+      locationEl.textContent = 'Location unavailable';
+    });
+  } else {
+    locationEl.textContent = 'Geolocation not supported';
+  }
+}
+
+// Load categories as tiles
 fetch('api/get_categories.php')
   .then(res => res.json())
   .then(categories => {
-    categories.forEach(cat => {
-      const option = document.createElement('option');
-      option.value = cat.name;
-      option.textContent = cat.name;
-      categorySelect.appendChild(option);
+    // "All" tile to reset filtering
+    const allTile = document.createElement('div');
+    allTile.className = 'category-tile active';
+    allTile.textContent = 'All';
+    allTile.addEventListener('click', () => {
+      currentPage = 1;
+      lastCategory = '';
+      highlightCategory('All');
+      loadDeals('', lastSearch, true);
     });
+    categoriesContainer.appendChild(allTile);
+
+    categories.forEach(cat => {
+      const tile = document.createElement('div');
+      tile.className = 'category-tile';
+      tile.textContent = cat.name;
+      tile.addEventListener('click', () => {
+        currentPage = 1;
+        lastCategory = cat.name;
+        highlightCategory(cat.name);
+        loadDeals(lastCategory, lastSearch, true);
+      });
+      categoriesContainer.appendChild(tile);
+    });
+
+    // ensure "All" starts highlighted
+    highlightCategory('All');
   });
 
-categorySelect.addEventListener('change', () => {
-  currentPage = 1;
-  lastCategory = categorySelect.value;
-  loadDeals(lastCategory, lastSearch, true);
-});
+function highlightCategory(name) {
+  document.querySelectorAll('.category-tile').forEach(tile => {
+    tile.classList.toggle('active', tile.textContent === name);
+  });
+}
 
 searchBtn.addEventListener('click', () => {
   currentPage = 1;
@@ -104,6 +148,7 @@ loadMoreBtn.addEventListener('click', () => {
 function init() {
   currentPage = 1;
   loadDeals();
+  displayLocation();
 }
 
 init();
