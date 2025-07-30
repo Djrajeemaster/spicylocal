@@ -1,0 +1,79 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpicyBeats Deal Submission</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+    <div class="deal-form">
+        <h2>Submit a Deal</h2>
+        <form id="deal-form">
+            <label for="title">Deal Title:</label><br>
+            <input type="text" id="title" name="title" required><br><br>
+
+            <label for="description">Deal Description:</label><br>
+            <textarea id="description" name="description" required></textarea><br><br>
+
+            <label for="category">Category:</label><br>
+            <select id="category" name="category">
+                <option value="food">Food</option>
+                <option value="electronics">Electronics</option>
+                <option value="clothing">Clothing</option>
+            </select><br><br>
+
+            <button type="submit">Submit Deal</button>
+        </form>
+
+        <div class="feedback-buttons">
+            <button onclick="submitFeedback('useful')">Useful</button>
+            <button onclick="submitFeedback('not_interested')">Not Interested</button>
+            <button onclick="submitFeedback('report_fake')">Report Fake</button>
+        </div>
+    </div>
+
+    <div class="filter">
+        <h3>Filter Deals</h3>
+        <label for="filter-category">Category:</label>
+        <select id="filter-category" onchange="filterDeals()">
+            <option value="all">All</option>
+            <option value="food">Food</option>
+            <option value="electronics">Electronics</option>
+            <option value="clothing">Clothing</option>
+        </select>
+    </div>
+
+    <div id="deal-list">
+        <div class="deal-card">
+            <h4>Deal Title 1</h4>
+            <p>Deal Description goes here...</p>
+        </div>
+        <div class="deal-card">
+            <h4>Deal Title 2</h4>
+            <p>Deal Description goes here...</p>
+        </div>
+    </div>
+
+    <script>
+        // Feedback Button Logic
+        function submitFeedback(feedbackType) {
+            console.log('Submitting feedback:', feedbackType);
+            // Add your AJAX logic to send feedback to the backend
+        }
+
+        // Filtering Logic
+        function filterDeals() {
+            var category = document.getElementById('filter-category').value;
+            console.log('Filtering deals by category:', category);
+            // Add your filtering logic here
+        }
+    </script>
+
+</body>
+</html>

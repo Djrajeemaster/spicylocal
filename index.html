@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpicyBeats - Local Deals</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header><h1>Welcome to SpicyBeats</h1></header>
+
+  <div class="filter-bar">
+    <label for="category-select">Category:</label>
+    <select id="category-select">
+      <option value="">All</option>
+    </select>
+    <input type="text" id="search-input" placeholder="Search deals" />
+    <button id="search-btn">Search</button>
+  </div>
+
+  <main>
+    <section id="deals-container">Loading deals...</section>
+    <button id="load-more">Load More</button>
+  </main>
+
+  <script src="bagit.js"></script>
+</body>
+</html>
