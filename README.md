@@ -16,3 +16,8 @@ export ADMIN_EMAIL=admin@example.com
 ```
 
 Run the PHP files through a local server of your choice.
+
+## Authentication
+
+Users can register at `register.php` (or `signup.php`) and log in via
+`login.php`. A `logout.php` script is provided to end the session.
