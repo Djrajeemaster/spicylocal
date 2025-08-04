@@ -12,6 +12,28 @@ console.log("💬 chat.js running...");
     return;
   }
 
+  function fetchMessages() {
+    const room = roomSelect.value;
+    fetch(`chat_api.php?room=${encodeURIComponent(room)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (!data.success) return;
+        messages.innerHTML = "";
+        data.messages.forEach(m => {
+          const msgDiv = document.createElement("div");
+          msgDiv.className = "chat-message" + (m.username === username ? " user" : "");
+          msgDiv.innerHTML = `<strong>${m.username}:</strong> ${m.message}`;
+          messages.appendChild(msgDiv);
+        });
+        messages.scrollTop = messages.scrollHeight;
+      })
+      .catch(err => console.error("❌ Chat fetch error:", err));
+  }
+
+  fetchMessages();
+  setInterval(fetchMessages, 5000);
+  roomSelect.addEventListener("change", fetchMessages);
+
   sendBtn.addEventListener("click", () => {
     const msg = input.value.trim();
     const room = roomSelect.value;
@@ -28,7 +50,7 @@ console.log("💬 chat.js running...");
     messages.appendChild(msgDiv);
     input.value = "";
     messages.scrollTop = messages.scrollHeight;
-console.log("Sending chat:", { username, msg, room });
+    console.log("Sending chat:", { username, msg, room });
 
     // Send to backend
     fetch("chat_api.php", {
@@ -40,6 +62,8 @@ console.log("Sending chat:", { username, msg, room });
     .then(data => {
       if (!data.success) {
         console.warn("⚠️ Failed to store chat message:", data.error || "Unknown error");
+      } else {
+        fetchMessages();
       }
     })
     .catch(err => {
