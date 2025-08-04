@@ -34,7 +34,7 @@ console.log("Sending chat:", { username, msg, room });
     fetch("chat_api.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, message: msg, room_name: room })
+      body: JSON.stringify({ username, message: msg, room })
     })
     .then(res => res.json())
     .then(data => {
