@@ -1,31 +1,32 @@
 <?php
-require_once '../config/db.php';
-
-// Expire outdated deals
-$pdo->exec("UPDATE deals SET status = 'expired' WHERE expiry_timestamp IS NOT NULL AND expiry_timestamp <= NOW() AND status != 'expired'");
 header('Content-Type: application/json');
+require_once __DIR__ . '/../config/db.php';
 
-$id = $_GET['id'] ?? null;
-
-if (!$id) {
-  echo json_encode(['error' => 'Missing ID']);
+$dealId = isset($_GET['id']) ? intval($_GET['id']) : 0;
+if (!$dealId) {
+  echo json_encode(['success' => false, 'error' => 'Missing deal ID']);
   exit;
 }
 
 try {
   $stmt = $pdo->prepare("
-    SELECT d.*,
-      (SELECT SUM(CASE WHEN vote_type = 'up' THEN 1 WHEN vote_type = 'down' THEN -1 ELSE 0 END)
-       FROM votes WHERE deal_id = d.id) AS votes,
-      (SELECT AVG(rating) FROM ratings WHERE deal_id = d.id) AS avg_rating
+    SELECT d.id, d.title, d.description, d.category, d.image, d.user_id, d.created_at, d.views, u.username
     FROM deals d
+    LEFT JOIN users u ON d.user_id = u.id
     WHERE d.id = ?
-    LIMIT 1
   ");
-  $stmt->execute([$id]);
+  $stmt->execute([$dealId]);
   $deal = $stmt->fetch(PDO::FETCH_ASSOC);
 
-  echo json_encode($deal ?: ['error' => 'Deal not found']);
+  if ($deal) {
+    if (!$deal['username']) {
+      $deal['username'] = 'Anonymous';
+    }
+    echo json_encode(['success' => true, 'deal' => $deal]);
+  } else {
+    echo json_encode(['success' => false, 'error' => 'Deal not found']);
+  }
 } catch (Exception $e) {
-  echo json_encode(['error' => 'Failed to load deal']);
+  echo json_encode(['success' => false, 'error' => $e->getMessage()]);
 }
+?>

@@ -2,37 +2,32 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SpicyBeats - Local Deals</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SpicyBeats Deals</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header>
-    <div class="header-top">
-      <h1>Welcome to SpicyBeats</h1>
-      <nav class="auth-links">
-        <a href="login.php" class="button">Login</a>
-        <a href="register.php" class="button">Register</a>
-      </nav>
-    </div>
-    <div id="location">Detecting location...</div>
-  </header>
+  
+<header class="header">
+  <div class="logo" style="padding-left: 1rem;">
+  <a href="index.html">
+    <img src="logo.png" alt="SpicyBeats" style="height: 36px; vertical-align: middle;">
+  </a>
+</div>
+  <div class="nav" id="nav-menu"></div>
+</header>
 
-  <section id="categories-container" class="categories-grid"></section>
 
-  <div class="filter-bar">
-    <input type="text" id="search-input" placeholder="Search deals" />
-    <button id="search-btn">Search</button>
-  </div>
+<div id="dropdown" class="dropdown hidden"></div>
 
-  <main>
-    <section id="deals-container">Loading deals...</section>
-    <button id="load-more">Load More</button>
-  </main>
-
-  <script src="bagit.js"></script>
+<main>
+  <div id="deal-list" class="deal-list">Loading deals...</div>
+  <div id="pagination" class="pagination-container" style="margin-top:1rem;"></div>
+</main>
+<div id="chat-toggle-btn">💬 Chat</div>
+<div id="chat-widget" class="hidden"> ... </div>
+<link rel="stylesheet" href="chat.css">
+<script src="chat.js"></script>
+<script src="bagit.js"></script>
 </body>
 </html>

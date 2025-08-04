@@ -1,0 +1,29 @@
+<?php
+header('Content-Type: application/json');
+require_once __DIR__ . '/../config/db.php';
+
+$data = json_decode(file_get_contents('php://input'), true);
+$username = $data['username'] ?? '';
+$deal_id = $data['deal_id'] ?? 0;
+$comment = trim($data['comment'] ?? '');
+
+if (!$username || !$deal_id || !$comment) {
+  echo json_encode(['success' => false, 'error' => 'Missing fields']);
+  exit;
+}
+
+// Get user_id from username
+$stmt = $pdo->prepare("SELECT id FROM users WHERE username = ?");
+$stmt->execute([$username]);
+$user = $stmt->fetch();
+if (!$user) {
+  echo json_encode(['success' => false, 'error' => 'User not found']);
+  exit;
+}
+$user_id = $user['id'];
+
+$stmt = $pdo->prepare("INSERT INTO comments (deal_id, user_id, comment, created_at) VALUES (?, ?, ?, NOW())");
+$success = $stmt->execute([$deal_id, $user_id, $comment]);
+
+echo json_encode(['success' => $success]);
+?>

@@ -1,0 +1,23 @@
+
+<!-- Floating Chat Widget -->
+<div id="chat-toggle-btn">💬 Chat</div>
+<div id="chat-widget" class="hidden">
+  <div class="chat-header">
+    <select id="chat-room-select">
+      <option value="Hot Deals">🔥 Hot Deals</option>
+      <option value="Food & Offers">🍔 Food & Offers</option>
+      <option value="General Chat">💬 General Chat</option>
+    </select>
+    <div class="chat-controls">
+      <button id="toggle-fullscreen">⛶</button>
+      <button id="close-chat">✖</button>
+    </div>
+  </div>
+  <div class="chat-messages" id="chat-messages"></div>
+  <div class="chat-input">
+    <input type="text" id="chat-message-input" placeholder="Type your message..." />
+    <button id="chat-send-btn">Send</button>
+  </div>
+</div>
+<link rel="stylesheet" href="chat.css">
+<script src="chat.js"></script>

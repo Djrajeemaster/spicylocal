@@ -1,109 +1,148 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Deal Details</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+  <title>Deal Detail</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header><h1>Deal Details</h1></header>
-  <main id="deal-content">Loading deal...</main>
-  <div id="rating-section" class="rating-section"></div>
-  <section id="comments"></section>
-  <div id="comment-form" class="comment-form">
-    <textarea id="comment-text" placeholder="Leave a comment" rows="3" cols="40"></textarea><br>
-    <button id="submit-comment">Submit Comment</button>
+
+<header class="header">
+  <div class="logo">SpicyBeats</div>
+  <div class="nav">
+    <a href="index.html">Home</a>
+    <div class="user-menu" id="user-menu" style="display: none;">
+      <div class="user-icon" id="user-icon">👤</div>
+      <span class="username-label" id="username-label"></span>
+      <div class="dropdown hidden" id="dropdown">
+        <a href="profile.html">Profile</a>
+        <a href="#" id="logout">Logout</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="deal-list">
+  <div class="deal-card">
+    
+  <h3>
+  <span id="deal-title">Loading...</span>
+  <span id="bookmark-container" class="bookmark-icon" title="Bookmark this deal">&#9733;</span>
+</h3>
+    <p id="deal-description"></p>
+    <p>👤 <span id="deal-user">Loading...</span> <span id="verified-badge"></span></p>
+    <p>👁️ <span id="view-count">Loading...</span> views</p>
+
+    <div class="deal-actions" style="margin-top: 1rem;">
+      <div class="vote-section">
+        <button class="vote-btn" data-vote="up">👍</button>
+        <span id="vote-count">0</span>
+        <button class="vote-btn" data-vote="down">👎</button>
+      </div>
+
+      <div class="feedback-section" style="margin-top: 0.5rem;">
+        <button class="feedback-btn" data-feedback="useful">✅ Useful (<span id="fb-useful">0</span>)</button>
+        <button class="feedback-btn" data-feedback="not_interested">❌ Not Interested (<span id="fb-not">0</span>)</button>
+        <button class="feedback-btn" data-feedback="fake">🚩 Fake (<span id="fb-fake">0</span>)</button>
+      </div>
+    </div>
   </div>
 
-  <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const dealId = urlParams.get('id');
+  <section style="margin-top: 2rem;">
+    <h3>💬 Comments</h3>
+    <div id="comments-list" style="margin-bottom: 1rem;"></div>
+    <div id="comment-form-container" style="display: none;">
+      <textarea id="comment-text" placeholder="Write your comment..." style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc;"></textarea><br/>
+      <button id="submit-comment" style="margin-top: 8px; padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">Post Comment</button>
+    </div>
+  </section>
+</main>
 
-    fetch(`api/get_deal.php?id=${dealId}`)
-      .then(res => res.json())
-      .then(deal => {
-        const container = document.getElementById('deal-content');
-        const ratingSection = document.getElementById('rating-section');
-        const avgRating = deal.avg_rating ? parseFloat(deal.avg_rating).toFixed(1) : 'N/A';
-        container.innerHTML = `
-          ${deal.image ? `<img src="images/${deal.image}" style="width:100%; border-radius:10px;" />` : ''}
-          <h2>${deal.title}</h2>
-          <p>${deal.description}</p>
-          <span class="badge">${deal.status}</span>
-          <p><strong>Votes:</strong> ${deal.votes || 0}</p>
-        `;
-        ratingSection.innerHTML = `Average rating: ${avgRating} / 5<br>
-          <label>Rate this deal:
-            <select id="rating-select">
-              <option value="">--</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-            </select>
-          </label>
-          <button id="submit-rating">Submit Rating</button>`;
-        loadComments();
-      })
-      .catch(() => {
-        document.getElementById('deal-content').innerHTML = '<p>Failed to load deal.</p>';
-      });
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const username = localStorage.getItem("username");
+  const userIcon = document.getElementById("user-icon");
+  const usernameLabel = document.getElementById("username-label");
+  const userMenu = document.getElementById("user-menu");
+  const dropdown = document.getElementById("dropdown");
+  const logoutBtn = document.getElementById("logout");
 
-    function loadComments() {
-      fetch(`api/get_comments.php?deal_id=${dealId}`)
-        .then(r => r.json())
-        .then(comments => {
-          const cont = document.getElementById('comments');
-          cont.innerHTML = '<h3>Comments</h3>';
-          comments.forEach(c => {
-            const div = document.createElement('div');
-            div.textContent = `${c.username}: ${c.comment}`;
-            cont.appendChild(div);
-          });
-        });
-    }
+  if (username) {
+    usernameLabel.textContent = username;
+    userMenu.style.display = "flex";
 
-    document.getElementById('submit-comment').addEventListener('click', () => {
-      const text = document.getElementById('comment-text').value;
-      fetch('api/submit_comment.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ deal_id: dealId, comment: text })
-      }).then(r => r.json()).then(res => {
-        if (res.success) {
-          document.getElementById('comment-text').value = '';
-          loadComments();
-        } else {
-          alert(res.error || 'Failed');
-        }
-      });
+    userIcon.addEventListener("click", () => dropdown.classList.toggle("hidden"));
+    usernameLabel.addEventListener("click", () => dropdown.classList.toggle("hidden"));
+
+    logoutBtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      localStorage.clear();
+      window.location.href = "login.html";
+    });
+  }
+
+  const dealId = new URLSearchParams(window.location.search).get("id");
+
+  fetch("api/increment_view.php?id=" + dealId)
+    .then(() => fetch("api/get_deal.php?id=" + dealId))
+    .then(res => res.json())
+    .then(data => {
+      if (data.success && data.deal) {
+        const deal = data.deal;
+        document.getElementById("deal-title").textContent = deal.title;
+        document.getElementById("deal-description").textContent = deal.description;
+        document.getElementById("deal-user").textContent = deal.username || "Anonymous";
+        document.getElementById("verified-badge").textContent = deal.is_verified == 1 ? "✔️ Verified" : "";
+        document.getElementById("view-count").textContent = deal.views;
+      } else {
+        document.getElementById("deal-title").textContent = "Deal not found.";
+      }
+    })
+    .catch((err) => {
+      console.error("Deal load failed:", err);
+      document.getElementById("deal-title").textContent = "Error loading deal.";
     });
 
-    document.getElementById('rating-section').addEventListener('click', evt => {
-      if (evt.target.id === 'submit-rating') {
-        const rating = document.getElementById('rating-select').value;
-        if (!rating) return;
-        fetch('api/submit_rating.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ deal_id: dealId, rating: parseInt(rating) })
-        })
-          .then(r => r.json())
-          .then(res => {
-            if (res.success) {
-              // reload deal to refresh average rating
-              location.reload();
-            } else {
-              alert(res.error || 'Failed');
-            }
-          });
+  // Comments load
+  fetch("api/get_comments.php?id=" + dealId)
+    .then(res => res.json())
+    .then(data => {
+      const container = document.getElementById("comments-list");
+      if (data.success && data.comments.length > 0) {
+        data.comments.forEach(c => {
+          const div = document.createElement("div");
+          div.innerHTML = `<strong>${c.username}</strong>: ${c.comment}`;
+          container.appendChild(div);
+        });
+      } else {
+        container.textContent = "No comments yet.";
       }
     });
-  </script>
+
+  // Post comment
+  if (username) {
+    document.getElementById("comment-form-container").style.display = "block";
+    document.getElementById("submit-comment").addEventListener("click", function () {
+      const commentText = document.getElementById("comment-text").value.trim();
+      if (!commentText) return alert("Comment cannot be empty.");
+
+      fetch("api/post_comment.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, deal_id: dealId, comment: commentText })
+      })
+      .then(res => res.json())
+      .then(resp => {
+        if (resp.success) location.reload();
+        else alert(resp.error || "Failed to post comment.");
+      });
+    });
+  }
+});
+</script>
+
+<script src="deal.js"></script>
 </body>
 </html>

@@ -1,26 +1,23 @@
+
 <?php
-require_once __DIR__ . '/../config/db.php';
 header('Content-Type: application/json');
+require_once __DIR__ . '/config/db.php';
 
 $data = json_decode(file_get_contents('php://input'), true);
+
 $title = $data['title'] ?? '';
 $description = $data['description'] ?? '';
-$image = $data['image'] ?? '';
 $category = $data['category'] ?? '';
-$expiry  = $data['expiry_timestamp'] ?? null;
-$user_id  = $data['user_id'] ?? null;
+$image = $data['image'] ?? '';
+$user_id = $data['user_id'] ?? 0;
 
-if (!$title || !$description || !$category || !$user_id) {
-  echo json_encode(['error' => 'Missing required fields']);
-  exit;
+if (!$title || !$description || !$category) {
+    echo json_encode(['error' => 'Missing required fields']);
+    exit;
 }
 
-try {
-    $status = 'pending';
-    $insert = $pdo->prepare("INSERT INTO deals (title, description, image, category, expiry_timestamp, status, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)");
-    $insert->execute([$title, $description, $image, $category, $expiry, $status, $user_id]);
+$stmt = $pdo->prepare("INSERT INTO deals (title, description, category, image, user_id, status) VALUES (?, ?, ?, ?, ?, 'pending')");
+$stmt->execute([$title, $description, $category, $image, $user_id]);
 
-    echo json_encode(['success' => true, 'status' => $status]);
-} catch (Exception $e) {
-    echo json_encode(['error' => 'Submission failed', 'details' => $e->getMessage()]);
-}
+echo json_encode(['success' => true, 'message' => 'Deal submitted']);
+?>

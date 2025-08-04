@@ -1,0 +1,208 @@
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f7fa;
+    margin: 0;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 28px;
+    color: #333;
+}
+
+.dashboard-container {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    padding: 20px;
+    overflow-x: auto;
+}
+
+.deal-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.deal-table th, .deal-table td {
+    padding: 12px 14px;
+    border: 1px solid #e0e0e0;
+    font-size: 14px;
+    text-align: left;
+}
+
+.deal-table th {
+    background-color: #f3f4f6;
+    font-weight: 600;
+    color: #333;
+}
+
+.deal-table tr:nth-child(even) {
+    background-color: #fafafa;
+}
+
+.deal-table tr:hover {
+    background-color: #f1f5f9;
+}
+
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    display: inline-block;
+    text-transform: capitalize;
+}
+.status-approved { background-color: #d1f3e0; color: #177245; }
+.status-pending { background-color: #fff1c1; color: #ad7b00; }
+.status-rejected { background-color: #f8d7da; color: #a50000; }
+
+.icon-group span {
+    margin-right: 8px;
+    display: inline-block;
+    font-size: 14px;
+    min-width: 32px;
+    text-align: center;
+}
+
+.deal-table td a {
+    text-decoration: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 14px;
+    margin-right: 6px;
+    display: inline-block;
+    color: white;
+}
+
+a[href*="approve"] { background-color: #10b981; }
+a[href*="reject"] { background-color: #ef4444; }
+a[href*="delete"] { background-color: #6b7280; }
+a[href*="edit"] { background-color: #3b82f6; }
+a[href*="pin"] { background-color: #a855f7; }
+
+a:hover {
+    opacity: 0.85;
+}
+
+.filters {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.filters button {
+    margin: 0 6px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    background-color: white;
+    color: #333;
+    font-weight: 600;
+    border: 1px solid #ddd;
+    cursor: pointer;
+}
+.filters button.active {
+    background-color: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+}
+
+.pagination {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.pagination button {
+    padding: 8px 14px;
+    margin: 0 4px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background-color: #f9fafb;
+    cursor: pointer;
+    font-size: 14px;
+}
+.pagination .active {
+    background-color: #3b82f6;
+    color: white;
+    font-weight: bold;
+}
+
+.pin-faded {
+    opacity: 0.3;
+}
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 10px 15px;
+  background-color: #f9fafb;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.status-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-status {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  color: #333;
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.btn-status:hover {
+  background-color: #e0f0ff;
+  border-color: #007bff;
+  color: #007bff;
+}
+
+.btn-status.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.category-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.category-form label {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.category-form select {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  background-color: white;
+}
+
+.btn-export {
+  margin-left: auto;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background-color: #28a745;
+  color: white;
+  font-size: 14px;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.btn-export:hover {
+  background-color: #218838;
+}
+
