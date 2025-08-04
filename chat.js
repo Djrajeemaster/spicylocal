@@ -5,6 +5,7 @@ console.log("💬 chat.js running...");
   const input = document.getElementById("chat-message-input");
   const messages = document.getElementById("chat-messages");
   const roomSelect = document.getElementById("chat-room-select");
+  const chatWidget = document.getElementById("chat-widget");
 
   if (!sendBtn || !input || !messages || !roomSelect) {
     console.warn("❌ Chat elements missing");
@@ -20,6 +21,24 @@ console.log("💬 chat.js running...");
     messages.appendChild(msgDiv);
   }
 
+  function fetchMessages(room, username) {
+    fetch(`chat_api.php?room=${encodeURIComponent(room)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (!data.success) return;
+        messages.innerHTML = "";
+        data.messages.forEach(m => {
+          const msgDiv = document.createElement("div");
+          msgDiv.className = "chat-message" + (m.username === username ? " user" : "");
+          msgDiv.innerHTML = `<strong>${m.username}:</strong> ${m.message}`;
+          messages.appendChild(msgDiv);
+        });
+        messages.scrollTop = messages.scrollHeight;
+      })
+      .catch(err => console.error("❌ Chat fetch error:", err));
+  }
+
+  // Session check to get username
   fetch("api/session.php")
     .then(res => res.json())
     .then(data => {
@@ -32,6 +51,11 @@ console.log("💬 chat.js running...");
       const username = data.username;
       localStorage.setItem("username", username);
 
+      // Load initial messages
+      fetchMessages(roomSelect.value, username);
+      setInterval(() => fetchMessages(roomSelect.value, username), 5000);
+      roomSelect.addEventListener("change", () => fetchMessages(roomSelect.value, username));
+
       sendBtn.addEventListener("click", () => {
         const msg = input.value.trim();
         const room = roomSelect.value;
@@ -41,7 +65,6 @@ console.log("💬 chat.js running...");
           return;
         }
 
-        // Add message to chat UI
         const msgDiv = document.createElement("div");
         msgDiv.className = "chat-message user";
         msgDiv.innerHTML = `<strong>${username}:</strong> ${msg}`;
@@ -51,21 +74,22 @@ console.log("💬 chat.js running...");
 
         console.log("Sending chat:", { username, msg, room });
 
-        // Send to backend
         fetch("chat_api.php", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ username, message: msg, room_name: room })
         })
-          .then(res => res.json())
-          .then(data => {
-            if (!data.success) {
-              console.warn("⚠️ Failed to store chat message:", data.error || "Unknown error");
-            }
-          })
-          .catch(err => {
-            console.error("❌ Chat API error:", err);
-          });
+        .then(res => res.json())
+        .then(data => {
+          if (!data.success) {
+            console.warn("⚠️ Failed to store chat message:", data.error || "Unknown error");
+          } else {
+            fetchMessages(room, username); // Refresh chat
+          }
+        })
+        .catch(err => {
+          console.error("❌ Chat API error:", err);
+        });
       });
     })
     .catch(err => {
@@ -73,25 +97,26 @@ console.log("💬 chat.js running...");
       disableChat();
     });
 
-  // Chat widget controls
+  // Chat widget UI controls
   const closeBtn = document.getElementById("close-chat");
+  const fullBtn = document.getElementById("toggle-fullscreen");
+  const toggleBtn = document.getElementById("chat-toggle-btn");
+
   if (closeBtn) {
     closeBtn.addEventListener("click", () => {
-      document.getElementById("chat-widget").classList.add("hidden");
+      chatWidget.classList.add("hidden");
     });
   }
 
-  const fullBtn = document.getElementById("toggle-fullscreen");
   if (fullBtn) {
     fullBtn.addEventListener("click", () => {
-      document.getElementById("chat-widget").classList.toggle("fullscreen");
+      chatWidget.classList.toggle("fullscreen");
     });
   }
 
-  const toggleBtn = document.getElementById("chat-toggle-btn");
   if (toggleBtn) {
     toggleBtn.addEventListener("click", () => {
-      document.getElementById("chat-widget").classList.toggle("hidden");
+      chatWidget.classList.toggle("hidden");
     });
   }
 })();
