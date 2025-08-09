@@ -4,7 +4,7 @@ header('Content-Type: application/json');
 require_once '../config/db.php';
 
 $username = $_GET['username'] ?? '';
-$deal_id = $_GET['deal_id'] ?? '';
+$deal_id = isset($_GET['deal_id']) ? (int)$_GET['deal_id'] : 0;
 
 if (!$username || !$deal_id) {
   echo json_encode(['success' => false, 'error' => 'Missing parameters']);
@@ -16,3 +16,4 @@ $stmt->execute([$username, $deal_id]);
 $exists = $stmt->fetch();
 
 echo json_encode(['success' => true, 'bookmarked' => !!$exists]);
+

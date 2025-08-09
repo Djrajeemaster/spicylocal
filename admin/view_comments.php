@@ -2,7 +2,7 @@
 require_once 'config/auth_check.php';
 require_once 'config/db.php';
 
-$deal_id = $_GET['deal_id'] ?? 0;
+$deal_id = isset($_GET['deal_id']) ? (int)$_GET['deal_id'] : 0;
 
 $stmt = $pdo->prepare("SELECT comments.*, users.username FROM comments LEFT JOIN users ON comments.user_id = users.id WHERE comments.deal_id = ?");
 $stmt->execute([$deal_id]);

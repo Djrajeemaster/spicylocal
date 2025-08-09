@@ -2,7 +2,7 @@
 require_once 'config/auth_check.php';
 require_once 'config/db.php';
 
-$deal_id = $_GET['id'] ?? 0;
+$deal_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
 $stmt = $pdo->prepare("SELECT is_pinned FROM deals WHERE id = ?");
 $stmt->execute([$deal_id]);

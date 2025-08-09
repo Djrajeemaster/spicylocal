@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/config/db.php';
 
-$deal_id = $_GET['id'] ?? null;
+$deal_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
 if (!$deal_id) {
     echo json_encode(['error' => 'Missing deal_id']);
