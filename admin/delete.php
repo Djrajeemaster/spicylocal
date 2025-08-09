@@ -3,7 +3,7 @@
 require_once __DIR__ . '/config/auth_check.php';
 require_once __DIR__ . '/config/db.php';
 
-$id = $_GET['id'] ?? 0;
+$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if (!$id) {
     // Invalid id; optionally display an error message or log
     header('Location: dashboard.php');
