@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Customize Business Profile</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="header.css" />
+  <style>
+    /* Basic styling for the customization form */
+    .bp-container {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .bp-container h2 {
+      margin-bottom: 1rem;
+    }
+    .bp-form-group {
+      margin-bottom: 1rem;
+    }
+    .bp-form-group label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 0.4rem;
+    }
+    .bp-form-group input[type="text"],
+    .bp-form-group textarea {
+      width: 100%;
+      padding: 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .bp-form-group input[type="file"] {
+      display: block;
+      margin-top: 0.3rem;
+    }
+    .bp-form-group textarea {
+      min-height: 100px;
+    }
+    .bp-preview {
+      margin-top: 0.5rem;
+    }
+    .bp-preview img {
+      max-width: 150px;
+      border-radius: 8px;
+    }
+    .bp-submit-btn {
+      padding: 0.6rem 1.2rem;
+      background: #1976d2;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .bp-submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .bp-message {
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <!-- Global header -->
+  <div id="global-header"></div>
+  <script src="loadHeader.js" defer></script>
+
+  <div class="bp-container">
+    <h2>Customize Business Profile</h2>
+    <form id="business-profile-form">
+      <div class="bp-form-group">
+        <label for="bp-logo">Logo</label>
+        <input type="file" id="bp-logo" name="logo" accept="image/*" />
+        <div class="bp-preview" id="bp-logo-preview"></div>
+      </div>
+      <div class="bp-form-group">
+        <label for="bp-about">About Your Business</label>
+        <textarea id="bp-about" name="about" placeholder="Describe your business..."></textarea>
+      </div>
+      <div class="bp-form-group">
+        <label for="bp-social">Social Links</label>
+        <input type="text" id="bp-social" name="social" placeholder="Comma-separated URLs" />
+      </div>
+      <button type="submit" class="bp-submit-btn">Save</button>
+      <div id="bp-message" class="bp-message"></div>
+    </form>
+  </div>
+
+  <script src="customize_business_profile.js"></script>
+  <script src="footer.js"></script>
+</body>
+</html>

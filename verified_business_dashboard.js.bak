@@ -1,0 +1,78 @@
+// verified_business_dashboard.js
+// Provides functionality for the Verified Business Dashboard page. This file
+// checks that the user is a verified business, fetches and displays the
+// business's own deals, and provides simple tab navigation.
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Check if the user is a verified business. If not, redirect to home.
+  const isVerified = localStorage.getItem('is_verified_business');
+  if (!isVerified || (isVerified !== '1' && isVerified !== 'true')) {
+    alert('Access denied: Verified Business only');
+    window.location.href = 'index.html';
+    return;
+  }
+
+  const username = localStorage.getItem('username') || '';
+  const dealsContainer = document.querySelector('[data-content="deals"]');
+  const tabs = document.querySelectorAll('#vb-tabs button');
+  const contentSections = document.querySelectorAll('#vb-content > div');
+
+  // Tab switching logic
+  tabs.forEach(btn => {
+    btn.addEventListener('click', () => {
+      // Set active tab
+      tabs.forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      const tabName = btn.getAttribute('data-tab');
+      // Show corresponding content
+      contentSections.forEach(section => {
+        if (section.getAttribute('data-content') === tabName) {
+          section.classList.add('active');
+        } else {
+          section.classList.remove('active');
+        }
+      });
+      // If switching to deals tab and not loaded yet, fetch deals
+      if (tabName === 'deals' && !dealsContainer.dataset.loaded) {
+        fetchDeals();
+      }
+    });
+  });
+
+  // Fetch and render the business's deals
+  function fetchDeals() {
+    if (!username) {
+      dealsContainer.innerHTML = '<p>Unable to determine user.</p>';
+      return;
+    }
+    fetch(`api/get_user_deals.php?username=${encodeURIComponent(username)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (!data.success) {
+          dealsContainer.innerHTML = '<p>Failed to load deals.</p>';
+          return;
+        }
+        const deals = data.deals || [];
+        if (deals.length === 0) {
+          dealsContainer.innerHTML = '<p>No deals posted yet.</p>';
+          return;
+        }
+        // Build a simple table of deals
+        let html = '<table class="vb-table"><thead><tr><th>ID</th><th>Title</th><th>Status</th><th>Created</th></tr></thead><tbody>';
+        deals.forEach(d => {
+          const status = d.status || 'pending';
+          const created = d.created_at || '';
+          html += `<tr><td>${d.id}</td><td>${d.title}</td><td>${status}</td><td>${created}</td></tr>`;
+        });
+        html += '</tbody></table>';
+        dealsContainer.innerHTML = html;
+        dealsContainer.dataset.loaded = '1';
+      })
+      .catch(() => {
+        dealsContainer.innerHTML = '<p>Error loading deals.</p>';
+      });
+  }
+
+  // Load deals by default when landing on dashboard
+  fetchDeals();
+});

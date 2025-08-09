@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,46 +5,189 @@
   <title>Deal Detail</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="global.css">
+  <link rel="stylesheet" href="header.css" />
+  <style>
+    /* Minimal polish */
+    .deal-actions .feedback-section button,
+    .deal-actions .vote-section button,
+    #report-abuse-btn {
+      padding: 6px 10px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-right: 6px;
+    }
+    #report-abuse-btn {
+      background: #ffe8e8;
+    }
+    #report-abuse-btn.disabled {
+      opacity: 0.6; cursor: not-allowed;
+    }
+    .safety-section {
+      margin-top: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .muted {
+      color: #666; font-size: 0.9rem;
+    }
+
+    /* --- Enhanced Deal Detail Styles --- */
+    /* Container for detail page card */
+    .deal-detail-card {
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    body.dark .deal-detail-card {
+      background: #1e1e1e;
+      color: #ddd;
+    }
+    .deal-detail-card h3, .deal-detail-card h1 {
+      font-size: 1.8rem;
+      color: #e91e63;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 0 0 0.5rem;
+    }
+    .deal-detail-card .bookmark-icon {
+      font-size: 1.5rem;
+      margin-left: 8px;
+      cursor: pointer;
+    }
+    .deal-detail-card .deal-summary {
+      font-style: italic;
+      color: #666;
+      margin: 0.5rem 0 1rem;
+    }
+    .deal-detail-card .deal-media {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .deal-detail-card .deal-media img {
+      width: 100%;
+      max-height: 400px;
+      object-fit: contain;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+    .deal-detail-card #deal-description {
+      margin-top: 1rem;
+      line-height: 1.6;
+      font-size: 1rem;
+    }
+    .deal-detail-card .tags {
+      margin-top: 0.5rem;
+    }
+    .deal-detail-card .user-info {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 0.75rem;
+      font-weight: 500;
+    }
+    .deal-detail-card #business-profile {
+      margin-top: 0.5rem;
+    }
+    .deal-detail-card .views-info {
+      margin-top: 0.5rem;
+      color: #555;
+    }
+    .deal-detail-card .deal-actions {
+      margin-top: 1.5rem;
+      border-top: 1px solid #eee;
+      padding-top: 1rem;
+    }
+    .deal-detail-card .vote-section,
+    .deal-detail-card .feedback-section {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 0.5rem;
+    }
+    .deal-detail-card button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .deal-detail-card .vote-section button[data-vote="up"] {
+      background: #e8f5e9;
+    }
+    .deal-detail-card .vote-section button[data-vote="down"] {
+      background: #ffebee;
+    }
+    .deal-detail-card .feedback-section button[data-feedback="useful"] {
+      background: #e8f5e9;
+    }
+    .deal-detail-card .feedback-section button[data-feedback="not_interested"] {
+      background: #fff8e1;
+    }
+    .deal-detail-card .feedback-section button[data-feedback="fake"] {
+      background: #ffebee;
+    }
+    .deal-detail-card #report-abuse-btn {
+      background: #fff5f5;
+    }
+    .deal-detail-card #report-abuse-btn.disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    /* Remove pointer cursor on detail page */
+    .deal-detail-card, .deal-detail-card * {
+      cursor: default !important;
+    }
+  </style>
 </head>
 <body>
 
-<header class="header">
-  <div class="logo">SpicyBeats</div>
-  <div class="nav">
-    <a href="index.html">Home</a>
-    <div class="user-menu" id="user-menu" style="display: none;">
-      <div class="user-icon" id="user-icon">👤</div>
-      <span class="username-label" id="username-label"></span>
-      <div class="dropdown hidden" id="dropdown">
-        <a href="profile.html">Profile</a>
-        <a href="#" id="logout">Logout</a>
-      </div>
-    </div>
-  </div>
-</header>
+<!-- Global Header mount -->
+<div id="global-header"></div>
 
-<main class="deal-list">
-  <div class="deal-card">
-    
-  <h3>
-  <span id="deal-title">Loading...</span>
-  <span id="bookmark-container" class="bookmark-icon" title="Bookmark this deal">&#9733;</span>
-</h3>
+<!-- Global Header -->
+<div id="global-header"></div>
+<link rel="stylesheet" href="header.css">
+<script src="loadHeader.js" defer></script><main class="deal-list">
+    <div class="deal-card deal-detail-card">
+    <h3>
+      <span id="deal-title">Loading...</span>
+      <span id="bookmark-container" class="bookmark-icon" title="Bookmark this deal">&#9733;</span>
+    </h3>
+    <p id="deal-summary" class="deal-summary"></p>
+    <div id="deal-media" class="deal-media"></div>
     <p id="deal-description"></p>
-    <p>👤 <span id="deal-user">Loading...</span> <span id="verified-badge"></span></p>
-    <p>👁️ <span id="view-count">Loading...</span> views</p>
+    <div id="deal-tags" class="tags"></div>
+    <div id="deal-status"></div>
+    <p class="user-info">👤 <span id="deal-user">Loading...</span> <span id="verified-badge"></span><span id="business-badge" class="business-badge" style="margin-left: 8px;"></span></p>
+    <div id="business-profile" class="business-profile" style="margin: 0.5rem 0;"></div>
+    <p class="views-info">👁️ <span id="view-count">Loading...</span> views</p>
+    <div id="deal-cta" style="margin-top:8px;"></div>
 
-    <div class="deal-actions" style="margin-top: 1rem;">
+    <div class="deal-actions">
       <div class="vote-section">
         <button class="vote-btn" data-vote="up">👍</button>
         <span id="vote-count">0</span>
         <button class="vote-btn" data-vote="down">👎</button>
       </div>
 
-      <div class="feedback-section" style="margin-top: 0.5rem;">
+      <div class="feedback-section">
         <button class="feedback-btn" data-feedback="useful">✅ Useful (<span id="fb-useful">0</span>)</button>
         <button class="feedback-btn" data-feedback="not_interested">❌ Not Interested (<span id="fb-not">0</span>)</button>
         <button class="feedback-btn" data-feedback="fake">🚩 Fake (<span id="fb-fake">0</span>)</button>
+      </div>
+
+      <!-- 🚩 Report Abuse (always visible; login required on click) -->
+      <div class="safety-section">
+        <button id="report-abuse-btn" title="Report abuse or policy violation">🚩 Report Abuse</button>
+        <span id="report-status" class="muted"></span>
       </div>
     </div>
   </div>
@@ -60,89 +202,203 @@
   </section>
 </main>
 
+<!-- Deal Logic -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
   const username = localStorage.getItem("username");
-  const userIcon = document.getElementById("user-icon");
-  const usernameLabel = document.getElementById("username-label");
-  const userMenu = document.getElementById("user-menu");
-  const dropdown = document.getElementById("dropdown");
-  const logoutBtn = document.getElementById("logout");
-
-  if (username) {
-    usernameLabel.textContent = username;
-    userMenu.style.display = "flex";
-
-    userIcon.addEventListener("click", () => dropdown.classList.toggle("hidden"));
-    usernameLabel.addEventListener("click", () => dropdown.classList.toggle("hidden"));
-
-    logoutBtn.addEventListener("click", function (e) {
-      e.preventDefault();
-      localStorage.clear();
-      window.location.href = "login.html";
-    });
-  }
-
   const dealId = new URLSearchParams(window.location.search).get("id");
 
-  fetch("api/increment_view.php?id=" + dealId)
-    .then(() => fetch("api/get_deal.php?id=" + dealId))
-    .then(res => res.json())
-    .then(data => {
-      if (data.success && data.deal) {
-        const deal = data.deal;
-        document.getElementById("deal-title").textContent = deal.title;
-        document.getElementById("deal-description").textContent = deal.description;
-        document.getElementById("deal-user").textContent = deal.username || "Anonymous";
-        document.getElementById("verified-badge").textContent = deal.is_verified == 1 ? "✔️ Verified" : "";
-        document.getElementById("view-count").textContent = deal.views;
-      } else {
-        document.getElementById("deal-title").textContent = "Deal not found.";
+  // Guard: missing deal id
+  if (!dealId) {
+    document.getElementById("deal-title").textContent = "Deal not found.";
+    return;
+  }
+
+  // Detailed deal loading is handled in deal.js. Only comments and abuse reporting are managed here.
+
+  // Load comments with reaction counts
+  function renderComments() {
+    fetch("api/get_comments.php?id=" + encodeURIComponent(dealId))
+      .then(res => res.json())
+      .then(data => {
+        const container = document.getElementById("comments-list");
+        container.innerHTML = "";
+        if (data.success && Array.isArray(data.comments) && data.comments.length > 0) {
+          data.comments.forEach(c => {
+            const wrapper = document.createElement("div");
+            wrapper.className = "comment-item";
+            const user = c.username || "User";
+            const commentText = c.comment || "";
+            wrapper.innerHTML = `<strong>${user}</strong>: ${commentText}`;
+            // Reaction buttons
+            const reactionsDiv = document.createElement('div');
+            reactionsDiv.className = 'comment-reactions';
+            const likeBtn = document.createElement('button');
+            likeBtn.textContent = '👍';
+            likeBtn.className = 'comment-like-btn';
+            likeBtn.dataset.id = c.id;
+            likeBtn.dataset.reaction = 'like';
+            const likesSpan = document.createElement('span');
+            likesSpan.textContent = c.likes || 0;
+            likesSpan.className = 'likes-count';
+            const dislikeBtn = document.createElement('button');
+            dislikeBtn.textContent = '👎';
+            dislikeBtn.className = 'comment-dislike-btn';
+            dislikeBtn.dataset.id = c.id;
+            dislikeBtn.dataset.reaction = 'dislike';
+            const dislikesSpan = document.createElement('span');
+            dislikesSpan.textContent = c.dislikes || 0;
+            dislikesSpan.className = 'dislikes-count';
+            // Append buttons and counts
+            reactionsDiv.appendChild(likeBtn);
+            reactionsDiv.appendChild(likesSpan);
+            reactionsDiv.appendChild(dislikeBtn);
+            reactionsDiv.appendChild(dislikesSpan);
+            wrapper.appendChild(reactionsDiv);
+            container.appendChild(wrapper);
+          });
+          // Attach click handlers for reactions
+          container.querySelectorAll('.comment-like-btn, .comment-dislike-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const reactionType = btn.dataset.reaction;
+              const commentId = btn.dataset.id;
+              const currentUser = localStorage.getItem('username');
+              if (!currentUser) {
+                alert('Please log in to react to comments.');
+                return;
+              }
+              fetch('api/reactions.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ comment_id: commentId, username: currentUser, type: reactionType })
+              })
+                .then(res => res.json())
+                .then(resp => {
+                  if (resp && resp.success) {
+                    // Update counts in UI
+                    const parent = btn.parentElement;
+                    if (parent) {
+                      const likesLabel = parent.querySelector('.likes-count');
+                      const dislikesLabel = parent.querySelector('.dislikes-count');
+                      if (likesLabel) likesLabel.textContent = resp.likes;
+                      if (dislikesLabel) dislikesLabel.textContent = resp.dislikes;
+                    }
+                  } else {
+                    alert((resp && resp.error) || 'Failed to react');
+                  }
+                })
+                .catch(() => alert('Error sending reaction'));
+            });
+          });
+        } else {
+          container.textContent = "No comments yet.";
+        }
+      })
+      .catch(() => {
+        const container = document.getElementById("comments-list");
+        container.textContent = "Failed to load comments";
+      });
+  }
+  renderComments();
+
+  // Show comment form if logged in and not muted; otherwise hide and show message
+  const commentFormContainer = document.getElementById("comment-form-container");
+  const isLoggedIn = !!localStorage.getItem('username');
+  const isMutedUser = localStorage.getItem('is_muted') === '1';
+  if (isLoggedIn && !isMutedUser) {
+    if (commentFormContainer) commentFormContainer.style.display = 'block';
+    const submitBtn = document.getElementById('submit-comment');
+    if (submitBtn) {
+      submitBtn.addEventListener('click', () => {
+        const commentText = (document.getElementById('comment-text').value || '').trim();
+        if (!commentText) {
+          alert('Comment cannot be empty.');
+          return;
+        }
+        const currentUser = localStorage.getItem('username');
+        fetch('api/post_comment.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: currentUser, deal_id: dealId, comment: commentText })
+        })
+          .then(res => res.json())
+          .then(resp => {
+            if (resp && resp.success) {
+              // Refresh comments without reloading the entire page
+              document.getElementById('comment-text').value = '';
+              renderComments();
+            } else {
+              alert((resp && resp.error) || 'Failed to post comment.');
+            }
+          })
+          .catch(() => alert('Failed to post comment.'));
+      });
+    }
+  } else {
+    // Not logged in or muted
+    if (commentFormContainer) commentFormContainer.style.display = 'none';
+    const msg = document.createElement('p');
+    msg.className = 'muted';
+    msg.textContent = isMutedUser ? 'You are muted and cannot post comments.' : 'Please log in to post a comment.';
+    const section = commentFormContainer ? commentFormContainer.parentElement : document.querySelector('section');
+    if (section) section.appendChild(msg);
+  }
+
+  // 🚩 Report Abuse logic
+  const reportBtn = document.getElementById("report-abuse-btn");
+  const reportStatus = document.getElementById("report-status");
+  let reporting = false;
+
+  if (reportBtn) {
+    reportBtn.addEventListener("click", () => {
+      if (reporting) return;
+      const currentUser = localStorage.getItem("username");
+
+      if (!currentUser) {
+        alert("Please log in to report abuse.");
+        return;
       }
-    })
-    .catch((err) => {
-      console.error("Deal load failed:", err);
-      document.getElementById("deal-title").textContent = "Error loading deal.";
-    });
 
-  // Comments load
-  fetch("api/get_comments.php?id=" + dealId)
-    .then(res => res.json())
-    .then(data => {
-      const container = document.getElementById("comments-list");
-      if (data.success && data.comments.length > 0) {
-        data.comments.forEach(c => {
-          const div = document.createElement("div");
-          div.innerHTML = `<strong>${c.username}</strong>: ${c.comment}`;
-          container.appendChild(div);
-        });
-      } else {
-        container.textContent = "No comments yet.";
-      }
-    });
-
-  // Post comment
-  if (username) {
-    document.getElementById("comment-form-container").style.display = "block";
-    document.getElementById("submit-comment").addEventListener("click", function () {
-      const commentText = document.getElementById("comment-text").value.trim();
-      if (!commentText) return alert("Comment cannot be empty.");
-
-      fetch("api/post_comment.php", {
+      const reason = prompt("Enter reason for reporting this deal (e.g., spam, scam, inappropriate):");
+      if (!reason || !reason.trim()) return;
+      reporting = true;
+      reportBtn.classList.add("disabled");
+      reportStatus.textContent = "Submitting report...";
+      // Use form-encoded data to support PHP $_POST parsing
+      const formData = new URLSearchParams();
+      formData.append('deal_id', dealId);
+      formData.append('username', currentUser);
+      formData.append('reason', reason.trim());
+      fetch("api/report_abuse.php", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, deal_id: dealId, comment: commentText })
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: formData.toString()
       })
       .then(res => res.json())
-      .then(resp => {
-        if (resp.success) location.reload();
-        else alert(resp.error || "Failed to post comment.");
+      .then(data => {
+        if (data && data.success) {
+          alert("Report submitted.");
+          reportStatus.textContent = "Thank you. Our team will review this report.";
+        } else {
+          alert(data.error || 'Error submitting report');
+          reportStatus.textContent = data.error || 'Error submitting report';
+        }
+      })
+      .catch(() => {
+        alert("Failed to submit report. Please try again later.");
+        reportStatus.textContent = "Failed to submit report.";
+      })
+      .finally(() => {
+        reporting = false;
+        reportBtn.classList.remove("disabled");
       });
     });
   }
 });
 </script>
 
+<!-- Other Deal Logic (votes/bookmarks/feedbacks) -->
 <script src="deal.js"></script>
+<script src="footer.js"></script>
 </body>
 </html>

@@ -1,0 +1,108 @@
+
+/* header.css - styles for global header */
+.global-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 14px;
+  background: #e91e63;
+  color: #fff;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+.global-header .logo { display:flex; align-items:center; gap:8px; color:#fff; text-decoration:none; font-weight:700; }
+.global-header .logo-img { width:24px; height:24px; }
+.nav-links { display:flex; align-items:center; gap:20px; font-weight:600; }
+.nav-links a { color:#fff; text-decoration:none; }
+.nav-links a:hover { text-decoration:underline; }
+
+/* Dark theme overrides for header elements */
+body.dark .global-header {
+  background: #333;
+  color: #f0f0f0;
+}
+body.dark .nav-links a {
+  color: #e0e0e0;
+}
+body.dark .avatar-btn {
+  color: #e0e0e0;
+}
+body.dark .avatar {
+  background: #444;
+  color: #e91e63;
+}
+body.dark .user-dropdown {
+  background: #2b2b2b;
+  color: #e0e0e0;
+}
+body.dark .user-dropdown a {
+  color: #e0e0e0;
+}
+body.dark .user-dropdown a:hover {
+  background: #3b3b3b;
+}
+
+/* Controls container for theme toggle and language select */
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+/* Theme toggle button styling */
+.theme-toggle {
+  background: transparent;
+  border: none;
+  color: inherit;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 4px;
+}
+
+/* Language dropdown styling */
+.language-select {
+  background: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 0.9rem;
+  color: #333;
+  cursor: pointer;
+}
+
+/* Adjust language select in dark mode */
+body.dark .language-select {
+  background: #333;
+  color: #f0f0f0;
+  border: 1px solid #555;
+}
+/* Search bar container: spans full width below the nav links */
+.search-container {
+  flex-basis: 100%;
+  margin-top: 8px;
+}
+
+/* Search input styling to align with SpicyBeats theme */
+.search-input {
+  width: 100%;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+/* Ensure search input is visually distinct on the pink header */
+.search-input::placeholder {
+  color: #888;
+}
+.user-wrap { display:flex; align-items:center; gap:8px; position:relative; }
+.avatar-btn { display:flex; align-items:center; gap:8px; background:transparent; border:none; color:#fff; cursor:pointer; }
+.avatar { display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:50%; background:#fff; color:#e91e63; font-weight:700; }
+.user-name { color:#fff; }
+.user-dropdown { position:absolute; top:100%; right:0; background:#fff; color:#333; border-radius:8px; box-shadow:0 4px 16px rgba(0,0,0,.15); padding:8px; min-width:180px; z-index:1000; }
+.user-dropdown a { display:block; padding:8px 10px; color:#333; text-decoration:none; border-radius:6px; }
+.user-dropdown a:hover { background:#f3f3f3; }
+.hidden { display:none !important; }

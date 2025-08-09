@@ -1,9 +1,18 @@
 <?php
+$EMBED_MODE = isset($_GET['embed']) && $_GET['embed']==='1';
+
+// Administrative dashboard for viewing and moderating deals.
+// Only accessible to admin and super admin users.
+
+// Start the session and enforce access control via common auth check.
+require_once __DIR__ . '/config/auth_check.php';
+require_once __DIR__ . '/config/db.php';
+
+// Preserve optional status filter from query string
 $status = $_GET['status'] ?? 'all';
-?>
-<?php
-session_start();
-require_once 'config/db.php';
+
+// Determine the logged-in user's role for permission-based UI (admin vs moderator)
+$role = $_SESSION['role'] ?? 'user';
 
 // Filtering
 $status_filter = $_GET['status'] ?? 'all';
@@ -38,6 +47,24 @@ $count_stmt = $pdo->prepare($count_query);
 $count_stmt->execute($filters);
 $total_deals = $count_stmt->fetchColumn();
 $total_pages = ceil($total_deals / $limit);
+
+// Fetch abuse reports for admin and moderator view
+$abuseReports = [];
+if (in_array($role, ['admin','moderator','super_admin'])) {
+    try {
+        $stmtAbuse = $pdo->prepare(
+            "SELECT ar.*, d.title AS deal_title, u.username AS user_name, u.is_muted
+             FROM abuse_reports ar
+             JOIN deals d ON ar.deal_id = d.id
+             LEFT JOIN users u ON d.user_id = u.id
+             ORDER BY ar.created_at DESC"
+        );
+        $stmtAbuse->execute();
+        $abuseReports = $stmtAbuse->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        $abuseReports = [];
+    }
+}
 
 // Main query
 $query = "
@@ -75,13 +102,25 @@ $deals = $stmt->fetchAll(PDO::FETCH_ASSOC);
             cursor: pointer;
         }
     </style>
+<?php if (!$EMBED_MODE): ?>
+    <script src="/bagit/loadHeader.v2.js?v=absfix2" defer></script>
+<?php endif; ?>
 </head>
 <body>
+    <?php if (!$EMBED_MODE): ?>
+<div id="global-header"></div>
+<?php endif; ?>
 <div style="position: absolute; top: 10px; right: 10px;">
   <a href="logout.php" style="color: red; text-decoration: none; font-weight: bold;">🚪 Logout</a>
 </div>
 
 <h1>Admin Dashboard</h1>
+
+<?php if (in_array($role, ['admin','super_admin'])): ?>
+  <div style="margin-bottom: 10px;">
+    <a href="users.php" style="background-color:#e91e63;color:#fff;padding:6px 12px;border-radius:4px;text-decoration:none;font-weight:bold;">👥 Manage Users</a>
+  </div>
+<?php endif; ?>
 
 <!-- Admin Filters Header -->
 <style>
@@ -119,6 +158,26 @@ $deals = $stmt->fetchAll(PDO::FETCH_ASSOC);
     font-weight: bold;
     text-decoration: none;
   }
+
+  /* Buttons for abuse reports actions */
+  .btn {
+    padding: 4px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .btn-mute {
+    background-color: #d9534f;
+    color: #fff;
+  }
+  .btn-unmute {
+    background-color: #5cb85c;
+    color: #fff;
+  }
+  .btn-reviewed {
+    background-color: #0275d8;
+    color: #fff;
+  }
 </style>
 
 <div class="filter-bar">
@@ -142,10 +201,12 @@ $deals = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </select>
   </form>
 
-  <!-- Export CSV Button -->
+  <!-- Export CSV Button (hidden for moderators) -->
+  <?php if ($role !== 'moderator'): ?>
   <a href="export_csv.php?status=<?= urlencode($status_filter) ?>&category=<?= urlencode($category) ?>" class="btn-export">
     📄 Export CSV
   </a>
+  <?php endif; ?>
 </div>
 
 </div>
@@ -172,7 +233,9 @@ $deals = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <th>Feedback</th>
                 <th>Comments</th>
                 <th>Pin</th>
-                <th>Actions</th>
+                <?php if ($role !== 'moderator'): ?>
+                    <th>Actions</th>
+                <?php endif; ?>
             </tr>
         </thead>
         <tbody>
@@ -181,23 +244,22 @@ $deals = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <td><?= $deal['id'] ?></td>
                 <td><?= htmlspecialchars($deal['title']) ?></td>
                 <td><?= htmlspecialchars($deal['username'] ?? 'Unknown') ?></td>
-                <td><span class="status-badge status-
-<form class='inline-status-form' data-id='<?= $deal['id'] ?>'>
-  <select class='status-dropdown' name='status'>
-    <option value='pending' <?= $deal['status'] === 'pending' ? 'selected' : '' ?>>Pending</option>
-    <option value='approved' <?= $deal['status'] === 'approved' ? 'selected' : '' ?>>Approved</option>
-    <option value='rejected' <?= $deal['status'] === 'rejected' ? 'selected' : '' ?>>Rejected</option>
-  </select>
-</form>
-">
-<form class='inline-status-form' data-id='<?= $deal['id'] ?>'>
-  <select class='status-dropdown' name='status'>
-    <option value='pending' <?= $deal['status'] === 'pending' ? 'selected' : '' ?>>Pending</option>
-    <option value='approved' <?= $deal['status'] === 'approved' ? 'selected' : '' ?>>Approved</option>
-    <option value='rejected' <?= $deal['status'] === 'rejected' ? 'selected' : '' ?>>Rejected</option>
-  </select>
-</form>
-</span></td>
+                <td>
+                    <!-- Status badge showing the current deal status -->
+                    <?php
+                        $status = $deal['status'];
+                        $statusClass = 'status-' . htmlspecialchars($status);
+                    ?>
+                    <span class="status-badge <?= $statusClass ?>"><?= ucfirst(htmlspecialchars($status)) ?></span>
+                    <!-- Inline form to update status. Displayed alongside the badge -->
+                    <form class="inline-status-form" data-id="<?= $deal['id'] ?>" style="display:inline-block;margin-left:6px;">
+                      <select class="status-dropdown" name="status">
+                        <option value="pending" <?= $status === 'pending' ? 'selected' : '' ?>>Pending</option>
+                        <option value="approved" <?= $status === 'approved' ? 'selected' : '' ?>>Approved</option>
+                        <option value="rejected" <?= $status === 'rejected' ? 'selected' : '' ?>>Rejected</option>
+                      </select>
+                    </form>
+                </td>
                 <td><?= $deal['vote_count'] ?> <?= $deal['vote_count'] > 10 ? '🔥' : '' ?></td>
                 <td>
                     <div class="icon-group">
@@ -213,6 +275,7 @@ $deals = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <?php endif; ?>
                 </td>
                 <td><?= isset($deal['is_pinned']) && $deal['is_pinned'] ? '📌' : '<span class="pin-faded">📌</span>' ?></td>
+                <?php if ($role !== 'moderator'): ?>
                 <td>
                     <?php if ($deal['status'] === 'pending'): ?>
                         <a href="/bagit/admin/approve.php?id=<?= $deal['id'] ?>">✅</a>
@@ -222,6 +285,7 @@ $deals = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <a href="/bagit/admin/edit.php?id=<?= $deal['id'] ?>">✏️</a>
                     <?php if ($deal['status'] === 'approved'): ?><a href="/bagit/admin/pin.php?id=<?= $deal['id'] ?>">📌</a><?php endif; ?>
                 </td>
+                <?php endif; ?>
             </tr>
         <?php endforeach; ?>
         </tbody>
@@ -237,17 +301,61 @@ $deals = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <?php endif; ?>
     </div>
 </div>
+
+<?php if (in_array($role, ['admin','moderator','super_admin'])): ?>
+  <hr style="margin:40px 0;">
+  <h2>Abuse Reports</h2>
+  <table class="deal-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Deal ID</th>
+        <th>Deal Title</th>
+        <th>Reported By</th>
+        <th>Reason</th>
+        <th>Reported At</th>
+        <th>Reviewed</th>
+        <th>User Muted?</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <?php foreach ($abuseReports as $r): ?>
+        <tr data-id="<?= $r['id'] ?>" data-targetuser="<?= htmlspecialchars($r['user_name']) ?>" data-muted="<?= $r['is_muted'] ?>">
+          <td><?= $r['id'] ?></td>
+          <td><?= $r['deal_id'] ?></td>
+          <td><?= htmlspecialchars($r['deal_title']) ?></td>
+          <td><?= htmlspecialchars($r['reported_by']) ?></td>
+          <td><?= nl2br(htmlspecialchars($r['reason'])) ?></td>
+          <td><?= htmlspecialchars($r['created_at']) ?></td>
+          <td><?= $r['reviewed'] ? 'Yes' : 'No' ?></td>
+          <td><?= $r['is_muted'] ? 'Yes' : 'No' ?></td>
+          <td>
+            <?php if ($r['is_muted']): ?>
+              <button class="btn btn-unmute mute-toggle">Unmute</button>
+            <?php else: ?>
+              <button class="btn btn-mute mute-toggle">Mute</button>
+            <?php endif; ?>
+            <?php if (!$r['reviewed']): ?>
+              <button class="btn btn-reviewed mark-reviewed">Mark Reviewed</button>
+            <?php endif; ?>
+          </td>
+        </tr>
+      <?php endforeach; ?>
+    </tbody>
+  </table>
+<?php endif; ?>
 </body>
 </html>
 
 
 <script>
+// Status dropdown change handler
 document.querySelectorAll('.status-dropdown').forEach(select => {
   select.addEventListener('change', function() {
-    const form = this.closest('.inline-status-form');
-    const id = form.getAttribute('data-id');
+    const form   = this.closest('.inline-status-form');
+    const id     = form.getAttribute('data-id');
     const status = this.value;
-
     fetch('update_status.php', {
       method: 'POST',
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
@@ -258,10 +366,54 @@ document.querySelectorAll('.status-dropdown').forEach(select => {
       if (data.success) {
         // Preserve current filters from the URL
         const params = new URLSearchParams(window.location.search);
-        params.set('status', status);  // update status to what was just set
+        params.set('status', status);
         window.location.href = `dashboard.php?${params.toString()}`;
       } else {
         alert("Update failed: " + (data.error || 'Unknown error'));
+      }
+    });
+  });
+});
+
+// Mute/unmute buttons in the abuse reports table
+document.querySelectorAll('.mute-toggle').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const row      = this.closest('tr');
+    const username = row.getAttribute('data-targetuser');
+    if (!username) return;
+    const action   = this.classList.contains('btn-mute') ? 'mute' : 'unmute';
+    fetch('../api/mute_user.php', {
+      method: 'POST',
+      headers: {'Content-Type':'application/x-www-form-urlencoded'},
+      body: new URLSearchParams({ username: username, action: action })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        location.reload();
+      } else {
+        alert(data.error || 'Error updating user');
+      }
+    });
+  });
+});
+
+// Mark abuse report as reviewed
+document.querySelectorAll('.mark-reviewed').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const row = this.closest('tr');
+    const id  = row.getAttribute('data-id');
+    fetch('../api/mark_abuse_reviewed.php', {
+      method: 'POST',
+      headers: {'Content-Type':'application/x-www-form-urlencoded'},
+      body: new URLSearchParams({ id: id })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        location.reload();
+      } else {
+        alert(data.error || 'Error marking reviewed');
       }
     });
   });

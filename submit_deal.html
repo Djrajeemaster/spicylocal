@@ -5,6 +5,8 @@
   <title>Post a Deal</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="style.css" />
+  <!-- SweetAlert2 for success and warning popups -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     .form-container {
       max-width: 720px;
@@ -50,14 +52,45 @@
       border-radius: 8px;
       object-fit: cover;
     }
+
+    /* Tooltip styling for deal submission reminder */
+    .tooltip-icon {
+      display: inline-block;
+      position: relative;
+      margin-left: 6px;
+      cursor: pointer;
+      color: #e91e63;
+      font-size: 1.1rem;
+    }
+    .tooltip-icon .tooltip-text {
+      visibility: hidden;
+      opacity: 0;
+      position: absolute;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #e91e63;
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      white-space: normal;
+      width: 220px;
+      z-index: 100;
+      transition: opacity 0.2s ease;
+    }
+    .tooltip-icon:hover .tooltip-text,
+    .tooltip-icon:focus .tooltip-text {
+      visibility: visible;
+      opacity: 1;
+    }
   </style>
 </head>
 <body>
-  <header class="header">
-    <div class="logo">SpicyBeats</div>
-    <nav class="nav" id="nav-menu"></nav>
-  </header>
-
+  <!-- Global Header Loader -->
+ <div id="global-header"></div>
+<link rel="stylesheet" href="header.css">
+<script src="loadHeader.js" defer></script>
   <div class="form-container">
     <h2>📤 Post a New Deal</h2>
     <form id="deal-form" action="submit_deal.php" method="POST" enctype="multipart/form-data">
@@ -87,14 +120,65 @@
         <option value="other">Other</option>
       </select>
 
-      <label for="expiry">Deal Expiration</label>
-      <input type="datetime-local" name="expiry" id="expiry" required>
+      <!-- Future-dated deal fields -->
+      <label for="start_date">Start Date</label>
+      <input type="datetime-local" name="start_date" id="start_date" required>
+
+      <label for="end_date">End Date (optional)</label>
+      <input type="datetime-local" name="end_date" id="end_date">
+
+      <!-- CTA fields -->
+      <label for="cta_text">CTA Text (optional)</label>
+      <input type="text" name="cta_text" id="cta_text" placeholder="e.g. Buy Now">
+
+      <label for="cta_url">CTA URL (optional)</label>
+      <input type="url" name="cta_url" id="cta_url" placeholder="https://example.com">
+
+      <!-- Summary field -->
+      <label for="summary">Short Summary (optional)</label>
+      <input type="text" name="summary" id="summary" placeholder="e.g. 50% off all pizzas this weekend">
+
+      <!-- Tag Picker -->
+      <label>Tags (choose one or more)</label>
+      <div id="tag-picker" style="margin-bottom: 1rem;">
+        <label><input type="checkbox" name="tags[]" value="electronics"> Electronics</label><br>
+        <label><input type="checkbox" name="tags[]" value="grocery"> Grocery</label><br>
+        <label><input type="checkbox" name="tags[]" value="local"> Local</label><br>
+        <label><input type="checkbox" name="tags[]" value="online"> Online</label><br>
+        <label><input type="checkbox" name="tags[]" value="weekend"> Weekend</label><br>
+        <label><input type="checkbox" name="tags[]" value="flash-sale"> Flash Sale</label>
+      </div>
+      <!-- Tag Suggestions (auto-suggest) -->
+      <div id="tag-suggestions" style="margin-bottom: 1rem;"></div>
+
+      <!-- Removed old expiry field; end_date now handles expiration -->
 
       <label for="images">Upload Image(s)</label>
       <input type="file" name="images[]" id="images" accept="image/*" multiple>
+      <small>Upload up to 5 images. Only the first 5 will be saved.</small>
       <div id="image-preview"></div>
 
-      <button type="submit">Submit Deal</button>
+      <!-- Agreement checkbox & tooltip near the submit button -->
+      <div id="terms-container" style="margin-bottom: 1rem;">
+        <label style="display: flex; align-items: center; font-size: 0.9rem;">
+          <input type="checkbox" id="terms-checkbox" style="margin-right: 6px;">
+          I agree not to post offensive or illegal content.
+        </label>
+        <small>
+          (<a href="terms.html" target="_blank" style="color:#e91e63;text-decoration:underline;">Terms &amp; Conditions</a>)
+        </small>
+      </div>
+      <!-- Preview and submit buttons -->
+      <button type="button" id="preview-btn" style="margin-right: 10px; background: #007bff;">Preview</button>
+      <button type="submit" id="submit-deal-btn">
+        Submit Deal
+      </button>
+      <span class="tooltip-icon" tabindex="0" id="submit-tooltip" aria-label="Deal posting guidelines">
+        ℹ
+        <span class="tooltip-text">
+          Reminder: No spam, offensive language, copyrighted content, or fake deals. Violations may result in ban.
+        </span>
+      </span>
     </form>
   </div>
 
@@ -105,7 +189,175 @@
   <script>
     // Auto-fill user ID
     document.addEventListener("DOMContentLoaded", () => {
+      // If user is muted, prevent posting
+      const isMuted = localStorage.getItem('is_muted') === '1';
+      if (isMuted) {
+        Swal.fire({
+          icon: 'error',
+          title: 'You are muted',
+          text: 'You cannot post new deals at this time.',
+          confirmButtonColor: '#e91e63'
+        }).then(() => {
+          window.location.href = 'index.html';
+        });
+        return;
+      }
       document.getElementById("user_id").value = localStorage.getItem("user_id") || "0";
+      // Attach image input limitation (max 5 images)
+      const imgInput = document.getElementById("images");
+      imgInput.addEventListener("change", function() {
+        if (this.files.length > 5) {
+          alert("Please upload no more than 5 images.");
+          // Reset file input
+          this.value = "";
+          document.getElementById("image-preview").innerHTML = "";
+        }
+      });
+      // Preview button logic
+      document.getElementById("preview-btn").addEventListener("click", showPreview);
+
+      // Load feature flags for AI and suggestions
+      let featureFlags = {};
+      fetch('api/feature_flags.php').then(r => r.json()).then(flags => {
+        featureFlags = flags || {};
+        // If tag suggestions feature is enabled, load popular tags
+        if (featureFlags.tag_suggestions) {
+          loadTagSuggestions();
+        }
+      }).catch(() => {
+        // fallback: still load tag suggestions
+        loadTagSuggestions();
+      });
+
+      // Auto summary and category suggestion listeners
+      const descEl = document.getElementById('description');
+      const titleEl = document.getElementById('title');
+      let summaryTimeout;
+      function handleAIUpdate() {
+        clearTimeout(summaryTimeout);
+        summaryTimeout = setTimeout(async () => {
+          const descVal = descEl.value.trim();
+          const titleVal = titleEl.value.trim();
+          if (featureFlags.ai_summary && descVal) {
+            // fetch summary from AI
+            try {
+              const res = await fetch('ai/summary.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ description: descVal })
+              });
+              const data = await res.json();
+              // populate summary if user hasn't typed anything
+              const summaryEl = document.getElementById('summary');
+              if (summaryEl && !summaryEl.value) {
+                summaryEl.value = data.summary || '';
+              }
+            } catch (err) {
+              console.warn('AI summary error', err);
+            }
+          }
+          if (featureFlags.auto_categorization && (descVal || titleVal)) {
+            try {
+              const res2 = await fetch('ai/category_predict.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title: titleVal, description: descVal })
+              });
+              const data2 = await res2.json();
+              const catSel = document.getElementById('category');
+              if (catSel && data2.categories && data2.categories.length) {
+                // If current category is empty or default, set to first suggestion
+                if (!catSel.value || catSel.value === '') {
+                  // ensure option exists; if not, set to 'other'
+                  const suggested = data2.categories[0];
+                  const opt = Array.from(catSel.options).find(o => o.value === suggested);
+                  catSel.value = opt ? suggested : 'other';
+                }
+                // Display suggestions list next to select (optional)
+                showCategorySuggestions(data2.categories);
+              }
+            } catch (err) {
+              console.warn('AI category error', err);
+            }
+          }
+        }, 600);
+      }
+      descEl.addEventListener('input', handleAIUpdate);
+      titleEl.addEventListener('input', handleAIUpdate);
+    });
+
+    // Load popular tags from backend and display suggestions
+    function loadTagSuggestions() {
+      fetch('api/get_tags.php?limit=10').then(r => r.json()).then(tags => {
+        const container = document.getElementById('tag-suggestions');
+        container.innerHTML = '';
+        if (!tags || !tags.length) return;
+        const label = document.createElement('div');
+        label.textContent = 'Popular tags:';
+        container.appendChild(label);
+        tags.forEach(t => {
+          const span = document.createElement('span');
+          span.textContent = t.tag_name;
+          span.style.padding = '4px 8px';
+          span.style.margin = '4px';
+          span.style.border = '1px solid #ddd';
+          span.style.borderRadius = '12px';
+          span.style.cursor = 'pointer';
+          span.addEventListener('click', () => {
+            // find checkbox with value equal to tag_name
+            const cb = document.querySelector(`#tag-picker input[value="${t.tag_name}"]`);
+            if (cb) {
+              cb.checked = true;
+            } else {
+              // If checkbox not found, create dynamic tag pill
+              const tagPicker = document.getElementById('tag-picker');
+              const labelEl = document.createElement('label');
+              const inputEl = document.createElement('input');
+              inputEl.type = 'checkbox';
+              inputEl.name = 'tags[]';
+              inputEl.value = t.tag_name;
+              inputEl.checked = true;
+              labelEl.appendChild(inputEl);
+              labelEl.append(' ' + t.tag_name.charAt(0).toUpperCase() + t.tag_name.slice(1));
+              tagPicker.appendChild(labelEl);
+              tagPicker.appendChild(document.createElement('br'));
+            }
+          });
+          container.appendChild(span);
+        });
+      }).catch(() => {});
+    }
+
+    // Show category suggestions near the select element
+    function showCategorySuggestions(categories) {
+      let suggestionDiv = document.getElementById('category-suggestion-box');
+      if (!suggestionDiv) {
+        suggestionDiv = document.createElement('div');
+        suggestionDiv.id = 'category-suggestion-box';
+        suggestionDiv.style.marginBottom = '0.8rem';
+        const parent = document.getElementById('category').parentNode;
+        parent.appendChild(suggestionDiv);
+      }
+      suggestionDiv.innerHTML = '';
+      const info = document.createElement('small');
+      info.textContent = 'Suggested categories: ';
+      suggestionDiv.appendChild(info);
+      categories.forEach(cat => {
+        const span = document.createElement('span');
+        span.textContent = cat;
+        span.style.padding = '4px 8px';
+        span.style.margin = '4px';
+        span.style.border = '1px solid #ddd';
+        span.style.borderRadius = '12px';
+        span.style.cursor = 'pointer';
+        span.addEventListener('click', () => {
+          const catSel = document.getElementById('category');
+          const opt = Array.from(catSel.options).find(o => o.value === cat);
+          catSel.value = opt ? cat : catSel.value;
+        });
+        suggestionDiv.appendChild(span);
+      });
+    }
     });
 
     // Live image preview
@@ -149,6 +401,178 @@
     function error() {
       alert("Unable to retrieve your location.");
     }
+
+    // Collect form data and display a preview modal
+    function showPreview() {
+      // Gather values
+      const title = document.getElementById("title").value.trim();
+      const desc  = document.getElementById("description").value.trim();
+      const price = document.getElementById("price").value;
+      const loc   = document.getElementById("location").value.trim();
+      const category = document.getElementById("category").value;
+      const startDate = document.getElementById("start_date").value;
+      const endDate   = document.getElementById("end_date").value;
+      const ctaText   = document.getElementById("cta_text").value.trim();
+      const summary   = document.getElementById("summary").value.trim();
+      // Tags
+      const tags = [];
+      document.querySelectorAll('#tag-picker input[type="checkbox"]:checked').forEach(cb => {
+        tags.push(cb.value);
+      });
+      // Images
+      const files = document.getElementById("images").files;
+      const images = [];
+      [...files].slice(0, 5).forEach(file => {
+        images.push(file);
+      });
+      // Build HTML for preview
+      let html = '';
+      html += `<div class="deal-card" style="max-width:600px; margin:1rem auto;">`;
+      html += `<h3>${title || 'Untitled Deal'}</h3>`;
+      if (summary) {
+        html += `<p><em>${summary}</em></p>`;
+      }
+      html += `<p>${desc || ''}</p>`;
+      html += `<p><strong>Category:</strong> ${category || ''}</p>`;
+      html += `<p><strong>Location:</strong> ${loc || ''}</p>`;
+      if (startDate) html += `<p><strong>Starts:</strong> ${startDate.replace('T',' ')}</p>`;
+      if (endDate)   html += `<p><strong>Ends:</strong> ${endDate.replace('T',' ')}</p>`;
+      if (tags.length) html += `<p><strong>Tags:</strong> ${tags.join(', ')}</p>`;
+      // Image previews
+      if (images.length) {
+        html += '<div style="display:flex; gap:8px; overflow-x:auto; margin-top:0.5rem;">';
+        images.forEach(file => {
+          html += `<img src="${URL.createObjectURL(file)}" style="height:80px; border-radius:6px;"/>`;
+        });
+        html += '</div>';
+      }
+      // CTA preview
+      if (ctaText) {
+        html += `<p><button style="padding:6px 12px; background:#007bff; color:#fff; border:none; border-radius:5px; cursor:pointer;">${ctaText}</button></p>`;
+      }
+      html += '</div>';
+      // Show modal
+      let modal = document.getElementById('deal-preview-modal');
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'deal-preview-modal';
+        modal.style.position = 'fixed';
+        modal.style.top = '0';
+        modal.style.left = '0';
+        modal.style.width = '100vw';
+        modal.style.height = '100vh';
+        modal.style.background = 'rgba(0,0,0,0.6)';
+        modal.style.display = 'flex';
+        modal.style.justifyContent = 'center';
+        modal.style.alignItems = 'center';
+        modal.style.zIndex = '2000';
+        modal.innerHTML = '<div id="deal-preview-content" style="background:#fff; padding:1rem; border-radius:8px; max-height:90vh; overflow-y:auto; position:relative;"></div>';
+        document.body.appendChild(modal);
+        modal.addEventListener('click', function(e) {
+          if (e.target === modal) {
+            modal.style.display = 'none';
+          }
+        });
+      }
+      document.getElementById('deal-preview-content').innerHTML = '<h3>Deal Preview</h3>' + html;
+      modal.style.display = 'flex';
+    }
   </script>
+  <!-- Terms agreement, tooltip, and submission handling -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const termsCheckbox = document.getElementById('terms-checkbox');
+      if (termsCheckbox) {
+        // Restore previous agreement state from localStorage
+        const savedAgree = localStorage.getItem('termsAgree');
+        if (savedAgree === 'true') {
+          termsCheckbox.checked = true;
+        }
+      }
+      const form = document.getElementById('deal-form');
+      if (form) {
+        form.addEventListener('submit', function(event) {
+          // Validate terms checkbox
+          if (!termsCheckbox || !termsCheckbox.checked) {
+            event.preventDefault();
+            // Increase reminder count and store
+            let reminderCount = parseInt(localStorage.getItem('termsReminder') || '0');
+            reminderCount++;
+            localStorage.setItem('termsReminder', reminderCount.toString());
+            const message = reminderCount > 1 ?
+              'Please remember to agree to the guidelines before submitting.' :
+              'Please agree to our Terms & Conditions before submitting.';
+            Swal.fire({
+              icon: 'warning',
+              title: 'Agreement Required',
+              text: message,
+              confirmButtonColor: '#e91e63'
+            });
+            return;
+          }
+          // Save user agreement state
+          localStorage.setItem('termsAgree', 'true');
+          // Prevent default form submission to handle via AJAX
+          event.preventDefault();
+          const formData = new FormData(form);
+          // Use AJAX to post the form and show SweetAlert on success
+          fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+          })
+          .then(res => res.json())
+          .then(data => {
+            if (data && data.success) {
+              Swal.fire({
+                icon: 'success',
+                title: 'Deal submitted successfully!',
+                text: 'Your deal is pending review and will appear once approved.',
+                timer: 4000,
+                timerProgressBar: true,
+                confirmButtonColor: '#e91e63'
+              });
+              setTimeout(() => {
+                window.location.href = 'index.html';
+              }, 4000);
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Submission error',
+                text: (data && data.error) ? data.error : 'Something went wrong. Please try again.',
+                confirmButtonColor: '#e91e63'
+              });
+            }
+          })
+          .catch(() => {
+            Swal.fire({
+              icon: 'error',
+              title: 'Submission error',
+              text: 'Network error. Please try again.',
+              confirmButtonColor: '#e91e63'
+            });
+          });
+        });
+      }
+      // Mobile-friendly tooltip toggling on click
+      const tooltipIcon = document.getElementById('submit-tooltip');
+      if (tooltipIcon) {
+        tooltipIcon.addEventListener('click', () => {
+          const textEl = tooltipIcon.querySelector('.tooltip-text');
+          if (textEl) {
+            const visible = textEl.style.visibility === 'visible' || textEl.style.opacity === '1';
+            if (visible) {
+              textEl.style.visibility = 'hidden';
+              textEl.style.opacity = '0';
+            } else {
+              textEl.style.visibility = 'visible';
+              textEl.style.opacity = '1';
+            }
+          }
+        });
+      }
+    });
+  </script>
+<script src="footer.js"></script>
 </body>
 </html>

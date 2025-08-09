@@ -20,12 +20,23 @@ document.addEventListener("DOMContentLoaded", () => {
       if (selected) {
         selected.style.display = "block";
 
-        // ✅ Trigger fetch only when switching to My Deals tab
+        // ✅ Trigger data loading based on selected SPA section
         if (target === "section-deals") {
+          // Load user's deals when entering My Deals tab
           if (typeof window.fetchUserDeals === "function") {
             window.fetchUserDeals("approved");
           } else {
             console.warn("fetchUserDeals() not defined yet.");
+          }
+        } else if (target === "section-saved") {
+          // Load saved (bookmarked) deals when entering Saved tab
+          if (typeof window.loadSavedDeals === "function") {
+            window.loadSavedDeals();
+          }
+        } else if (target === "section-recent") {
+          // Load recently viewed deals when entering Recently Viewed tab
+          if (typeof window.loadRecentViews === "function") {
+            window.loadRecentViews();
           }
         }
       }

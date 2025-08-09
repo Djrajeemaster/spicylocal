@@ -10,21 +10,10 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-<header class="header">
-  <div class="logo">SpicyBeats</div>
-  <div class="nav">
-    <a href="index.html">Home</a>
-    <div class="user-menu" id="user-menu" style="display: none;">
-      <div class="user-icon" id="user-icon">👤</div>
-      <span class="username-label" id="username-label"></span>
-      <div class="dropdown hidden" id="dropdown">
-        <a href="profile.html">Profile</a>
-        <a href="#" id="logout">Logout</a>
-      </div>
-    </div>
-  </div>
-</header>
-
+<!-- Global Header Loader -->
+<div id="global-header"></div>
+<link rel="stylesheet" href="header.css">
+<script src="loadHeader.js" defer></script>
 <div class="container">
   <aside class="sidebar">
     <div class="logo">SpicyBeats</div>
@@ -34,7 +23,6 @@
       <a href="#" data-target="section-deals">My Deals</a>
 	  <a href="#" data-target="section-saved">Saved Deals</a>
 	  <a href="#" data-target="section-recent">Recently Viewed</a>
-      <a href="#" data-target="section-messages">Messages</a>
       <a href="#" data-target="section-analytics">Analytics</a>
       <a href="#" data-target="section-settings">Settings</a>
       <a href="#" id="logout-link">Logout</a>
@@ -53,7 +41,6 @@
 
       <section class="summary-cards">
         <div class="card"><h4>Total Deals</h4><div id="total-deals">--</div><small class="trend up">+12% from last month</small></div>
-        <div class="card"><h4>Messages</h4><div id="message-count">--</div><small class="trend">5 unread</small></div>
         <div class="card"><h4>Revenue</h4><div>$2,847</div><small class="trend up">+8% from last week</small></div>
         <div class="card"><h4>Success Rate</h4><div>94%</div><small class="trend up">Above average</small></div>
       </section>
@@ -103,6 +90,13 @@
       <p id="password-update-msg" class="status-msg"></p>
     </form>
   </div>
+
+  <!-- Gamification stats -->
+  <div class="card card-gamify">
+    <h4>🎮 Achievements</h4>
+    <div id="xp-level" style="margin-bottom:0.5rem;"></div>
+    <div id="badge-list"></div>
+  </div>
 </div>
 
 
@@ -119,10 +113,6 @@
 </section>
     </div>
 
-    <div id="section-messages" class="spa-section" style="display: none;">
-      <h3>✉️ Messages</h3>
-      <p>Your latest messages will appear here.</p>
-    </div>
 
     <div id="section-analytics" class="spa-section" style="display: none;">
       <h3>📊 Analytics</h3>
@@ -150,5 +140,6 @@
 </div>
 <script src="spa_switching.js"></script>
 <script src="profile.js"></script>
+<script src="footer.js"></script>
 </body>
 </html>

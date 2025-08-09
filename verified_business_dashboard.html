@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verified Business Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="header.css" />
+  <style>
+    /* Basic styling for dashboard */
+    .vb-container {
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+    .vb-tabs {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .vb-tabs button {
+      padding: 0.6rem 1rem;
+      border: none;
+      border-radius: 6px;
+      background: #e91e63;
+      color: #fff;
+      cursor: pointer;
+    }
+    .vb-tabs button.active {
+      background: #c2185b;
+    }
+    .vb-content > div {
+      display: none;
+    }
+    .vb-content > div.active {
+      display: block;
+    }
+    /* Table for listing deals */
+    table.vb-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    table.vb-table th, table.vb-table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+    table.vb-table th {
+      background: #f7f7f7;
+    }
+  </style>
+</head>
+<body>
+  <!-- Global Header -->
+  <div id="global-header"></div>
+  <link rel="stylesheet" href="header.css" />
+  <script src="loadHeader.js" defer></script>
+
+  <div class="vb-container">
+    <h2>Verified Business Dashboard</h2>
+    <div class="vb-tabs" id="vb-tabs">
+      <button data-tab="deals" class="active">My Deals</button>
+      <button data-tab="profile">Profile</button>
+      <button data-tab="branding">Branding</button>
+      <button data-tab="analytics">Analytics</button>
+    </div>
+    <div class="vb-content" id="vb-content">
+      <div data-content="deals" class="active"><p>Loading deals...</p></div>
+      <div data-content="profile"><p>Profile settings coming soon.</p></div>
+      <div data-content="branding">
+        <p>You can customize your business profile, including your logo, about section and social links.</p>
+        <p><a href="customize_business_profile.html" style="color:#1976d2; text-decoration:underline;">Go to Customize Business Profile</a></p>
+      </div>
+      <div data-content="analytics"><p>Analytics coming soon.</p></div>
+    </div>
+  </div>
+
+  <script src="verified_business_dashboard.js"></script>
+  <script src="footer.js"></script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+
+:root{
+  --sb-accent: #ff007a;
+  --sb-accent-contrast: #ffffff;
+  --sb-accent-weak: color-mix(in oklab, var(--sb-accent) 12%, white);
+  --sb-ring: color-mix(in oklab, var(--sb-accent) 45%, transparent);
+}
+
+/* Links & hovers */
+a, .link, .nav a.active{ color: var(--sb-accent); }
+a:hover{ text-decoration-color: var(--sb-accent); }
+
+/* Primary buttons */
+.button, .btn, .btn-primary, button.primary{
+  background: var(--sb-accent);
+  color: var(--sb-accent-contrast);
+  border-color: var(--sb-accent);
+}
+.button:hover, .btn:hover, .btn-primary:hover, button.primary:hover{
+  box-shadow: 0 6px 18px var(--sb-ring);
+}
+
+/* Outline buttons that should take accent on active */
+.btn-outline.active, .chip.is-active, .tag.is-active{
+  background: var(--sb-accent-weak);
+  border-color: var(--sb-accent);
+  color: var(--sb-accent);
+}
+
+/* Inputs focus rings */
+input:focus, select:focus, textarea:focus{
+  outline: none;
+  box-shadow: 0 0 0 3px var(--sb-ring);
+  border-color: var(--sb-accent);
+}
+
+/* Tabs / nav active state */
+.tab.is-active, .tabs .active{
+  border-bottom: 2px solid var(--sb-accent);
+  color: var(--sb-accent);
+}
+
+/* Badges */
+.badge, .badge-primary{
+  background: var(--sb-accent-weak);
+  color: var(--sb-accent);
+  border-color: var(--sb-accent);
+}
+.badge-verified{
+  background: var(--sb-accent-weak);
+  color: var(--sb-accent);
+  border: 1px solid var(--sb-accent);
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+/* Pagination current */
+#pagination{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; padding:10px 0; }
+.pg-btn{ border:1px solid #e2e8f0; padding:6px 10px; border-radius:8px; background:#fff; cursor:pointer; min-width:36px; }
+.pg-btn.is-current{ font-weight:700; box-shadow: 0 0 0 2px var(--sb-ring); border-color: var(--sb-accent); }
+.pg-btn:disabled{ opacity:.5; cursor:not-allowed; }
+
+/* NEW pill uses accent */
+.badge-new{ background: var(--sb-accent); color: var(--sb-accent-contrast); }

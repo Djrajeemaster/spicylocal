@@ -5,29 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SpicyBeats Deals</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="cards.css" />
+  <link rel="stylesheet" href="theme.css" />
 </head>
 <body>
-  
-<header class="header">
-  <div class="logo" style="padding-left: 1rem;">
-  <a href="index.html">
-    <img src="logo.png" alt="SpicyBeats" style="height: 36px; vertical-align: middle;">
-  </a>
-</div>
-  <div class="nav" id="nav-menu"></div>
-</header>
+<!-- Global Header Loader -->
+<div id="global-header"></div>
+<link rel="stylesheet" href="header.css">
+<script src="loadHeader.js" defer></script>
 
-
-<div id="dropdown" class="dropdown hidden"></div>
-
+  <!-- Search Bar: visible below the global header -->
+  <div id="search-bar" class="search-container">
+    <input type="search" id="deal-search" class="search-input" placeholder="Search deals..." />
+  </div>
 <main>
   <div id="deal-list" class="deal-list">Loading deals...</div>
   <div id="pagination" class="pagination-container" style="margin-top:1rem;"></div>
 </main>
-<div id="chat-toggle-btn">💬 Chat</div>
-<div id="chat-widget" class="hidden"> ... </div>
-<link rel="stylesheet" href="chat.css">
-<script src="chat.js"></script>
+
+<script src="theme.js" defer></script>
 <script src="bagit.js"></script>
+<script src="footer.js"></script>
+  <!-- Search functionality script -->
+  <script src="search.js"></script>
 </body>
 </html>

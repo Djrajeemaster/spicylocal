@@ -1,0 +1,256 @@
+
+// loadHeader.js (robust, null-safe, role-aware)
+(function () {
+  const HEADER_MOUNTED_ATTR = "data-header-mounted";
+  function isTrue(v) { return v === "1" || v === "true"; }
+  function safeById(id) { return document.getElementById(id); }
+  function mountHeader(html) {
+    const mountPoint = document.getElementById("global-header");
+    if (mountPoint) {
+      mountPoint.innerHTML = html;
+    } else {
+      document.body.insertAdjacentHTML("afterbegin", html);
+    }
+    document.body.setAttribute(HEADER_MOUNTED_ATTR, "1");
+  }
+  async function init() {
+    if (document.body.getAttribute(HEADER_MOUNTED_ATTR) === "1") return;
+    let res;
+    try {
+      res = await fetch("header.html", { cache: "no-store" });
+      if (!res.ok) throw new Error("Failed to fetch header.html: " + res.status);
+      const html = await res.text();
+      mountHeader(html);
+    } catch (err) {
+      console.error("[loadHeader] fetch error:", err);
+      return;
+    }
+
+    // Load feature flags and translations before building nav
+    let featureFlags = {};
+    let translations = {};
+    const userLang = localStorage.getItem("language") || "en";
+    try {
+      const ffRes = await fetch("api/feature_flags.php");
+      featureFlags = await ffRes.json();
+    } catch (err) {
+      console.warn("Unable to load feature flags", err);
+    }
+    try {
+      const trRes = await fetch(`lang/${userLang}.json`);
+      if (trRes.ok) {
+        // Attempt to parse JSON only if response is OK and not an HTML error page
+        const contentType = trRes.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          translations = await trRes.json();
+        } else {
+          // Fallback to English if file is not JSON (e.g., 404 HTML)
+          const enRes = await fetch('lang/en.json');
+          if (enRes.ok) {
+            translations = await enRes.json();
+          }
+        }
+      } else {
+        // If requested language file not found, fallback to English
+        const enRes = await fetch('lang/en.json');
+        if (enRes.ok) {
+          translations = await enRes.json();
+        }
+      }
+    } catch (err) {
+      console.warn('Unable to load translations', err);
+      // Final fallback: attempt to load English translations
+      try {
+        const enRes = await fetch('lang/en.json');
+        if (enRes.ok) {
+          translations = await enRes.json();
+        }
+      } catch (e) {
+        // If even the fallback fails, leave translations empty
+        translations = {};
+      }
+    }
+    function t(key) {
+      return translations && translations[key] ? translations[key] : key;
+    }
+    const navMenu      = safeById("nav-menu");
+    const avatarEl     = safeById("user-avatar");
+    const nameEl       = safeById("user-name");
+    const ddAdmin      = safeById("dd-admin");
+    const ddModerator  = safeById("dd-moderator");
+    const ddSuperAdmin = safeById("dd-superadmin");
+    const ddBusiness   = safeById("dd-business");
+    const ddUsers      = safeById("dd-users");
+    const ddLogout     = safeById("dd-logout");
+    const ddProfile    = safeById("dd-profile");
+    // Messages dropdown removed per phase 14; ddMessages is undefined
+    const ddMessages   = null;
+    const ddAlerts     = safeById("dd-alerts");
+    const userToggle   = safeById("user-toggle");
+    const userDropdown = safeById("user-dropdown");
+    const themeToggle  = safeById("theme-toggle");
+    const languageSelect = safeById("language-select");
+    const username     = localStorage.getItem("username");
+    const isAdmin      = isTrue(localStorage.getItem("is_admin"));
+    const isModerator  = isTrue(localStorage.getItem("is_moderator"));
+    // Determine if the current user is a verified business. This value should
+    // be stored in localStorage (e.g., set after login). We treat "1" or
+    // "true" as true.
+    const isVerifiedBusiness = isTrue(localStorage.getItem("is_verified_business"));
+    // Determine if the current user is a super admin. Prefer server-provided flag
+    // from feature flags (returned under _is_super_admin). If not present, fall
+    // back to localStorage (useful if older login_unified.php sets is_super_admin).
+    const isSuperAdmin  = featureFlags && typeof featureFlags._is_super_admin === 'boolean'
+      ? featureFlags._is_super_admin
+      : isTrue(localStorage.getItem('is_super_admin'));
+    if (navMenu) {
+      if (username) {
+        const links = [];
+        // Home
+        links.push(`<a href="index.html">${t('home')}</a>`);
+        // Post deal (hide if muted)
+        const isMuted = localStorage.getItem('is_muted') === '1';
+        if (!isMuted) {
+          links.push(`<a href="submit_deal.html">${t('post_deal')}</a>`);
+        }
+        // Messages removed per phase 14 requirements
+        // Smart alerts link removed from header. Users can access Smart Alerts via the profile dropdown.
+        // Business dashboard
+        if (isVerifiedBusiness) {
+          links.push(`<a href="verified_business_dashboard.html">${t('business_dashboard')}</a>`);
+        }
+        // Leaderboard if enabled
+        if (featureFlags.leaderboard) {
+          links.push(`<a href="leaderboard.html">${t('leaderboard')}</a>`);
+        }
+        navMenu.innerHTML = links.join('');
+      } else {
+        navMenu.innerHTML = `
+          <a href="index.html">${t('home')}</a>
+          <a href="login_unified.php">${t('login')}</a>
+          <a href="signup.html">${t('signup')}</a>
+        `;
+      }
+    }
+    if (username) {
+      const initials = (username || "")
+        .split(/[\s._-]+/)
+        .map(s => s && s[0] ? s[0].toUpperCase() : "")
+        .join("")
+        .slice(0, 2) || "SB";
+      if (avatarEl) avatarEl.textContent = initials;
+      if (nameEl)   nameEl.textContent   = username;
+      // Show or hide admin, moderator and super admin links based on user role
+      // Show or hide role-specific links
+      if (ddSuperAdmin) {
+        // Show for super admin only
+        ddSuperAdmin.classList.toggle("hidden", !isSuperAdmin);
+      }
+      if (ddAdmin) {
+        // Show admin link for admin or super admin
+        ddAdmin.classList.toggle("hidden", !(isAdmin || isSuperAdmin));
+      }
+      if (ddModerator) {
+        // Show moderator link for moderator or super admin
+        ddModerator.classList.toggle("hidden", !(isModerator || isSuperAdmin));
+      }
+      if (ddBusiness) {
+        // Show business mode for verified business users
+        ddBusiness.classList.toggle("hidden", !isVerifiedBusiness);
+      }
+      if (ddUsers) {
+        // Show User Management link for admin and super admins
+        ddUsers.classList.toggle("hidden", !(isAdmin || isSuperAdmin));
+      }
+      // Ensure alerts links are visible for logged-in users (messages removed)
+      if (ddAlerts)   ddAlerts.classList.remove("hidden");
+
+      // Refresh user info (role, muted status) from server session to ensure consistency
+      try {
+        const infoRes = await fetch('api/get_user_info.php');
+        const infoData = await infoRes.json();
+        if (infoData && infoData.success) {
+          // Update localStorage fields based on server data
+          if (typeof infoData.role !== 'undefined') {
+            localStorage.setItem('is_admin', infoData.role === 'admin' ? '1' : '0');
+            localStorage.setItem('is_moderator', infoData.role === 'moderator' ? '1' : '0');
+            // super_admin handled via feature flags or separate logic
+          }
+          if (typeof infoData.is_verified_business !== 'undefined') {
+            localStorage.setItem('is_verified_business', infoData.is_verified_business ? '1' : '0');
+          }
+          if (typeof infoData.is_muted !== 'undefined') {
+            localStorage.setItem('is_muted', infoData.is_muted ? '1' : '0');
+          }
+        }
+      } catch (err) {
+        console.warn('Could not refresh user info', err);
+      }
+
+    } else {
+      if (userDropdown && !userDropdown.classList.contains("hidden")) {
+        userDropdown.classList.add("hidden");
+      }
+      // For unauthenticated users, clicking profile/messages/alerts redirects to login
+      const redirectToLogin = (e) => {
+        e.preventDefault();
+        window.location.href = "login_unified.php";
+      };
+      if (ddProfile)   ddProfile.addEventListener("click", redirectToLogin);
+      if (ddAlerts)    ddAlerts.addEventListener("click", redirectToLogin);
+    }
+    if (userToggle && userDropdown) {
+      userToggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        userDropdown.classList.toggle("hidden");
+      });
+      document.addEventListener("click", () => {
+        if (!userDropdown.classList.contains("hidden")) {
+          userDropdown.classList.add("hidden");
+        }
+      });
+      userDropdown.addEventListener("click", (e) => e.stopPropagation());
+    }
+    if (ddLogout) {
+      ddLogout.addEventListener("click", (e) => {
+        e.preventDefault();
+        localStorage.clear();
+        window.location.href = "login_unified.php";
+      });
+    }
+
+    // Theme toggle logic
+    function applyTheme() {
+      const savedTheme = localStorage.getItem("theme") || "light";
+      document.body.classList.toggle("dark", savedTheme === "dark");
+      if (themeToggle) {
+        themeToggle.textContent = savedTheme === "dark" ? "🌞" : "🌙";
+      }
+    }
+    if (themeToggle) {
+      applyTheme();
+      themeToggle.addEventListener("click", () => {
+        const current = document.body.classList.contains("dark") ? "dark" : "light";
+        const newTheme = current === "dark" ? "light" : "dark";
+        localStorage.setItem("theme", newTheme);
+        applyTheme();
+      });
+    }
+
+    // Language selection logic
+    if (languageSelect) {
+      const savedLang = localStorage.getItem("language") || "en";
+      languageSelect.value = savedLang;
+      languageSelect.addEventListener("change", () => {
+        localStorage.setItem("language", languageSelect.value);
+        // Placeholder for future i18n logic
+        console.log("Language set to", languageSelect.value);
+      });
+    }
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();

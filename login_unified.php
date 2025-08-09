@@ -23,12 +23,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($user['role'] === 'admin') {
                 $_SESSION['admin'] = true;
             }
+
+            // Determine flags for super admin role and role name for client storage
+            $isSuperAdminFlag = ($user['role'] === 'super_admin') ? 1 : 0;
+            $roleName         = $user['role'];
+            // Escape role name for safe insertion into JavaScript
+            $roleNameEsc     = addslashes($roleName);
 echo "<script>
+  // Persist key user attributes to localStorage for client‑side use
+  localStorage.setItem('user_id', '".addslashes($user['id'])."');
   localStorage.setItem('username', '".addslashes($user['username'])."');
   localStorage.setItem('email', '".addslashes($user['email'])."');
   localStorage.setItem('joined', '".addslashes($user['created_at'])."');
   localStorage.setItem('is_verified', '".($user['is_verified'] ? '1' : '0')."');
   localStorage.setItem('is_admin', '".($user['role'] === 'admin' ? '1' : '0')."');
+  localStorage.setItem('is_moderator', '".($user['role'] === 'moderator' ? '1' : '0')."');
+  localStorage.setItem('is_verified_business', '".($user['is_verified_business'] ? '1' : '0')."');
   window.location.replace('index.html');
 </script>";
 

@@ -1,0 +1,241 @@
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("✅ bagit.js loaded");
+
+  // 1️⃣ Register service worker for push notifications
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker
+      .register("firebase-messaging-sw.js", { scope: "./" })
+      .then(reg => console.log("✅ Service Worker registered:", reg))
+      .catch(err => console.error("❌ Service Worker registration failed:", err));
+  }
+
+  // Load feature flags
+  let featureFlags = {};
+  (async () => {
+    try {
+      const res = await fetch("api/feature_flags.php");
+      featureFlags = await res.json();
+    } catch {
+      featureFlags = {};
+    }
+  })();
+
+  const username = localStorage.getItem("username");
+
+  // === HOME PAGE DEAL LIST (with real counters) ===
+const dealList = document.getElementById("deal-list");
+if (dealList) {
+  const SB = { page: 1, limit: 10, category: "", sort: "views", q: "" };
+
+  const esc = s => ("" + (s || "")).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;" }[c]));
+  const fmt = n => (Number(n||0) >= 1000 ? (Number(n)/1000).toFixed(1)+"k" : (Number(n||0)));
+  const heatWidthFromViews = v => { v = Number(v||0); return Math.max(2, Math.min(100, (v/(v+50))*100)); };
+  const pickThumb = t => {
+    if (!t || !String(t).trim()) return "uploads/default.jpg";
+    const s = String(t).trim();
+    return (s.includes("/") || s.startsWith("http")) ? s : `uploads/${s}`;
+  };
+  const snippet = (txt, n=160) => {
+    const s = (txt||"").replace(/\s+/g," ").trim();
+    return s.length > n ? s.slice(0, n-1) + "…" : s;
+  };
+
+  // Normalizers (accept array, object-map, or paged)
+  const normDeals = resp => {
+    if (Array.isArray(resp)) return { items: resp, total: resp.length, page: 1, pages: 1 };
+    if (resp && Array.isArray(resp.items)) return resp;
+    if (resp && resp.items && typeof resp.items === "object") {
+      const arr = Object.values(resp.items);
+      return { items: arr, total: arr.length, page: resp.page||1, pages: resp.pages||1 };
+    }
+    return { items: [], total: 0, page: 1, pages: 1 };
+  };
+  const toMap = (data, idKey="id") => {
+    if (!data) return {};
+    if (Array.isArray(data)) {
+      const m = {};
+      data.forEach(x => { if (x && x[idKey] != null) m[String(x[idKey])] = x; });
+      return m;
+    }
+    // already an object keyed by id
+    return data;
+  };
+
+  function fetchAll(){
+    const qs = new URLSearchParams({
+      page: SB.page, limit: SB.limit, category: SB.category, sort: SB.sort, q: SB.q, status: "approved"
+    });
+    return Promise.all([
+      fetch("api/get_votes.php").then(r=>r.json()).catch(()=> ({})),
+      fetch("api/get_feedback.php").then(r=>r.json()).catch(()=> ({})),
+      fetch(`api/get_deals.php?${qs}`).then(r=>r.json())
+    ]);
+  }
+
+  function renderDeal(d, voteMap, feedbackMap){
+    const idStr = String(d.id);
+    const votes = voteMap[idStr] || { up: 0, down: 0 };
+    const fb    = feedbackMap[idStr] || { useful: 0, fake: 0, not_interested: 0, report_abuse: 0 };
+
+    // Counters you asked for:
+    const upvoteCount   = Number(votes.up || 0);                           // 👍
+    const fakeCount     = Number(fb.fake || 0);                             // 🚩
+    const reportAbuse   = Number(fb.report_abuse || fb.abuse || fb.not_interested || 0); // ⚠️ fallback
+
+    const title    = d.title || "";
+    const desc     = snippet(d.summary || d.description);
+    const username = d.username || "Unknown";
+    const views    = Number(d.views || 0);
+    const price    = d.price && d.price !== "0.00" ? `₹${d.price}` : "";
+    const city     = d.location || "";
+    const pinned   = String(d.is_pinned||"0")==="1" ? "📌 " : "";
+    const verified = Number(d.is_verified) === 1 ? '<span class="badge-verified">✔️ Verified</span>' : '';
+    const vbiz     = Number(d.is_verified_business) === 1 ? '<span class="business-badge">🏬 Verified Business</span>' : '';
+    const thumb    = pickThumb(d.thumbnail || d.image);
+
+    return `
+      <a href="deal.html?id=${d.id}" class="deal-card"
+         style="display:block;text-decoration:none;color:inherit;background:#fff;border-radius:14px;padding:16px;margin:14px 0;box-shadow:0 1px 4px rgba(0,0,0,.06);">
+        <div class="deal-body" style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;">
+          <div class="deal-text" style="flex:1 1 auto;min-width:0;">
+            <h3 style="margin:0 0 6px;color:#e91e63;">${pinned}${esc(title)}</h3>
+            ${desc ? `<p class="deal-description" style="margin:4px 0 6px;opacity:.9">${esc(desc)}</p>` : ""}
+            <div class="meta" style="opacity:.85;font-size:.9rem;margin:3px 0;">
+              👤 ${esc(username)} ${verified} ${vbiz}
+            </div>
+            <div class="meta" style="opacity:.85;font-size:.9rem;margin:3px 0;">
+              👁 ${fmt(views)}${price ? " · "+price : ""}${city ? " · "+esc(city) : ""}
+            </div>
+            <div class="heat" style="height:6px;background:#eee;border-radius:6px;margin-top:8px;position:relative;overflow:hidden;">
+              <span style="position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#ff3b6a,#ff6ea8);border-radius:6px;width:${heatWidthFromViews(views)}%"></span>
+            </div>
+            <div class="counters" style="margin-top:6px;">
+              👍 ${fmt(upvoteCount)} · 🚩 ${fmt(fakeCount)} · ⚠️ ${fmt(reportAbuse)}
+            </div>
+          </div>
+          <div class="deal-thumb" style="flex:0 0 auto;">
+            <img loading="lazy" data-src="${thumb}" alt="Deal: ${esc(title)}"
+                 style="width:120px;height:120px;object-fit:cover;border-radius:12px;display:block;">
+          </div>
+        </div>
+      </a>`;
+  }
+
+  function lazyImgs(){
+    const io = new IntersectionObserver(es => es.forEach(e => {
+      if (e.isIntersecting) { const img = e.target; img.src = img.dataset.src; io.unobserve(img); }
+    }), { rootMargin: "200px" });
+    dealList.querySelectorAll("img[data-src]").forEach(img => io.observe(img));
+  }
+
+  function renderList([votesRaw, feedbackRaw, dealsRaw]){
+    const { items, page, pages } = normDeals(dealsRaw);
+    const voteMap = toMap(votesRaw);       // expects { [dealId]: { up, down } } or array with id
+    const feedbackMap = toMap(feedbackRaw);// expects { [dealId]: { fake, report_abuse|not_interested, useful } } or array with id
+
+    dealList.innerHTML = items.map(d => renderDeal(d, voteMap, feedbackMap)).join("") || "<p>No deals found.</p>";
+    lazyImgs();
+
+    // Pager (optional)
+    const pager = document.getElementById("pager");
+    if (pager) {
+      const info = document.getElementById("page-info");
+      if (info) info.textContent = `Page ${page} / ${pages}`;
+      const prev = pager.querySelector('[data-nav="prev"]');
+      const next = pager.querySelector('[data-nav="next"]');
+      if (prev) prev.disabled = SB.page <= 1;
+      if (next) next.disabled = SB.page >= pages;
+      prev?.addEventListener("click", () => { if (SB.page>1){ SB.page--; boot(); }});
+      next?.addEventListener("click", () => { SB.page++; boot(); });
+    }
+  }
+
+  function boot(){
+    fetchAll()
+      .then(renderList)
+      .catch(err => {
+        console.error("Error loading deals:", err);
+        dealList.innerHTML = "<p>Error loading deals.</p>";
+      });
+  }
+
+  // Optional controls
+  document.getElementById("sort-select")?.addEventListener("change", e => {
+    SB.sort = e.target.value; SB.page = 1; boot();
+  });
+  const searchInput = document.getElementById("deal-search");
+  if (searchInput && !searchInput.__sbAttached) {
+    searchInput.__sbAttached = true;
+    searchInput.addEventListener("input", () => {
+      clearTimeout(window.__sbDebounce);
+      window.__sbDebounce = setTimeout(() => {
+        SB.q = searchInput.value.trim(); SB.page = 1; boot();
+      }, 300);
+    });
+  }
+
+  boot();
+}
+
+
+  // (Optional) local search helper kept for other pages if they still use it.
+  function setupSearch() {
+    const input = document.getElementById("deal-search");
+    if (!input) return;
+    if (input.__searchAttached) return;
+    input.__searchAttached = true;
+    input.addEventListener("input", () => {
+      const query = input.value.toLowerCase();
+      const cards = document.querySelectorAll(".deal-card");
+      cards.forEach(card => {
+        const titleEl = card.querySelector(".deal-title, h3");
+        const descEl = card.querySelector(".deal-description");
+        const title = titleEl ? titleEl.textContent.toLowerCase() : "";
+        const desc = descEl ? descEl.textContent.toLowerCase() : "";
+        card.style.display = title.includes(query) || desc.includes(query) ? "block" : "none";
+      });
+    });
+  }
+
+  // 2️⃣ Push Notifications Setup — runs once after UI loads
+  if (username) {
+    setTimeout(() => {
+      (async () => {
+        try {
+          const { initializeApp } = await import("https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js");
+          const { getMessaging, getToken } = await import("https://www.gstatic.com/firebasejs/11.0.1/firebase-messaging.js");
+
+          const firebaseConfig = {
+            apiKey: "AIzaSyDE2UrLCv9zrUk94ZHd5Aj5EQR_bb_UuO0",
+            authDomain: "spicybeats-app.firebaseapp.com",
+            projectId: "spicybeats-app",
+            storageBucket: "spicybeats-app.firebasestorage.app",
+            messagingSenderId: "248095282713",
+            appId: "1:248095282713:web:4b951995f1c6b2fd147c88"
+          };
+
+          const app = initializeApp(firebaseConfig);
+          const messaging = getMessaging(app);
+
+          const permission = await Notification.requestPermission();
+          if (permission === "granted") {
+            const token = await getToken(messaging, {
+              vapidKey: "BN4i6amvqzyOcM29Vr6wSPeX27Emhmi-O1wfnsHU3Ljer--cVHpbBxYA8zZbr4Uk3hlP7USjmn5SLckghnHGt10",
+              serviceWorkerRegistration: await navigator.serviceWorker.getRegistration()
+            });
+            console.log("🔑 Push token:", token);
+            await fetch("api/save_token.php", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ username, token })
+            });
+          } else {
+            console.warn("❌ Notifications denied");
+          }
+        } catch (err) {
+          console.error("Push notification setup failed:", err);
+        }
+      })();
+    }, 1000);
+  }
+});
