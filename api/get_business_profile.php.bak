@@ -1,0 +1,45 @@
+<?php
+/**
+ * Returns the business profile for the currently authenticated user or
+ * for a given username via ?username= param. Only the user or an admin
+ * should be allowed to fetch their profile. For simplicity we only
+ * enforce that the request is authenticated via session.
+ */
+session_start();
+header('Content-Type: application/json');
+require_once __DIR__ . '/../config/db.php';
+
+// Authentication: require a logged‑in session
+if (!isset($_SESSION['user_id'])) {
+  echo json_encode(['success' => false, 'error' => 'Not logged in']);
+  exit;
+}
+
+$targetUsername = isset($_GET['username']) ? trim($_GET['username']) : '';
+// Determine which user's profile to fetch: if a username is provided, use it,
+// otherwise default to the logged‑in user
+if ($targetUsername) {
+  $stmt = $pdo->prepare("SELECT id, username, is_verified_business, business_logo, business_about, business_social FROM users WHERE username = ? LIMIT 1");
+  $stmt->execute([$targetUsername]);
+} else {
+  $stmt = $pdo->prepare("SELECT id, username, is_verified_business, business_logo, business_about, business_social FROM users WHERE id = ? LIMIT 1");
+  $stmt->execute([$_SESSION['user_id']]);
+}
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$user) {
+  echo json_encode(['success' => false, 'error' => 'User not found']);
+  exit;
+}
+
+echo json_encode([
+  'success' => true,
+  'profile' => [
+    'username' => $user['username'],
+    'is_verified_business' => (int)($user['is_verified_business'] ?? 0),
+    'logo' => $user['business_logo'] ?? '',
+    'about' => $user['business_about'] ?? '',
+    'social' => $user['business_social'] ?? ''
+  ]
+]);
+?>

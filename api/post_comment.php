@@ -1,4 +1,7 @@
 <?php
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+require_once __DIR__ . '/require_login.php';
 header('Content-Type: application/json');
 require_once __DIR__ . '/../config/db.php';
 
@@ -21,6 +24,15 @@ if (!$user) {
   exit;
 }
 $user_id = $user['id'];
+
+// Check if the user is muted
+$muteStmt = $pdo->prepare('SELECT is_muted FROM users WHERE id = ?');
+$muteStmt->execute([$user_id]);
+$isMuted = $muteStmt->fetchColumn();
+if ($isMuted) {
+  echo json_encode(['success' => false, 'error' => 'You are muted and cannot post comments']);
+  exit;
+}
 
 $stmt = $pdo->prepare("INSERT INTO comments (deal_id, user_id, comment, created_at) VALUES (?, ?, ?, NOW())");
 $success = $stmt->execute([$deal_id, $user_id, $comment]);

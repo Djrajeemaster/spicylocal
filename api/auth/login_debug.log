@@ -1,1 +1,1 @@
-{"input_username":"mallika","input_password":"mallika123","fetched_user":{"id":"9","username":"mallika","email":"","password":"$2y$10$OttwSHsXS2JrQuNdpjOJn.uXMTVebH9.uKktoY.Uz5TZ8DK6XEB\/m","is_verified":"0","created_at":"2025-08-03 15:32:28","role":"user"}}
+{"input_username":"jhon_doe","input_password":"test123","fetched_user":false}

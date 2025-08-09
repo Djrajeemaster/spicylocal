@@ -1,5 +1,8 @@
 
 <?php
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+require_once __DIR__ . '/require_login.php';
 session_start();
 header('Content-Type: application/json');
 require_once 'config/db.php';

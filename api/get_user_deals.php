@@ -1,4 +1,7 @@
 <?php
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+require_once __DIR__ . '/require_login.php';
 require_once __DIR__ . '/config/db.php';
 
 header('Content-Type: application/json');
@@ -9,11 +12,19 @@ $status = $_GET['status'] ?? 'all';
 $response = ['success' => false, 'deals' => []];
 
 if ($username) {
-    $sql = "
-        SELECT deals.* FROM deals
-        JOIN users ON deals.user_id = users.id
-        WHERE users.username = ?
-    ";
+    /*
+     * Retrieve a user's deals with additional metadata: username,
+     * verification flags, tags and a thumbnail. The GROUP BY and
+     * GROUP_CONCAT operate similarly to those in get_deals.php.
+     */
+    $sql = "SELECT deals.*, users.username, users.is_verified, users.is_verified_business,
+                   GROUP_CONCAT(DISTINCT dt.tag_name) AS tags,
+                   MIN(di.image_path) AS thumbnail
+            FROM deals
+            JOIN users ON deals.user_id = users.id
+            LEFT JOIN deal_tags dt ON deals.id = dt.deal_id
+            LEFT JOIN deal_images di ON deals.id = di.deal_id
+            WHERE users.username = ?";
     $params = [$username];
 
     if ($status !== 'all') {
@@ -21,10 +32,15 @@ if ($username) {
         $params[] = $status;
     }
 
+    $sql .= " GROUP BY deals.id";
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
     $deals = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+    // Assign default empty array for tags if null
+    foreach ($deals as &$d) {
+        $d['tags'] = $d['tags'] ? array_filter(array_map('trim', explode(',', $d['tags']))) : [];
+    }
     $response['success'] = true;
     $response['deals'] = $deals;
 }
