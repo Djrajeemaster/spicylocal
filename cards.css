@@ -1,7 +1,7 @@
 
 /* Cards enhancement (non-destructive) */
 .metrics--static, .metrics--static * { pointer-events: none; cursor: default; }
-.metric { display: inline-flex; align-items: center; gap: 6px; }
+.metric { display:inline-flex !important; align-items:center !important; gap:4px !important; padding:0 !important; background:transparent !important; border:none !important; box-shadow:none !important; }
 .heat-badge { position:absolute; right:6px; top:6px; width:44px; height:44px; border-radius:50%;
   display:flex; align-items:center; justify-content:center; font-weight:700; color:#fff;
   text-shadow:0 1px 2px rgba(0,0,0,.25); box-shadow:0 1px 3px rgba(0,0,0,.12) inset; }
@@ -146,17 +146,7 @@
 .deal-meta-inline{ display:flex !important; align-items:center !important; gap:12px !important; color:#6b7785 !important; font-size:13px !important; }
 
 /* Make existing .metric look like pills (no JS changes needed) */
-.metrics .metric{
-  display:inline-flex !important;
-  align-items:center !important;
-  gap:8px !important;
-  padding:6px 10px !important;
-  border-radius:12px !important;
-  background:#f3f4f6 !important;
-  font-weight:600 !important;
-  font-size:14px !important;
-  margin-left:12px !important;
-}
+.metrics .metric{ display:inline-flex !important; align-items:center !important; gap:4px !important; padding:0 !important; background:transparent !important; border:none !important; box-shadow:none !important; }
 
 /* Icons */
 .i-like::before{ content:"👍"; }
@@ -182,3 +172,52 @@
 .deal-card{ position:relative; }
 .deal-card > .heat-badge{ position:absolute; top:6px; right:6px; z-index:3; pointer-events:none; }
 .deal-thumb .heat-badge{ display:none !important; visibility:hidden !important; }
+
+/* List card metrics use same SVG icons as deal page */
+.metrics--static .ic{ display:inline-block; vertical-align:middle; opacity:.75; margin-right:6px; }
+.metrics--static .metric{ display:inline-flex !important; align-items:center !important; gap:4px !important; padding:0 !important; background:transparent !important; border:none !important; box-shadow:none !important; }
+.metrics--static .metric .count{ font-weight:600 !important; margin-left:2px !important; }
+
+/* Role badges next to username */
+.role-badge{ display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:50%; margin-left:6px; }
+.role-badge .ic{ width:12px; height:12px; }
+.is-verified{ background:#e0e7ff; color:#3730a3; } /* indigo */
+.is-biz{ background:#fef3c7; color:#b45309; }      /* amber */
+.ic-user{ margin-right:6px; opacity:.75; }
+.deal-meta{ display:flex; align-items:center; gap:6px; }
+
+/* A11y: visible focus ring */
+:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
+
+
+/* Image: keep full view, no crop */
+.deal-media img{ width:100%; height:auto; max-height:450px; object-fit:contain; }
+
+
+/* Sticky bar: mobile only */
+@media (min-width:901px){ #sticky-bar, .deal-sticky{ display:none !important; } }
+
+
+/* Toolbar */
+.deals-toolbar{ display:flex; align-items:center; gap:12px; margin:10px 12px; }
+.deals-toolbar .tabs{ display:flex; gap:8px; flex-wrap:wrap; }
+.deals-toolbar .spacer{ flex:1; }
+.deals-toolbar .tab{ padding:8px 12px; border:1px solid #e5e7eb; background:#fff; border-radius:999px; cursor:pointer; }
+.deals-toolbar .tab.active{ border-color: var(--sb-primary,#e91e63); box-shadow:0 0 0 2px rgba(233,30,99,.15); }
+.deals-toolbar .sort select{ padding:8px 12px; border:1px solid #e5e7eb; border-radius:10px; background:#fff; }
+.deals-toolbar .grid-tog{ margin-left:8px; font-size:14px; color:#475569; }
+
+/* Grid mode (optional) */
+#deal-list.grid-mode{
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px,1fr));
+  gap:16px;
+  align-items:stretch;
+}
+@media (max-width:640px){ #deal-list.grid-mode{ grid-template-columns:1fr; } }
+
+.deal-footer .metrics{margin-left:auto;display:inline-flex;align-items:center;gap:6px;height:24px;padding:4px 8px;border-radius:999px;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;font-size:12px;line-height:1;flex-shrink:0}
+
+.metric:not(:last-child)::after{content:'·';opacity:.55;margin:0 4px}
+
+.metric .ic{width:14px;height:14px}

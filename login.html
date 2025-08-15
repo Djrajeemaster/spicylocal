@@ -1,12 +1,29 @@
 
 <!DOCTYPE html>
+
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Login - SpicyBeats</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
-  <style>
+<!-- THEME BOOT: put before CSS to avoid FOUC -->
+<script>
+(function(){
+  try{
+    var ls = localStorage.getItem('sb_theme');
+    if(ls){
+      var t = JSON.parse(ls);
+      var c = t.brand || t.color;
+      if(c){
+        var r = document.documentElement;
+        r.style.setProperty('--sb-accent', c);
+        r.style.setProperty('--sb-primary', c);
+      }
+    }
+  }catch(e){}
+})();
+</script>
+<meta charset="utf-8"/>
+<title>Login - SpicyBeats</title>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="style.css" rel="stylesheet"/>
+<style>
     .login-container {
       max-width: 400px;
       margin: 100px auto;
@@ -37,22 +54,21 @@
       border-radius: 4px;
     }
   </style>
-</head>
+
 <body>
 <!-- Global Header Loader -->
 <div id="global-header"></div>
-<link rel="stylesheet" href="global.css" />
-<script src="loadHeader.js" defer></script>
-  <div class="login-container">
-    <h2>Login</h2>
-    <form id="loginForm" onsubmit="handleLogin(event)">
-      <input type="text" id="username" placeholder="Username" required />
-      <input type="password" id="password" placeholder="Password" required />
-      <button type="submit">Login</button>
-    </form>
-  </div>
-
-  <script>
+<link href="global.css" rel="stylesheet">
+<script defer="" src="loadHeader.js"></script>
+<div class="login-container">
+<h2>Login</h2>
+<form id="loginForm" onsubmit="handleLogin(event)">
+<input id="username" placeholder="Username" required="" type="text"/>
+<input id="password" placeholder="Password" required="" type="password"/>
+<button type="submit">Login</button>
+</form>
+</div>
+<script>
     function handleLogin(event) {
       event.preventDefault();
       const username = document.getElementById('username').value;
@@ -75,5 +91,5 @@
     }
   </script>
 <script src="footer.js"></script>
-</body>
+</link></body>
 </html>

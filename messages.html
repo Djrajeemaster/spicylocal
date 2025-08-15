@@ -1,34 +1,46 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Send a Message</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="header.css" />
-  <script src="loadHeader.js" defer></script>
-  <script src="loadFooter.js" defer></script>
-</head>
-<body>
 
+<html lang="en">
+<!-- THEME BOOT: put before CSS to avoid FOUC -->
+<script>
+(function(){
+  try{
+    var ls = localStorage.getItem('sb_theme');
+    if(ls){
+      var t = JSON.parse(ls);
+      var c = t.brand || t.color;
+      if(c){
+        var r = document.documentElement;
+        r.style.setProperty('--sb-accent', c);
+        r.style.setProperty('--sb-primary', c);
+      }
+    }
+  }catch(e){}
+})();
+</script>
+<meta charset="utf-8"/>
+<title>Send a Message</title>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="style.css" rel="stylesheet"/>
+<link href="header.css" rel="stylesheet"/>
+<script defer="" src="loadHeader.js"></script>
+<script defer="" src="loadFooter.js"></script>
+
+<body>
 <!-- ✅ Global Header -->
 <div id="global-header"></div>
-
 <!-- ✅ Message Form -->
 <div class="message-form-wrapper">
-  <h2>Send a Message</h2>
-  <form id="message-form">
-    <input type="text" id="to-user" placeholder="To (username)" required />
-    <textarea id="message-text" placeholder="Your message..." required></textarea>
-    <button type="submit" id="send-btn">Send</button>
-  </form>
+<h2>Send a Message</h2>
+<form id="message-form">
+<input id="to-user" placeholder="To (username)" required="" type="text"/>
+<textarea id="message-text" placeholder="Your message..." required=""></textarea>
+<button id="send-btn" type="submit">Send</button>
+</form>
 </div>
-
 <!-- ✅ Global Footer -->
 <div id="global-footer"></div>
-
 <!-- ✅ Script for sending -->
 <script src="message.js"></script>
-
 </body>
 </html>

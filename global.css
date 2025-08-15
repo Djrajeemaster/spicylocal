@@ -1,6 +1,7 @@
+:root{--sb-accent:var(--sb-primary);--sb-primary:var(--sb-accent);--sb-on-primary:#fff}
 /* === SpicyBeats Global Header (cleaned) ========================== */
 :root {
-  --sb-primary: #e91e63;   /* Header background (brand) */
+  --sb-primary: var(--sb-primary);   /* Header background (brand) */
   --sb-on-primary: #ffffff;/* Text/icons on header */
   --sb-shadow: rgba(0,0,0,0.12);
 }
@@ -139,3 +140,37 @@
     max-width: 90%;
   }
 }
+
+
+/* === Patch: Prevent header from becoming its own scroll area === */
+#global-header,
+.global-header,
+#sb-header,
+.header-wrap {
+  max-height: none !important;
+  overflow: visible !important;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* Ensure parent wrappers don't trap scroll */
+.page, .container, .wrap, .main, .sa-wrap, .content, .header-wrap {
+  overflow: visible !important;
+}
+
+/* Page scroll sanity */
+html, body {
+  height: auto !important;
+  overflow-y: auto !important;
+  overflow-x: hidden;
+}
+
+
+/* Pagination (minimal) */
+.pagination{ display:flex; gap:8px; align-items:center; justify-content:center; margin:16px 0; }
+.pagination .pg-link{ padding:6px 10px; border:1px solid #e5e7eb; border-radius:8px; text-decoration:none; color:#374151; }
+.pagination .pg-link:hover{ background:#f5f5f5; }
+.pagination .pg-current{ padding:6px 10px; border-radius:8px; background:#111827; color:#fff; }
+.pagination .pg-disabled{ pointer-events:none; opacity:.5; border:1px solid #e5e7eb; border-radius:8px; padding:6px 10px; color:#6b7280; }
+.pagination .pg-ellipsis{ padding:0 6px; color:#9ca3af; }

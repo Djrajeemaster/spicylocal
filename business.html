@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+
+<html><head><meta charset="utf-8"/><title>For Businesses</title><link href="/bagit/global.css" rel="stylesheet"/><meta content="For Businesses - Bagit deals and offers." name="description"/><meta content="For Businesses" property="og:title"/><meta content="website" property="og:type"/></head>
+<body>
+<h1>Get Verified</h1>
+<form id="f">
+<label>Business name <input name="business_name" required=""/></label><br/>
+<label>Website <input name="website"/></label><br/>
+<label>Contact email <input name="contact_email" type="email"/></label><br/>
+<button type="submit">Request verification</button>
+</form>
+<p class="hidden" id="ok">Request submitted.</p>
+<script src="/bagit/csrf.js"></script>
+<script>
+document.getElementById('f').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const payload = Object.fromEntries(fd.entries());
+  const r = await csrfFetch('/bagit/api/business_request_verification.php', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload), credentials:'include' });
+  const j = await r.json();
+  if (j && j.ok) { document.getElementById('ok').classList.remove('hidden'); }
+});
+</script>
+</body></html>

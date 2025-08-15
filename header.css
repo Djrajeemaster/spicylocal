@@ -6,7 +6,7 @@
   justify-content: space-between;
   gap: 16px;
   padding: 10px 14px;
-  background: #e91e63;
+  background: var(--sb-primary);
   color: #fff;
   border-radius: 8px;
   margin-bottom: 12px;
@@ -30,7 +30,7 @@ body.dark .avatar-btn {
 }
 body.dark .avatar {
   background: #444;
-  color: #e91e63;
+  color: var(--sb-primary);
 }
 body.dark .user-dropdown {
   background: #2b2b2b;
@@ -100,9 +100,45 @@ body.dark .language-select {
 }
 .user-wrap { display:flex; align-items:center; gap:8px; position:relative; }
 .avatar-btn { display:flex; align-items:center; gap:8px; background:transparent; border:none; color:#fff; cursor:pointer; }
-.avatar { display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:50%; background:#fff; color:#e91e63; font-weight:700; }
+.avatar { display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:50%; background:#fff; color:var(--sb-primary); font-weight:700; }
 .user-name { color:#fff; }
 .user-dropdown { position:absolute; top:100%; right:0; background:#fff; color:#333; border-radius:8px; box-shadow:0 4px 16px rgba(0,0,0,.15); padding:8px; min-width:180px; z-index:1000; }
 .user-dropdown a { display:block; padding:8px 10px; color:#333; text-decoration:none; border-radius:6px; }
 .user-dropdown a:hover { background:#f3f3f3; }
 .hidden { display:none !important; }
+
+
+/* === Patch: Prevent header from becoming its own scroll area === */
+#global-header,
+.global-header,
+#sb-header,
+.header-wrap {
+  max-height: none !important;
+  overflow: visible !important;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* Ensure parent wrappers don't trap scroll */
+.page, .container, .wrap, .main, .sa-wrap, .content, .header-wrap {
+  overflow: visible !important;
+}
+
+/* Page scroll sanity */
+html, body {
+  height: auto !important;
+  overflow-y: auto !important;
+  overflow-x: hidden;
+}
+
+/* A11y: visible focus ring */
+:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
+
+
+/* Image: keep full view, no crop */
+.deal-media img{ width:100%; height:auto; max-height:450px; object-fit:contain; }
+
+
+/* Sticky bar: mobile only */
+@media (min-width:901px){ #sticky-bar, .deal-sticky{ display:none !important; } }

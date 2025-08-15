@@ -1,23 +1,32 @@
 <!DOCTYPE html>
+
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Deal Detail</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="global.css">
-  <link rel="stylesheet" href="header.css" />
-  <style>
-    /* Minimal polish */
-    .deal-actions .feedback-section button,
-    .deal-actions .vote-section button,
-    #report-abuse-btn {
-      padding: 6px 10px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      margin-right: 6px;
+<!-- THEME BOOT: put before CSS to avoid FOUC -->
+<script>
+(function(){
+  try{
+    var ls = localStorage.getItem('sb_theme');
+    if(ls){
+      var t = JSON.parse(ls);
+      var c = t.brand || t.color;
+      if(c){
+        var r = document.documentElement;
+        r.style.setProperty('--sb-accent', c);
+        r.style.setProperty('--sb-primary', c);
+      }
     }
+  }catch(e){}
+})();
+</script>
+<meta charset="utf-8"/>
+<title>Deal Detail</title>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="style.css" rel="stylesheet"/>
+<link href="global.css" rel="stylesheet"/>
+<link href="header.css" rel="stylesheet">
+<style>
+    /* Minimal polish */
+    
     #report-abuse-btn {
       background: #ffe8e8;
     }
@@ -105,13 +114,7 @@
       padding-top: 1rem;
     }
     .deal-detail-card .vote-section,
-    .deal-detail-card .feedback-section {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 0.5rem;
-    }
+    .deal-detail-card 
     .deal-detail-card button {
       padding: 8px 12px;
       border: none;
@@ -145,63 +148,118 @@
     .deal-detail-card, .deal-detail-card * {
       cursor: default !important;
     }
-  </style>
-</head>
-<body>
+  
+/* Minimal actions strip (low emphasis) */
+.deal-actions{display:flex;align-items:center;gap:12px;margin-top:10px;font-size:13px;color:#6b7280}
+.deal-actions .action{display:inline-flex;align-items:center;gap:6px;padding:4px 6px;background:transparent;border:0;border-radius:8px;cursor:pointer;color:inherit}
+.deal-actions .action:hover{background:#f5f5f5;color:#374151}
+.deal-actions .action:disabled{opacity:.6;cursor:default}
+.deal-actions .ic{display:block;opacity:.75}
+.deal-actions .count{font-weight:600;font-size:12px;opacity:.85}
+.deal-actions .is-muted .ic{opacity:.55}
+.report-link{padding:0;background:none;border:0;color:#9ca3af;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.report-link:hover{color:#ef4444}
+@media(max-width:768px){.deal-actions{gap:14px;font-size:14px}}
 
+
+/* Two-column layout for deal page */
+.deal-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start;margin-top:8px}
+.deal-left img{width:100%;height:auto;border-radius:12px}
+.deal-right-col{display:block}
+@media(max-width:1024px){.deal-grid{grid-template-columns:1fr}}
+
+/* Meta + badges */
+.role-badge{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;margin-left:6px}
+.role-badge .ic{width:12px;height:12px}
+.is-verified{background:#e0e7ff;color:#3730a3}
+.is-biz{background:#fef3c7;color:#b45309}
+.ic-user{margin-right:6px;opacity:.75}
+.deal-meta{display:flex;align-items:center;gap:6px}
+
+/* Comments preview */
+.comments-preview{margin-top:12px}
+.cp-title{font-size:13px;font-weight:600;color:#374151;margin-bottom:6px}
+.comment-snippet{font-size:13px;color:#4b5563;padding:6px 0;border-bottom:1px solid #f1f5f9}
+.comment-snippet .author{font-weight:600;margin-right:6px;color:#374151}
+.cp-link{display:inline-block;margin-top:6px;font-size:13px;color:#6b7280;text-decoration:underline;text-underline-offset:3px}
+.cp-link:hover{color:#111827}
+
+
+/* Two-column layout */
+.deal-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start;margin-top:8px}
+.deal-left .deal-media{width:100%}
+.deal-right-col{display:block}
+@media(max-width:1024px){.deal-grid{grid-template-columns:1fr}}
+
+</style>
+<link href="deal.css" rel="stylesheet"/>
+<style>
+.deal-layout.two-col{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start}
+@media(max-width:1024px){.deal-layout.two-col{grid-template-columns:1fr}}
+</style>
+
+<body>
 <!-- Global Header mount -->
 <div id="global-header"></div>
-
-<!-- Global Header -->
-<div id="global-header"></div>
-<link rel="stylesheet" href="header.css">
-<script src="loadHeader.js" defer></script><main class="deal-list">
-    <div class="deal-card deal-detail-card">
-    <h3>
-      <span id="deal-title">Loading...</span>
-      <span id="bookmark-container" class="bookmark-icon" title="Bookmark this deal">&#9733;</span>
-    </h3>
-    <p id="deal-summary" class="deal-summary"></p>
-    <div id="deal-media" class="deal-media"></div>
-    <p id="deal-description"></p>
-    <div id="deal-tags" class="tags"></div>
-    <div id="deal-status"></div>
-    <p class="user-info">👤 <span id="deal-user">Loading...</span> <span id="verified-badge"></span><span id="business-badge" class="business-badge" style="margin-left: 8px;"></span></p>
-    <div id="business-profile" class="business-profile" style="margin: 0.5rem 0;"></div>
-    <p class="views-info">👁️ <span id="view-count">Loading...</span> views</p>
-    <div id="deal-cta" style="margin-top:8px;"></div>
-
-    <div class="deal-actions">
-      <div class="vote-section">
-        <button class="vote-btn" data-vote="up">👍</button>
-        <span id="vote-count">0</span>
-        <button class="vote-btn" data-vote="down">👎</button>
-      </div>
-
-      <div class="feedback-section">
-        <button class="feedback-btn" data-feedback="useful">✅ Useful (<span id="fb-useful">0</span>)</button>
-        <button class="feedback-btn" data-feedback="not_interested">❌ Not Interested (<span id="fb-not">0</span>)</button>
-        <button class="feedback-btn" data-feedback="fake">🚩 Fake (<span id="fb-fake">0</span>)</button>
-      </div>
-
-      <!-- 🚩 Report Abuse (always visible; login required on click) -->
-      <div class="safety-section">
-        <button id="report-abuse-btn" title="Report abuse or policy violation">🚩 Report Abuse</button>
-        <span id="report-status" class="muted"></span>
-      </div>
-    </div>
-  </div>
-
-  <section style="margin-top: 2rem;">
-    <h3>💬 Comments</h3>
-    <div id="comments-list" style="margin-bottom: 1rem;"></div>
-    <div id="comment-form-container" style="display: none;">
-      <textarea id="comment-text" placeholder="Write your comment..." style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc;"></textarea><br/>
-      <button id="submit-comment" style="margin-top: 8px; padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">Post Comment</button>
-    </div>
-  </section>
+<!-- Global Header --><script defer="" src="loadHeader.js"></script>
+<main class="deal-layout two-col">
+<section class="deal-left">
+<div class="deal-media" id="deal-media"></div>
+</section>
+<section class="deal-right">
+<h1 class="deal-title-row">
+<span id="deal-title">Loading...</span>
+<span class="bookmark-icon" id="bookmark-container" title="Bookmark">★</span>
+</h1>
+<p class="deal-summary" id="deal-summary"></p>
+<div id="deal-description"></div>
+<div class="tags" id="deal-tags"></div>
+<div id="deal-status"></div>
+<div class="meta-row" id="deal-meta">
+<span class="user-info"><span class="user-icon" id="user-icon"></span> <span id="deal-user">Loading...</span></span>
+<span class="chip" id="verified-badge"></span>
+<span class="chip chip-blue" id="business-badge"></span>
+<span class="chip chip-muted" id="views-chip">👁️ <span id="views-count">0</span> views</span>
+</div>
+<div class="deal-actions" id="deal-actions">
+<button aria-label="Upvote" class="action vote-btn" data-vote="up">
+<svg aria-hidden="true" class="ic" height="16" viewbox="0 0 24 24" width="16"><path d="M2 10h4v10H2zM8 21h7.2a3 3 0 0 0 2.94-2.46l1.18-7A3 3 0 0 0 16.37 8H13V5a3 3 0 0 0-3-3l-2 6v13z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="1.6"></path></svg>
+<span class="count" id="vote-count">0</span>
+</button>
+<button aria-label="Downvote" class="action vote-btn" data-vote="down">
+<svg aria-hidden="true" class="ic" height="16" viewbox="0 0 24 24" width="16"><path d="M22 14h-4V4h4zM16 3H8.8A3 3 0 0 0 5.86 5.46l-1.18 7A3 3 0 0 0 7.63 16H11v3a3 3 0 0 0 3 3l2-6V3z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="1.6"></path></svg>
+<span class="count" id="downvote-count">0</span>
+</button>
+<button aria-label="Reports" class="action is-muted" disabled="" id="btn-reports">
+<svg aria-hidden="true" class="ic" height="16" viewbox="0 0 24 24" width="16"><path d="M6 21V4h9l1 3h3v7h-7l-1-3H6z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="1.6"></path></svg>
+<span class="count" id="report-count">0</span>
+</button>
+<button aria-label="Report" class="report-link" id="report-abuse-btn">Report</button><span aria-live="polite" class="report-status" id="report-status"></span>
+</div>
+<div class="comments-preview">
+<div class="cp-title">Recent comments</div>
+<div id="comment-preview"></div>
+<a class="cp-link" href="#comments-section" id="comments-link">View all comments</a>
+</div>
+</section>
 </main>
+<section style="margin-top: 2rem;">
+<h3>💬 Comments</h3>
+<div id="comments-list" style="margin-bottom: 1rem;"></div>
+<div id="comment-form-container" style="display:none;">
+<textarea id="comment-text" placeholder="Write your comment..." style="width:100%;padding:10px;border-radius:6px;border:1px solid #ccc;"></textarea><br/>
+<button id="submit-comment" style="margin-top:8px;padding:8px 15px;background:#28a745;color:#fff;border:none;border-radius:5px;">Post Comment</button>
+</div>
+</section>
 
+
+<div class="deal-sticky" id="sticky-bar">
+<button class="sticky-cta" id="sticky-cta">View Deal</button>
+<div class="sticky-actions">
+<button class="vote-btn" data-vote="up">👍</button>
+<button class="feedback-btn" data-feedback="fake">🚩</button>
+</div>
+</div>
 <!-- Deal Logic -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
@@ -230,32 +288,8 @@ document.addEventListener("DOMContentLoaded", function () {
             const user = c.username || "User";
             const commentText = c.comment || "";
             wrapper.innerHTML = `<strong>${user}</strong>: ${commentText}`;
-            // Reaction buttons
-            const reactionsDiv = document.createElement('div');
-            reactionsDiv.className = 'comment-reactions';
-            const likeBtn = document.createElement('button');
-            likeBtn.textContent = '👍';
-            likeBtn.className = 'comment-like-btn';
-            likeBtn.dataset.id = c.id;
-            likeBtn.dataset.reaction = 'like';
-            const likesSpan = document.createElement('span');
-            likesSpan.textContent = c.likes || 0;
-            likesSpan.className = 'likes-count';
-            const dislikeBtn = document.createElement('button');
-            dislikeBtn.textContent = '👎';
-            dislikeBtn.className = 'comment-dislike-btn';
-            dislikeBtn.dataset.id = c.id;
-            dislikeBtn.dataset.reaction = 'dislike';
-            const dislikesSpan = document.createElement('span');
-            dislikesSpan.textContent = c.dislikes || 0;
-            dislikesSpan.className = 'dislikes-count';
-            // Append buttons and counts
-            reactionsDiv.appendChild(likeBtn);
-            reactionsDiv.appendChild(likesSpan);
-            reactionsDiv.appendChild(dislikeBtn);
-            reactionsDiv.appendChild(dislikesSpan);
-            wrapper.appendChild(reactionsDiv);
-            container.appendChild(wrapper);
+            /* comment reactions removed */
+container.appendChild(wrapper);
           });
           // Attach click handlers for reactions
           container.querySelectorAll('.comment-like-btn, .comment-dislike-btn').forEach(btn => {
@@ -347,7 +381,26 @@ document.addEventListener("DOMContentLoaded", function () {
   // 🚩 Report Abuse logic
   const reportBtn = document.getElementById("report-abuse-btn");
   const reportStatus = document.getElementById("report-status");
+  function setReportStatus(msg){ if (reportStatus) reportStatus.textContent = msg; }
   let reporting = false;
+// Client rate limit: prevent repeat reports within 2 minutes per user per deal
+const RL_WINDOW_MS = 2 * 60 * 1000;
+function canReportNow(dealId, user){
+  try{
+    const key = 'report_rl:'+user+':'+dealId;
+    const last = parseInt(localStorage.getItem(key)||'0',10)||0;
+    const now = Date.now();
+    return (now - last) >= RL_WINDOW_MS;
+  }catch(e){ return true; }
+}
+
+function markReportWindow(dealId, user){
+  try{
+    const key = 'report_rl:'+user+':'+dealId;
+    localStorage.setItem(key, String(Date.now()));
+  }catch(e){}
+}
+
 
   if (reportBtn) {
     reportBtn.addEventListener("click", () => {
@@ -359,46 +412,123 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
       }
 
+      if (!canReportNow(dealId, currentUser)) { alert('Please wait before submitting another report for this deal.'); return; }
       const reason = prompt("Enter reason for reporting this deal (e.g., spam, scam, inappropriate):");
       if (!reason || !reason.trim()) return;
       reporting = true;
       reportBtn.classList.add("disabled");
-      reportStatus.textContent = "Submitting report...";
+      setReportStatus("Submitting report...");
       // Use form-encoded data to support PHP $_POST parsing
       const formData = new URLSearchParams();
       formData.append('deal_id', dealId);
       formData.append('username', currentUser);
       formData.append('reason', reason.trim());
       fetch("api/report_abuse.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: formData.toString()
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.success) {
-          alert("Report submitted.");
-          reportStatus.textContent = "Thank you. Our team will review this report.";
-        } else {
-          alert(data.error || 'Error submitting report');
-          reportStatus.textContent = data.error || 'Error submitting report';
-        }
-      })
-      .catch(() => {
-        alert("Failed to submit report. Please try again later.");
-        reportStatus.textContent = "Failed to submit report.";
-      })
-      .finally(() => {
-        reporting = false;
-        reportBtn.classList.remove("disabled");
-      });
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-Requested-With": "XMLHttpRequest"
+          },
+          body: (function(){
+            const form = new URLSearchParams();
+            const userId = localStorage.getItem("user_id") || localStorage.getItem("userid") || "";
+            form.set("deal_id", dealId);
+            form.set("dealId", dealId);
+            form.set("reason", reason.trim());
+            form.set("reason_text", reason.trim());
+            form.set("username", currentUser || "");
+            form.set("user_id", userId);
+            form.set("action", "report");
+            form.set("source", "deal_page");
+            return form.toString();
+          })(),
+          credentials: "same-origin"
+        })
+        .then(async (res) => {
+          const text = await res.text();
+          let data;
+          try { data = JSON.parse(text); } catch { data = null; }
+          const ok = data && (data.ok === true || data.success === true || data.status === "ok");
+          if (res.ok && ok) {
+            markReportWindow(dealId, currentUser);
+            alert("Report submitted.");
+            setReportStatus("Thank you. Our team will review this report.");
+          } else {
+            const err = (data && (data.error || data.message)) || text || "Unknown error";
+            console.error("report_abuse.php error:", err);
+            alert(err.length > 200 ? "Failed to submit report." : err);
+            setReportStatus("Failed to submit report.");
+          }
+        })
+        .catch(() => {
+          alert("Network error. Please try again later.");
+          setReportStatus("Failed to submit report.");
+        })
+        .finally(() => {
+          reporting = false;
+          reportBtn.classList.remove("disabled");
+        });
     });
   }
 });
 </script>
-
 <!-- Other Deal Logic (votes/bookmarks/feedbacks) -->
-<script src="deal.js"></script>
+<script src="deal.js?v=2025-08-11-04"></script>
 <script src="footer.js"></script>
+<script>
+// mirror sticky CTA from #deal-cta (added by deal.js)
+(function(){
+  const target = document.getElementById('deal-cta');
+  if (!target) return;
+  const mo = new MutationObserver(() => {
+    const a = target.querySelector('a');
+    if (a) {
+      const sticky = document.getElementById('sticky-cta');
+      if (sticky) {
+        sticky.textContent = a.textContent || 'View Deal';
+        sticky.onclick = () => window.open(a.href, '_blank');
+      }
+      mo.disconnect();
+    }
+  });
+  mo.observe(target, { childList: true });
+})();
+</script>
+<script>
+(function(){
+  function byId(id){ return document.getElementById(id); }
+  const title = byId('deal-title');
+  const meta  = byId('deal-meta');
+  const actions = document.getElementById('deal-actions');
+  const slotT = byId('deal-title-slot');
+  const slotM = byId('deal-meta-slot');
+  const slotA = byId('deal-actions-slot');
+  if (title && slotT) slotT.appendChild(title);
+  if (meta && slotM) slotM.appendChild(meta);
+  if (actions && slotA) slotA.appendChild(actions);
+
+  window.renderCommentPreview = function(list){
+    const wrap = byId('comment-preview');
+    const link = byId('comments-link');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    const items = (list||[]).slice(0,2);
+    if (items.length === 0){
+      wrap.innerHTML = '<div class="comment-snippet" style="opacity:.7">No comments yet.</div>';
+    }else{
+      items.forEach(c => {
+        const div = document.createElement('div');
+        div.className = 'comment-snippet';
+        const author = (c.username || c.user || 'user');
+        const text = (c.text || c.comment || '').toString();
+        div.innerHTML = '<span class="author">'+escapeHtml(author)+'</span><span class="text">'+escapeHtml(text)+'</span>';
+        wrap.appendChild(div);
+      });
+    }
+    if (link){ link.textContent = 'View all comments ('+(list?list.length:0)+')'; }
+  };
+  function escapeHtml(s){return s.replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));}
+})();
+</script>
 </body>
-</html>
+</link></html>

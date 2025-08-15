@@ -2,7 +2,16 @@
 importScripts('https://www.gstatic.com/firebasejs/11.0.1/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/11.0.1/firebase-messaging-compat.js');
 
-
+// IMPORTANT: use the exact config from Firebase Console
+firebase.initializeApp({
+  apiKey: "AIzaSyDE2UrLCv9zrUk94ZHd5Aj5EQR_bb_UuO0",
+  authDomain: "spicybeats-app.firebaseapp.com",
+  projectId: "spicybeats-app",
+  // likely this ↓ should be spicybeats-app.appspot.com — verify in console
+  storageBucket: "spicybeats-app.appspot.com",
+  messagingSenderId: "248095282713",
+  appId: "1:248095282713:web:4b951995f1c6b2fd147c88",
+});
 
 const messaging = firebase.messaging();
 
@@ -28,4 +37,3 @@ self.addEventListener("notificationclick", (event) => {
     })
   );
 });
-

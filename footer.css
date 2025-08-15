@@ -1,1 +1,12 @@
 /* CSS for footer layout + leaderboard */
+
+/* A11y: visible focus ring */
+:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
+
+
+/* Image: keep full view, no crop */
+.deal-media img{ width:100%; height:auto; max-height:450px; object-fit:contain; }
+
+
+/* Sticky bar: mobile only */
+@media (min-width:901px){ #sticky-bar, .deal-sticky{ display:none !important; } }

@@ -1,0 +1,111 @@
+/* deal.css — fixed two-column layout without large gap */
+
+/* Main layout */
+.deal-layout {
+  display: grid;
+  grid-template-columns: auto 1fr; /* Image column shrinks to fit image */
+  align-items: start;
+  gap: 20px;
+  max-width: 1400px; /* Adjusted for full image without huge white space */
+  margin: 24px auto;
+  padding: 0 12px;
+}
+
+/* Image container */
+.deal-media {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f9f9f9;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Deal image styling */
+.deal-media img {
+  display: block;
+  width: auto;           /* Maintain natural ratio */
+  max-width: 100%;       /* Fit inside container */
+  height: auto;          /* Maintain proportion */
+  max-height: 450px;     /* Prevent giant images */
+  object-fit: contain;   /* No cropping */
+  border-radius: 12px;
+}
+
+/* Title row */
+.deal-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 8px;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+/* Responsive: stack on mobile */
+@media (max-width: 900px) {
+  .deal-layout {
+    grid-template-columns: 1fr;
+  }
+  .deal-media img {
+    max-height: 350px;
+  }
+}
+
+/* === GAP KILLER OVERRIDES (append at end) === */
+.deal-grid,
+.deal-layout.two-col {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+  gap: 20px !important;
+  align-items: start !important;
+}
+
+.deal-media img {
+  width: 100% !important;
+  height: auto !important;
+  max-height: 450px !important;
+  object-fit: contain !important;
+}
+
+@media (max-width: 1024px) {
+  .deal-grid,
+  .deal-layout.two-col { grid-template-columns: 1fr !important; }
+}
+/* Sticky bar: mobile only */
+@media (min-width: 901px){
+  #sticky-bar, .deal-sticky { display: none !important; }
+}
+@media (max-width: 900px){
+  .deal-sticky{
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    display: flex; justify-content: space-between; gap: 8px;
+    background: #fff; border-top: 1px solid #eee;
+    padding: 10px 12px; z-index: 60;
+    box-shadow: 0 -8px 16px rgba(0,0,0,.05);
+  }
+  .deal-sticky .sticky-cta{
+    flex: 1; padding: 12px; border: 0; border-radius: 12px;
+    background: var(--sb-primary); color: #fff; font-weight: 700;
+  }
+  .deal-sticky .vote-btn,
+  .deal-sticky .feedback-btn{
+    padding: 10px 12px; border: 1px solid #eee; border-radius: 12px; background: #fafafa;
+  }
+}
+
+/* A11y: visible focus ring */
+:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
+
+.deal-card .mini-stats{margin-left:auto;display:inline-flex;align-items:center;gap:6px;height:24px;padding:4px 8px;border-radius:999px;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;font-size:12px;line-height:1;flex-shrink:0}
+
+.deal-card .mini-stats .pill{display:inline-flex;align-items:center;gap:4px;height:auto;padding:0;background:transparent;border:none;box-shadow:none}
+
+.deal-card .mini-stats .pill:not(:last-child)::after{content:'·';opacity:.55;margin:0 4px}
+
+.deal-card .mini-stats .i{font-size:14px;line-height:0;transform:translateY(1px)}
+
+.deal-card .mini-stats .c,.deal-card .mini-stats .n{font-weight:600;margin-left:2px}
+
+@media (max-width:480px){.deal-card .mini-stats{height:22px;padding:3px 6px;gap:4px}.deal-card .mini-stats .i{font-size:13px}}

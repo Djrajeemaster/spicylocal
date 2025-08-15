@@ -1,3 +1,4 @@
+function escapeHTML(s){ s=String(s==null?'':s); return s.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 window.onload = () => {
   console.log("💬 chat.js running...");
 
@@ -22,7 +23,7 @@ window.onload = () => {
   saved.forEach(item => {
     const msgDiv = document.createElement("div");
     msgDiv.className = "chat-message user";
-    msgDiv.innerHTML = `<strong>${item.username}:</strong> ${item.message}`;
+    msgDiv.innerHTML = `<strong>${escapeHTML(item.username)}:</strong> ${escapeHTML(item.message)}`;
     messages.appendChild(msgDiv);
   });
   messages.scrollTop = messages.scrollHeight;
@@ -39,7 +40,7 @@ window.onload = () => {
 
     const msgDiv = document.createElement("div");
     msgDiv.className = "chat-message user";
-    msgDiv.innerHTML = `<strong>${username}:</strong> ${msg}`;
+    msgDiv.innerHTML = `<strong>${escapeHTML(username)}:</strong> ${escapeHTML(msg)}`;
     messages.appendChild(msgDiv);
     input.value = "";
     messages.scrollTop = messages.scrollHeight;

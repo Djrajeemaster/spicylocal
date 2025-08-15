@@ -1,12 +1,29 @@
 <!DOCTYPE html>
+
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Leaderboard - SpicyBeats</title>
-  <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="header.css" />
-  <style>
+<!-- THEME BOOT: put before CSS to avoid FOUC -->
+<script>
+(function(){
+  try{
+    var ls = localStorage.getItem('sb_theme');
+    if(ls){
+      var t = JSON.parse(ls);
+      var c = t.brand || t.color;
+      if(c){
+        var r = document.documentElement;
+        r.style.setProperty('--sb-accent', c);
+        r.style.setProperty('--sb-primary', c);
+      }
+    }
+  }catch(e){}
+})();
+</script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Leaderboard - SpicyBeats</title>
+<link href="style.css" rel="stylesheet"/>
+<link href="header.css" rel="stylesheet"/>
+<style>
     table {
       width: 100%;
       border-collapse: collapse;
@@ -28,25 +45,25 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
   </style>
-</head>
+
 <body>
-  <div id="global-header"></div>
-  <script src="loadHeader.js" defer></script>
-  <div class="leaderboard-container">
-    <h2>🏆 Top Deal Posters</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>User</th>
-          <th>Deals</th>
-          <th>Verified</th>
-        </tr>
-      </thead>
-      <tbody id="leaderboard-body">
-      </tbody>
-    </table>
-  </div>
-  <script src="leaderboard.js" defer></script>
+<div id="global-header"></div>
+<script defer="" src="loadHeader.js"></script>
+<div class="leaderboard-container">
+<h2>🏆 Top Deal Posters</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>User</th>
+<th>Deals</th>
+<th>Verified</th>
+</tr>
+</thead>
+<tbody id="leaderboard-body">
+</tbody>
+</table>
+</div>
+<script defer="" src="leaderboard.js"></script>
 </body>
 </html>

@@ -1,12 +1,29 @@
 <!DOCTYPE html>
+
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Customize Business Profile</title>
-  <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="header.css" />
-  <style>
+<!-- THEME BOOT: put before CSS to avoid FOUC -->
+<script>
+(function(){
+  try{
+    var ls = localStorage.getItem('sb_theme');
+    if(ls){
+      var t = JSON.parse(ls);
+      var c = t.brand || t.color;
+      if(c){
+        var r = document.documentElement;
+        r.style.setProperty('--sb-accent', c);
+        r.style.setProperty('--sb-primary', c);
+      }
+    }
+  }catch(e){}
+})();
+</script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Customize Business Profile</title>
+<link href="style.css" rel="stylesheet"/>
+<link href="header.css" rel="stylesheet"/>
+<style>
     /* Basic styling for the customization form */
     .bp-container {
       max-width: 800px;
@@ -65,34 +82,32 @@
       font-weight: bold;
     }
   </style>
-</head>
+
 <body>
-  <!-- Global header -->
-  <div id="global-header"></div>
-  <script src="loadHeader.js" defer></script>
-
-  <div class="bp-container">
-    <h2>Customize Business Profile</h2>
-    <form id="business-profile-form">
-      <div class="bp-form-group">
-        <label for="bp-logo">Logo</label>
-        <input type="file" id="bp-logo" name="logo" accept="image/*" />
-        <div class="bp-preview" id="bp-logo-preview"></div>
-      </div>
-      <div class="bp-form-group">
-        <label for="bp-about">About Your Business</label>
-        <textarea id="bp-about" name="about" placeholder="Describe your business..."></textarea>
-      </div>
-      <div class="bp-form-group">
-        <label for="bp-social">Social Links</label>
-        <input type="text" id="bp-social" name="social" placeholder="Comma-separated URLs" />
-      </div>
-      <button type="submit" class="bp-submit-btn">Save</button>
-      <div id="bp-message" class="bp-message"></div>
-    </form>
-  </div>
-
-  <script src="customize_business_profile.js"></script>
-  <script src="footer.js"></script>
+<!-- Global header -->
+<div id="global-header"></div>
+<script defer="" src="loadHeader.js"></script>
+<div class="bp-container">
+<h2>Customize Business Profile</h2>
+<form id="business-profile-form">
+<div class="bp-form-group">
+<label for="bp-logo">Logo</label>
+<input accept="image/*" id="bp-logo" name="logo" type="file"/>
+<div class="bp-preview" id="bp-logo-preview"></div>
+</div>
+<div class="bp-form-group">
+<label for="bp-about">About Your Business</label>
+<textarea id="bp-about" name="about" placeholder="Describe your business..."></textarea>
+</div>
+<div class="bp-form-group">
+<label for="bp-social">Social Links</label>
+<input id="bp-social" name="social" placeholder="Comma-separated URLs" type="text"/>
+</div>
+<button class="bp-submit-btn" type="submit">Save</button>
+<div class="bp-message" id="bp-message"></div>
+</form>
+</div>
+<script src="customize_business_profile.js"></script>
+<script src="footer.js"></script>
 </body>
 </html>

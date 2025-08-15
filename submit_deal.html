@@ -1,13 +1,30 @@
 <!DOCTYPE html>
+
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Post a Deal</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style.css" />
-  <!-- SweetAlert2 for success and warning popups -->
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <style>
+<!-- THEME BOOT: put before CSS to avoid FOUC -->
+<script>
+(function(){
+  try{
+    var ls = localStorage.getItem('sb_theme');
+    if(ls){
+      var t = JSON.parse(ls);
+      var c = t.brand || t.color;
+      if(c){
+        var r = document.documentElement;
+        r.style.setProperty('--sb-accent', c);
+        r.style.setProperty('--sb-primary', c);
+      }
+    }
+  }catch(e){}
+})();
+</script>
+<meta charset="utf-8"/>
+<title>Post a Deal</title>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="style.css" rel="stylesheet"/>
+<!-- SweetAlert2 for success and warning popups -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
     .form-container {
       max-width: 720px;
       margin: 2rem auto;
@@ -85,108 +102,92 @@
       opacity: 1;
     }
   </style>
-</head>
+
 <body>
-  <!-- Global Header Loader -->
- <div id="global-header"></div>
-<link rel="stylesheet" href="header.css">
-<script src="loadHeader.js" defer></script>
-  <div class="form-container">
-    <h2>📤 Post a New Deal</h2>
-    <form id="deal-form" action="submit_deal.php" method="POST" enctype="multipart/form-data">
-      <input type="hidden" name="user_id" id="user_id" />
-
-      <label for="title">Title</label>
-      <input type="text" name="title" id="title" required>
-
-      <label for="description">Description</label>
-      <textarea name="description" id="description" required></textarea>
-
-      <label for="price">Price</label>
-      <input type="number" name="price" id="price" required step="0.01" min="0">
-
-      <label for="location">Location 
-        <button type="button" onclick="getLocation()" style="margin-left: 10px; padding: 2px 10px; font-size: 0.8rem;">📍 Auto</button>
-      </label>
-      <input type="text" name="location" id="location" required>
-
-      <label for="category">Category</label>
-      <select name="category" id="category" required>
-        <option value="">Select Category</option>
-        <option value="food">Food</option>
-        <option value="electronics">Electronics</option>
-        <option value="clothing">Clothing</option>
-        <option value="entertainment">Entertainment</option>
-        <option value="other">Other</option>
-      </select>
-
-      <!-- Future-dated deal fields -->
-      <label for="start_date">Start Date</label>
-      <input type="datetime-local" name="start_date" id="start_date" required>
-
-      <label for="end_date">End Date (optional)</label>
-      <input type="datetime-local" name="end_date" id="end_date">
-
-      <!-- CTA fields -->
-      <label for="cta_text">CTA Text (optional)</label>
-      <input type="text" name="cta_text" id="cta_text" placeholder="e.g. Buy Now">
-
-      <label for="cta_url">CTA URL (optional)</label>
-      <input type="url" name="cta_url" id="cta_url" placeholder="https://example.com">
-
-      <!-- Summary field -->
-      <label for="summary">Short Summary (optional)</label>
-      <input type="text" name="summary" id="summary" placeholder="e.g. 50% off all pizzas this weekend">
-
-      <!-- Tag Picker -->
-      <label>Tags (choose one or more)</label>
-      <div id="tag-picker" style="margin-bottom: 1rem;">
-        <label><input type="checkbox" name="tags[]" value="electronics"> Electronics</label><br>
-        <label><input type="checkbox" name="tags[]" value="grocery"> Grocery</label><br>
-        <label><input type="checkbox" name="tags[]" value="local"> Local</label><br>
-        <label><input type="checkbox" name="tags[]" value="online"> Online</label><br>
-        <label><input type="checkbox" name="tags[]" value="weekend"> Weekend</label><br>
-        <label><input type="checkbox" name="tags[]" value="flash-sale"> Flash Sale</label>
-      </div>
-      <!-- Tag Suggestions (auto-suggest) -->
-      <div id="tag-suggestions" style="margin-bottom: 1rem;"></div>
-
-      <!-- Removed old expiry field; end_date now handles expiration -->
-
-      <label for="images">Upload Image(s)</label>
-      <input type="file" name="images[]" id="images" accept="image/*" multiple>
-      <small>Upload up to 5 images. Only the first 5 will be saved.</small>
-      <div id="image-preview"></div>
-
-      <!-- Agreement checkbox & tooltip near the submit button -->
-      <div id="terms-container" style="margin-bottom: 1rem;">
-        <label style="display: flex; align-items: center; font-size: 0.9rem;">
-          <input type="checkbox" id="terms-checkbox" style="margin-right: 6px;">
+<!-- Global Header Loader -->
+<div id="global-header"></div>
+<link href="header.css" rel="stylesheet"/>
+<script defer="" src="loadHeader.js"></script>
+<div class="form-container">
+<h2>📤 Post a New Deal</h2>
+<form action="submit_deal.php" enctype="multipart/form-data" id="deal-form" method="POST">
+<input id="user_id" name="user_id" type="hidden"/>
+<label for="title">Title</label>
+<input id="title" name="title" required="" type="text"/>
+<label for="description">Description</label>
+<textarea id="description" name="description" required=""></textarea>
+<label for="price">Price</label>
+<input id="price" min="0" name="price" required="" step="0.01" type="number"/>
+<label for="location">Location 
+        <button onclick="getLocation()" style="margin-left: 10px; padding: 2px 10px; font-size: 0.8rem;" type="button">📍 Auto</button>
+</label>
+<input id="location" name="location" required="" type="text"/>
+<label for="category">Category</label>
+<select id="category" name="category" required="">
+<option value="">Select Category</option>
+<option value="food">Food</option>
+<option value="electronics">Electronics</option>
+<option value="clothing">Clothing</option>
+<option value="entertainment">Entertainment</option>
+<option value="other">Other</option>
+</select>
+<!-- Future-dated deal fields -->
+<label for="start_date">Start Date</label>
+<input id="start_date" name="start_date" required="" type="datetime-local"/>
+<label for="end_date">End Date (optional)</label>
+<input id="end_date" name="end_date" type="datetime-local"/>
+<!-- CTA fields -->
+<label for="cta_text">CTA Text (optional)</label>
+<input id="cta_text" name="cta_text" placeholder="e.g. Buy Now" type="text"/>
+<label for="cta_url">CTA URL (optional)</label>
+<input id="cta_url" name="cta_url" placeholder="https://example.com" type="url"/>
+<!-- Summary field -->
+<label for="summary">Short Summary (optional)</label>
+<input id="summary" name="summary" placeholder="e.g. 50% off all pizzas this weekend" type="text"/>
+<!-- Tag Picker -->
+<label>Tags (choose one or more)</label>
+<div id="tag-picker" style="margin-bottom: 1rem;">
+<label><input name="tags[]" type="checkbox" value="electronics"/> Electronics</label><br/>
+<label><input name="tags[]" type="checkbox" value="grocery"/> Grocery</label><br/>
+<label><input name="tags[]" type="checkbox" value="local"/> Local</label><br/>
+<label><input name="tags[]" type="checkbox" value="online"/> Online</label><br/>
+<label><input name="tags[]" type="checkbox" value="weekend"/> Weekend</label><br/>
+<label><input name="tags[]" type="checkbox" value="flash-sale"/> Flash Sale</label>
+</div>
+<!-- Tag Suggestions (auto-suggest) -->
+<div id="tag-suggestions" style="margin-bottom: 1rem;"></div>
+<!-- Removed old expiry field; end_date now handles expiration -->
+<label for="images">Upload Image(s)</label>
+<input accept="image/*" id="images" multiple="" name="images[]" type="file"/>
+<small>Upload up to 5 images. Only the first 5 will be saved.</small>
+<div id="image-preview"></div>
+<!-- Agreement checkbox & tooltip near the submit button -->
+<div id="terms-container" style="margin-bottom: 1rem;">
+<label style="display: flex; align-items: center; font-size: 0.9rem;">
+<input id="terms-checkbox" style="margin-right: 6px;" type="checkbox"/>
           I agree not to post offensive or illegal content.
         </label>
-        <small>
-          (<a href="terms.html" target="_blank" style="color:#e91e63;text-decoration:underline;">Terms &amp; Conditions</a>)
+<small>
+          (<a href="terms.html" style="color:#e91e63;text-decoration:underline;" target="_blank">Terms &amp; Conditions</a>)
         </small>
-      </div>
-      <!-- Preview and submit buttons -->
-      <button type="button" id="preview-btn" style="margin-right: 10px; background: #007bff;">Preview</button>
-      <button type="submit" id="submit-deal-btn">
+</div>
+<!-- Preview and submit buttons -->
+<button id="preview-btn" style="margin-right: 10px; background: #007bff;" type="button">Preview</button>
+<button id="submit-deal-btn" type="submit">
         Submit Deal
       </button>
-      <span class="tooltip-icon" tabindex="0" id="submit-tooltip" aria-label="Deal posting guidelines">
+<span aria-label="Deal posting guidelines" class="tooltip-icon" id="submit-tooltip" tabindex="0">
         ℹ
         <span class="tooltip-text">
           Reminder: No spam, offensive language, copyrighted content, or fake deals. Violations may result in ban.
         </span>
-      </span>
-    </form>
-  </div>
-
-  <footer class="footer" style="text-align:center; padding:1rem; color:#777;">
+</span>
+</form>
+</div>
+<footer class="footer" style="text-align:center; padding:1rem; color:#777;">
     © SpicyBeats 2025. All rights reserved.
   </footer>
-
-  <script>
+<script>
     // Auto-fill user ID
     document.addEventListener("DOMContentLoaded", () => {
       // If user is muted, prevent posting
@@ -478,8 +479,8 @@
       modal.style.display = 'flex';
     }
   </script>
-  <!-- Terms agreement, tooltip, and submission handling -->
-  <script>
+<!-- Terms agreement, tooltip, and submission handling -->
+<script>
     document.addEventListener('DOMContentLoaded', () => {
       const termsCheckbox = document.getElementById('terms-checkbox');
       if (termsCheckbox) {

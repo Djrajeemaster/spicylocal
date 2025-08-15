@@ -1,12 +1,29 @@
 <!DOCTYPE html>
+
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Verified Business Dashboard</title>
-  <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="header.css" />
-  <style>
+<!-- THEME BOOT: put before CSS to avoid FOUC -->
+<script>
+(function(){
+  try{
+    var ls = localStorage.getItem('sb_theme');
+    if(ls){
+      var t = JSON.parse(ls);
+      var c = t.brand || t.color;
+      if(c){
+        var r = document.documentElement;
+        r.style.setProperty('--sb-accent', c);
+        r.style.setProperty('--sb-primary', c);
+      }
+    }
+  }catch(e){}
+})();
+</script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Verified Business Dashboard</title>
+<link href="style.css" rel="stylesheet"/>
+<link href="header.css" rel="stylesheet"/>
+<style>
     /* Basic styling for dashboard */
     .vb-container {
       max-width: 1000px;
@@ -51,33 +68,31 @@
       background: #f7f7f7;
     }
   </style>
-</head>
+
 <body>
-  <!-- Global Header -->
-  <div id="global-header"></div>
-  <link rel="stylesheet" href="header.css" />
-  <script src="loadHeader.js" defer></script>
-
-  <div class="vb-container">
-    <h2>Verified Business Dashboard</h2>
-    <div class="vb-tabs" id="vb-tabs">
-      <button data-tab="deals" class="active">My Deals</button>
-      <button data-tab="profile">Profile</button>
-      <button data-tab="branding">Branding</button>
-      <button data-tab="analytics">Analytics</button>
-    </div>
-    <div class="vb-content" id="vb-content">
-      <div data-content="deals" class="active"><p>Loading deals...</p></div>
-      <div data-content="profile"><p>Profile settings coming soon.</p></div>
-      <div data-content="branding">
-        <p>You can customize your business profile, including your logo, about section and social links.</p>
-        <p><a href="customize_business_profile.html" style="color:#1976d2; text-decoration:underline;">Go to Customize Business Profile</a></p>
-      </div>
-      <div data-content="analytics"><p>Analytics coming soon.</p></div>
-    </div>
-  </div>
-
-  <script src="verified_business_dashboard.js"></script>
-  <script src="footer.js"></script>
+<!-- Global Header -->
+<div id="global-header"></div>
+<link href="header.css" rel="stylesheet"/>
+<script defer="" src="loadHeader.js"></script>
+<div class="vb-container">
+<h2>Verified Business Dashboard</h2>
+<div class="vb-tabs" id="vb-tabs">
+<button class="active" data-tab="deals">My Deals</button>
+<button data-tab="profile">Profile</button>
+<button data-tab="branding">Branding</button>
+<button data-tab="analytics">Analytics</button>
+</div>
+<div class="vb-content" id="vb-content">
+<div class="active" data-content="deals"><p>Loading deals...</p></div>
+<div data-content="profile"><p>Profile settings coming soon.</p></div>
+<div data-content="branding">
+<p>You can customize your business profile, including your logo, about section and social links.</p>
+<p><a href="customize_business_profile.html" style="color:#1976d2; text-decoration:underline;">Go to Customize Business Profile</a></p>
+</div>
+<div data-content="analytics"><p>Analytics coming soon.</p></div>
+</div>
+</div>
+<script src="verified_business_dashboard.js"></script>
+<script src="footer.js"></script>
 </body>
 </html>

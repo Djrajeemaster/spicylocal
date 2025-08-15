@@ -1,11 +1,28 @@
 <!DOCTYPE html>
+
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SpicyBeats – Signup</title>
-  <link rel="stylesheet" href="style.css" />
-  <style>
+<!-- THEME BOOT: put before CSS to avoid FOUC -->
+<script>
+(function(){
+  try{
+    var ls = localStorage.getItem('sb_theme');
+    if(ls){
+      var t = JSON.parse(ls);
+      var c = t.brand || t.color;
+      if(c){
+        var r = document.documentElement;
+        r.style.setProperty('--sb-accent', c);
+        r.style.setProperty('--sb-primary', c);
+      }
+    }
+  }catch(e){}
+})();
+</script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SpicyBeats – Signup</title>
+<link href="style.css" rel="stylesheet"/>
+<style>
     body {
       background: #f9f9f9;
       font-family: 'Segoe UI', sans-serif;
@@ -64,36 +81,30 @@
       margin-top: 1rem;
     }
   </style>
-</head>
+
 <body>
 <!-- Global Header Loader -->
 <div id="global-header"></div>
-<link rel="stylesheet" href="global.css" />
-<script src="loadHeader.js" defer></script>
+<link href="global.css" rel="stylesheet"/>
+<script defer="" src="loadHeader.js"></script>
 <div class="signup-container">
-  <h2>Create Your Account</h2>
-  <form id="signup-form" action="register.php" method="POST">
-    <label for="username">Username</label>
-    <input type="text" id="username" name="username" required />
-	
-	<label for="password">Password</label>
-  <input type="password" id="password" name="password" required />
-
-    <label for="password">Password</label>
-    <input type="password" id="password" name="password" required />
-
-    <label for="confirm-password">Confirm Password</label>
-    <input type="password" id="confirm-password" required />
-
-    <div class="error" id="error-message"></div>
-
-    <button type="submit">Sign Up</button>
-  </form>
-  <div class="login-link">
+<h2>Create Your Account</h2>
+<form action="register.php" id="signup-form" method="POST">
+<label for="username">Username</label>
+<input id="username" name="username" required="" type="text"/>
+<label for="password">Password</label>
+<input id="password" name="password" required="" type="password"/>
+<label for="password">Password</label>
+<input id="password" name="password" required="" type="password"/>
+<label for="confirm-password">Confirm Password</label>
+<input id="confirm-password" required="" type="password"/>
+<div class="error" id="error-message"></div>
+<button type="submit">Sign Up</button>
+</form>
+<div class="login-link">
     Already have an account? <a href="login_unified.php">Login</a>
-  </div>
 </div>
-
+</div>
 <script>
   document.getElementById("signup-form").addEventListener("submit", function (e) {
     const pwd = document.getElementById("password").value;
@@ -108,7 +119,6 @@
     }
   });
 </script>
-
 <script src="footer.js"></script>
 </body>
 </html>

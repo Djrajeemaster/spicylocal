@@ -1,32 +1,49 @@
 <!DOCTYPE html>
+
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SpicyBeats Deals</title>
-  <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="cards.css" />
-  <link rel="stylesheet" href="theme.css" />
-</head>
+<!-- THEME BOOT: put before CSS to avoid FOUC -->
+<script>
+(function(){
+  try{
+    var ls = localStorage.getItem('sb_theme');
+    if(ls){
+      var t = JSON.parse(ls);
+      var c = t.brand || t.color;
+      if(c){
+        var r = document.documentElement;
+        r.style.setProperty('--sb-accent', c);
+        r.style.setProperty('--sb-primary', c);
+      }
+    }
+  }catch(e){}
+})();
+</script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SpicyBeats Deals</title>
+<link href="style.css" rel="stylesheet"/>
+<link href="cards.css" rel="stylesheet"/>
+<link href="theme.css" rel="stylesheet"/>
+
 <body>
 <!-- Global Header Loader -->
 <div id="global-header"></div>
-<link rel="stylesheet" href="header.css">
-<script src="loadHeader.js" defer></script>
-
-  <!-- Search Bar: visible below the global header -->
-  <div id="search-bar" class="search-container">
-    <input type="search" id="deal-search" class="search-input" placeholder="Search deals..." />
-  </div>
+<link href="header.css" rel="stylesheet"/>
+<script defer="" src="loadHeader.js"></script>
+<!-- Search Bar: visible below the global header -->
+<div class="search-container" id="search-bar">
+<input class="search-input" id="deal-search" placeholder="Search deals..." type="search"/>
+</div>
+<div id="deals-toolbar" class="deals-toolbar"></div>
 <main>
-  <div id="deal-list" class="deal-list">Loading deals...</div>
-  <div id="pagination" class="pagination-container" style="margin-top:1rem;"></div>
+<div class="deal-list" id="deal-list">Loading deals...</div>
+<div class="pagination-container" id="pagination" style="margin-top:1rem;"></div>
 </main>
-
-<script src="theme.js" defer></script>
+<script defer="" src="theme.js"></script>
 <script src="bagit.js"></script>
+<script src="search.js"></script>
+<script defer src="deals_filters_v3.js?v=3"></script>
 <script src="footer.js"></script>
-  <!-- Search functionality script -->
-  <script src="search.js"></script>
-</body>
+<!-- Search functionality script -->
+<script defer="" src="/bagit/pagination.js"></script></body>
 </html>

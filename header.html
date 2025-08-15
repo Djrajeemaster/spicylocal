@@ -1,33 +1,30 @@
 <!-- Global Header -->
 <div class="global-header" id="sb-header">
-  <a href="/bagit/index.html" class="logo">
-    <img src="/bagit/logo.png" alt="SpicyBeats" class="logo-img" />
-    <span>SpicyBeats</span>
-  </a>
-
-  <nav id="nav-menu" class="nav-links">
-    <!-- Populated by loadHeader.js -->
-    <a href="/bagit/index.html" class="nav-link nav-home">Home</a>
-    <a href="/bagit/login_unified.php" class="nav-link login-link">Login</a>
-    <a href="/bagit/signup.html" class="nav-link signup-link">Signup</a>
-  </nav>
-
-  <div class="user-wrap user-menu hidden" id="user-menu">
-    <button class="avatar-btn" id="user-menu-toggle" aria-haspopup="true" aria-expanded="false">
-      <span class="avatar" id="user-avatar">SB</span>
-      <span class="user-name username-label"></span>
-    </button>
-    <div class="user-dropdown hidden" id="user-dropdown" role="menu">
-      <a href="profile.html" id="dd-profile" role="menuitem">Profile</a>
-      <a href="/bagit/admin/dashboard.php" id="dd-admin" class="hidden" role="menuitem">Admin Mode</a>
-      <a href="/bagit/admin/dashboard.php" id="dd-moderator" class="hidden" role="menuitem">Moderation Mode</a>
-      <a href="/bagit/admin/superadmin.php" id="dd-superadmin" class="hidden" role="menuitem">Super Admin Mode</a>
-      <a href="/bagit/verified_business_dashboard.html" id="dd-business" class="hidden" role="menuitem">Business Mode</a>
-      <a href="/bagit/admin/users.php" id="dd-users" class="hidden" role="menuitem">User Management</a>
-      <a href="/bagit/smart_alerts.html" id="dd-smartalerts" role="menuitem">Smart Alerts</a>
-      <a href="#" id="dd-logout" role="menuitem">Logout</a>
-    </div>
-  </div>
+<a class="logo" href="/bagit/index.html">
+<img alt="SpicyBeats" class="logo-img" loading="lazy" src="/bagit/logo.png"/>
+<span>SpicyBeats</span>
+</a>
+<nav class="nav-links" id="nav-menu">
+<!-- Populated by loadHeader.js -->
+<a class="nav-link nav-home" href="/bagit/index.html">Home</a>
+<a class="nav-link login-link" href="/bagit/login_unified.php">Login</a>
+<a class="nav-link signup-link" href="/bagit/signup.html">Signup</a>
+</nav>
+<div class="user-wrap user-menu hidden" id="user-menu">
+<button aria-expanded="false" aria-haspopup="true" class="avatar-btn" id="user-menu-toggle">
+<span class="avatar" id="user-avatar">SB</span>
+<span class="user-name username-label"></span>
+</button>
+<div class="user-dropdown hidden" id="user-dropdown" role="menu">
+<a href="profile.html" id="dd-profile" role="menuitem">Profile</a>
+<a class="hidden" href="/bagit/admin/dashboard.php" id="dd-admin" role="menuitem">Admin Mode</a>
+<a class="hidden" href="/bagit/admin/dashboard.php" id="dd-moderator" role="menuitem">Moderation Mode</a>
+<a class="hidden" href="/bagit/admin/superadmin.php" id="dd-superadmin" role="menuitem">Super Admin Mode</a>
+<a class="hidden" href="/bagit/verified_business_dashboard.html" id="dd-business" role="menuitem">Business Mode</a>
+<a class="hidden" href="/bagit/admin/users.php" id="dd-users" role="menuitem">User Management</a>
+<a href="/bagit/smart_alerts.html" id="dd-smartalerts" role="menuitem">Smart Alerts</a>
+<a href="#" id="dd-logout" role="menuitem">Logout</a>
 </div>
-
-<div id="sponsored-banner" class="sponsored hidden"></div>
+</div>
+</div>
+<div class="sponsored hidden" id="sponsored-banner"></div>

@@ -31,7 +31,14 @@
     });
   }
 
-  function mountHeader(html) {
+  function mountHeader(html) { /* RELOCATE_IF_SCROLL_PRISON */
+  try {
+    var mount = document.getElementById('global-header');
+    if (mount && mount.parentElement && getComputedStyle(mount.parentElement).overflow !== 'visible') {
+      document.body.insertBefore(mount, document.body.firstChild);
+    }
+  } catch(e){}
+
     const mountPoint = document.getElementById("global-header");
     if (mountPoint) {
       mountPoint.innerHTML = html;
@@ -276,3 +283,75 @@
     document.head.appendChild(s);
   }
 })();
+
+
+// ===== ROLE-AWARE HEADER START =====
+(function(){
+  try{
+    // Ensure header mount exists
+    var mount = document.getElementById('global-header');
+    if(!mount){
+      mount = document.createElement('div');
+      mount.id = 'global-header';
+      document.body.insertBefore(mount, document.body.firstChild);
+    }
+
+    // Roles from localStorage (string '1' means true)
+    var isAdmin = localStorage.getItem('is_admin') === '1';
+    var isModerator = localStorage.getItem('is_moderator') === '1';
+    var isSuperAdmin = localStorage.getItem('is_superadmin') === '1';
+    var isBiz = localStorage.getItem('is_biz') === '1';
+
+    // Build nav items based on roles
+    function navItem(href, text){
+      return '<a class="gh-link" href="'+href+'">'+text+'</a>';
+    }
+
+    var nav = [
+      navItem('/bagit/index.html','Home'),
+      navItem('/bagit/deals.html','Deals'),
+      navItem('/bagit/post_deal.html','Post Deal')
+    ];
+
+    if (isBiz)       nav.push(navItem('/bagit/business.html','Business'));
+    if (isModerator) nav.push(navItem('/bagit/moderation.html','Moderator'));
+    if (isAdmin)     nav.push(navItem('/bagit/admin/index.html','Admin'));
+    if (isSuperAdmin)nav.push(navItem('/bagit/admin/superadmin.html','Superadmin'));
+
+    // Username if present
+    var username = localStorage.getItem('username') || '';
+    var userBlock = username ? ('<span class="gh-user">Hi, '+username+'</span>') : '';
+
+    var html = ''
+      + '<header class="global-header-wrap">'
+      + '  <div class="gh-inner">'
+      + '    <a class="gh-logo" href="/bagit/index.html">Bagit</a>'
+      + '    <nav class="gh-nav">'+ nav.join('') +'</nav>'
+      + '    <div class="gh-right">'
+      +        userBlock
+      + '    </div>'
+      + '  </div>'
+      + '</header>';
+
+    mount.innerHTML = html;
+
+    // Minimal CSS if header.css missing or lacking classes
+    var styleId = 'gh-inline-style';
+    if (!document.getElementById(styleId)){
+      var s = document.createElement('style');
+      s.id = styleId;
+      s.textContent = [
+        '.global-header-wrap{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid #eee}',
+        '.gh-inner{max-width:1200px;margin:0 auto;padding:10px 12px;display:flex;align-items:center;gap:16px}',
+        '.gh-logo{font-weight:800;text-decoration:none;color:#111}',
+        '.gh-nav{display:flex;gap:12px;flex:1;flex-wrap:wrap}',
+        '.gh-link{color:#374151;text-decoration:none;padding:6px 10px;border-radius:8px}',
+        '.gh-link:hover{background:#f5f5f5}',
+        '.gh-right{display:flex;align-items:center;gap:10px;color:#6b7280}',
+        '@media(max-width:768px){.gh-inner{padding:8px}.gh-nav{gap:8px}}'
+      ].join('');
+      document.head.appendChild(s);
+    }
+  }catch(e){ console.warn('Header inject error', e); }
+})();
+// ===== ROLE-AWARE HEADER END =====

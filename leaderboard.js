@@ -1,3 +1,4 @@
+function escapeHTML(s){ s=String(s==null?'':s); return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 // Script to populate leaderboard
 document.addEventListener('DOMContentLoaded', () => {
   fetch('api/get_leaderboard.php')

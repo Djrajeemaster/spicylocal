@@ -60,7 +60,25 @@ exit;
 
 <!DOCTYPE html>
 <html>
-<head>
+\1
+<!-- THEME BOOT: put before CSS to avoid FOUC -->
+<script>
+(function(){
+  try{
+    var ls = localStorage.getItem('sb_theme');
+    if(ls){
+      var t = JSON.parse(ls);
+      var c = t.brand || t.color;
+      if(c){
+        var r = document.documentElement;
+        r.style.setProperty('--sb-accent', c);
+        r.style.setProperty('--sb-primary', c);
+      }
+    }
+  }catch(e){}
+})();
+</script>
+
     <title>Login - SpicyBeats</title>
     <link rel="stylesheet" href="style.css">
     <style>

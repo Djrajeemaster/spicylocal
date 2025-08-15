@@ -1,12 +1,30 @@
 
-<!doctype html>
+<!DOCTYPE html>
+
 <html>
-<head>
-  <meta charset="utf-8">
-  <title>Users – Super Admin</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="../theme.css">
-  <style>
+\1
+<!-- THEME BOOT: put before CSS to avoid FOUC -->
+<script>
+(function(){
+  try{
+    var ls = localStorage.getItem('sb_theme');
+    if(ls){
+      var t = JSON.parse(ls);
+      var c = t.brand || t.color;
+      if(c){
+        var r = document.documentElement;
+        r.style.setProperty('--sb-accent', c);
+        r.style.setProperty('--sb-primary', c);
+      }
+    }
+  }catch(e){}
+})();
+</script>
+<meta charset="utf-8"/>
+<title>Users – Super Admin</title>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<link href="../theme.css" rel="stylesheet"/>
+<style>
     body{font-family:system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, sans-serif; padding:16px;}
     h1{font-size:20px; margin:0 0 16px;}
     table{width:100%; border-collapse:collapse; background:#fff; border:1px solid #e5e7eb; border-radius:12px; overflow:hidden;}
@@ -21,14 +39,14 @@
     input[type="search"]{padding:8px 10px; border:1px solid #e5e7eb; border-radius:8px; min-width:260px;}
     select{padding:6px 10px; border:1px solid #e2e8f0; border-radius:8px;}
   </style>
-</head>
+
 <body>
-  <h1>Users (Super Admin)</h1>
-  <div class="toolbar">
-    <input id="q" type="search" placeholder="Search username/email">
-    <button id="refresh" class="btn">Refresh</button>
-  </div>
-  <div id="app">Loading…</div>
-  <script src="users.js" defer></script>
+<h1>Users (Super Admin)</h1>
+<div class="toolbar">
+<input id="q" placeholder="Search username/email" type="search"/>
+<button class="btn" id="refresh">Refresh</button>
+</div>
+<div id="app">Loading…</div>
+<script defer="" src="users.js"></script>
 </body>
 </html>

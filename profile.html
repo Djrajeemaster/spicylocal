@@ -1,145 +1,143 @@
 
 <!DOCTYPE html>
+
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>SpicyBeats Profile Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="profile.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
+<!-- THEME BOOT: put before CSS to avoid FOUC -->
+<script>
+(function(){
+  try{
+    var ls = localStorage.getItem('sb_theme');
+    if(ls){
+      var t = JSON.parse(ls);
+      var c = t.brand || t.color;
+      if(c){
+        var r = document.documentElement;
+        r.style.setProperty('--sb-accent', c);
+        r.style.setProperty('--sb-primary', c);
+      }
+    }
+  }catch(e){}
+})();
+</script>
+<meta charset="utf-8"/>
+<title>SpicyBeats Profile Dashboard</title>
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<link href="style.css" rel="stylesheet"/>
+<link href="profile.css" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <body>
 <!-- Global Header Loader -->
 <div id="global-header"></div>
-<link rel="stylesheet" href="header.css">
-<script src="loadHeader.js" defer></script>
+<link href="header.css" rel="stylesheet"/>
+<script defer="" src="loadHeader.js"></script>
 <div class="container">
-  <aside class="sidebar">
-    <div class="logo">SpicyBeats</div>
-    <nav class="nav-menu">
-      <a href="#" class="active" data-target="section-dashboard">Dashboard</a>
-      <a href="#" data-target="section-profile">Profile</a>
-      <a href="#" data-target="section-deals">My Deals</a>
-	  <a href="#" data-target="section-saved">Saved Deals</a>
-	  <a href="#" data-target="section-recent">Recently Viewed</a>
-      <a href="#" data-target="section-analytics">Analytics</a>
-      <a href="#" data-target="section-settings">Settings</a>
-      <a href="#" id="logout-link">Logout</a>
-    </nav>
-  </aside>
-
-  <main class="main">
-    <div id="section-dashboard" class="spa-section">
-      <header class="welcome-header">
-        <div>
-          <h2>Welcome back, <span id="user-name">User</span>!</h2>
-          <p>Here's what's happening with your deals today.</p>
-        </div>
-        <div id="verified-badge" class="badge-verified">✔ Verified Member</div>
-      </header>
-
-      <section class="summary-cards">
-        <div class="card"><h4>Total Deals</h4><div id="total-deals">--</div><small class="trend up">+12% from last month</small></div>
-        <div class="card"><h4>Revenue</h4><div>$2,847</div><small class="trend up">+8% from last week</small></div>
-        <div class="card"><h4>Success Rate</h4><div>94%</div><small class="trend up">Above average</small></div>
-      </section>
-
-      <section class="recent-section">
-        <div class="recent-deals">
-          <h3>Recent Deals</h3>
-          <div id="recent-deals-list"></div>
-          <button class="view-all-btn">View All Deals</button>
-        </div>
-        <div class="recent-interactions">
-          <h3>Recent Interactions</h3>
-          <div id="recent-interactions-list"></div>
-          <button class="view-all-btn">View All Activity</button>
-        </div>
-      </section>
-    </div>
-
-    
-<div id="section-profile" class="spa-section" style="display: none;">
-  <h3 class="section-heading">👤 My Profile</h3>
-
-  <div class="card card-profile">
-    <h4>User Info</h4>
-    <div class="info-row"><strong>Username:</strong> <span id="info-username">--</span></div>
-    <div class="info-row"><strong>Email:</strong> <span id="info-email">--</span></div>
-    <div class="info-row"><strong>Member Since:</strong> <span id="info-joined">--</span></div>
-    <div class="info-row">
-      <strong>Status:</strong>
-      <span id="info-verified" class="badge badge-verified">--</span>
-    </div>
-  </div>
-
-  <div class="card card-form">
-    <h4>🔑 Change Password</h4>
-    <form id="change-password-form">
-      <label for="current_password">Current Password</label>
-      <input type="password" name="current_password" required placeholder="Enter current password" />
-
-      <label for="new_password">New Password</label>
-      <input type="password" name="new_password" required placeholder="Enter new password" />
-
-      <label for="confirm_password">Confirm New Password</label>
-      <input type="password" name="confirm_password" required placeholder="Confirm new password" />
-
-      <button type="submit" class="btn-primary">Update Password</button>
-      <p id="password-update-msg" class="status-msg"></p>
-    </form>
-  </div>
-
-  <!-- Gamification stats -->
-  <div class="card card-gamify">
-    <h4>🎮 Achievements</h4>
-    <div id="xp-level" style="margin-bottom:0.5rem;"></div>
-    <div id="badge-list"></div>
-  </div>
+<aside class="sidebar">
+<div class="logo">SpicyBeats</div>
+<nav class="nav-menu">
+<a class="active" data-target="section-dashboard" href="#">Dashboard</a>
+<a data-target="section-profile" href="#">Profile</a>
+<a data-target="section-deals" href="#">My Deals</a>
+<a data-target="section-saved" href="#">Saved Deals</a>
+<a data-target="section-recent" href="#">Recently Viewed</a>
+<a data-target="section-analytics" href="#">Analytics</a>
+<a data-target="section-settings" href="#">Settings</a>
+<a href="#" id="logout-link">Logout</a>
+</nav>
+</aside>
+<main class="main">
+<div class="spa-section" id="section-dashboard">
+<header class="welcome-header">
+<div>
+<h2>Welcome back, <span id="user-name">User</span>!</h2>
+<p>Here's what's happening with your deals today.</p>
 </div>
-
-
-    <div id="section-deals" class="spa-section" style="display: none;">
-    <h2>📦My Deals</h2>
-  <p>List of your posted deals and their status.</p>
-  <div class="deal-tabs">
-    <button data-status="approved" class="active">Approved</button>
-    <button data-status="pending">Pending</button>
-    <button data-status="rejected">Rejected</button>
-  </div>
-  <div id="deal-list" class="deal-cards"></div>
-  <div id="no-deals-message" class="hidden">No deals found in this category.</div>
+<div class="badge-verified" id="verified-badge">✔ Verified Member</div>
+</header>
+<section class="summary-cards">
+<div class="card"><h4>Total Deals</h4><div id="total-deals">--</div><small class="trend up">+12% from last month</small></div>
+<div class="card"><h4>Revenue</h4><div>$2,847</div><small class="trend up">+8% from last week</small></div>
+<div class="card"><h4>Success Rate</h4><div>94%</div><small class="trend up">Above average</small></div>
 </section>
-    </div>
-
-
-    <div id="section-analytics" class="spa-section" style="display: none;">
-      <h3>📊 Analytics</h3>
-      <p>Deal performance and activity insights.</p>
-    </div>
-
-    <div id="section-settings" class="spa-section" style="display: none;">
-      <h3>⚙️ Settings</h3>
-      <p>Manage your account settings and preferences.</p>
-    </div>
-	
-	<div id="section-saved" class="spa-section" style="display: none;">
-  <h2>⭐ Saved Deals</h2>
-  <div id="saved-deals-container" class="deal-cards"></div>
-  <p id="no-saved-message" class="hidden">No saved deals found.</p>
+<section class="recent-section">
+<div class="recent-deals">
+<h3>Recent Deals</h3>
+<div id="recent-deals-list"></div>
+<button class="view-all-btn">View All Deals</button>
 </div>
-
-<div id="section-recent" class="spa-section" style="display: none;">
-  <h2>🕵️ Recently Viewed</h2>
-  <div id="recent-deals-container" class="deal-cards"></div>
-  <p id="no-recent-message" class="hidden">No recently viewed deals.</p>
+<div class="recent-interactions">
+<h3>Recent Interactions</h3>
+<div id="recent-interactions-list"></div>
+<button class="view-all-btn">View All Activity</button>
 </div>
+</section>
+</div>
+<div class="spa-section" id="section-profile" style="display: none;">
+<h3 class="section-heading">👤 My Profile</h3>
+<div class="card card-profile">
+<h4>User Info</h4>
+<div class="info-row"><strong>Username:</strong> <span id="info-username">--</span></div>
+<div class="info-row"><strong>Email:</strong> <span id="info-email">--</span></div>
+<div class="info-row"><strong>Member Since:</strong> <span id="info-joined">--</span></div>
+<div class="info-row">
+<strong>Status:</strong>
+<span class="badge badge-verified" id="info-verified">--</span>
+</div>
+</div>
+<div class="card card-form">
+<h4>🔑 Change Password</h4>
+<form id="change-password-form">
+<label for="current_password">Current Password</label>
+<input name="current_password" placeholder="Enter current password" required="" type="password"/>
+<label for="new_password">New Password</label>
+<input name="new_password" placeholder="Enter new password" required="" type="password"/>
+<label for="confirm_password">Confirm New Password</label>
+<input name="confirm_password" placeholder="Confirm new password" required="" type="password"/>
+<button class="btn-primary" type="submit">Update Password</button>
+<p class="status-msg" id="password-update-msg"></p>
+</form>
+</div>
+<!-- Gamification stats -->
+<div class="card card-gamify">
+<h4>🎮 Achievements</h4>
+<div id="xp-level" style="margin-bottom:0.5rem;"></div>
+<div id="badge-list"></div>
+</div>
+</div>
+<div class="spa-section" id="section-deals" style="display: none;">
+<h2>📦My Deals</h2>
+<p>List of your posted deals and their status.</p>
+<div class="deal-tabs">
+<button class="active" data-status="approved">Approved</button>
+<button data-status="pending">Pending</button>
+<button data-status="rejected">Rejected</button>
+</div>
+<div class="deal-cards" id="deal-list"></div>
+<div class="hidden" id="no-deals-message">No deals found in this category.</div>
 
-</main>
+</div>
+<div class="spa-section" id="section-analytics" style="display: none;">
+<h3>📊 Analytics</h3>
+<p>Deal performance and activity insights.</p>
+</div>
+<div class="spa-section" id="section-settings" style="display: none;">
+<h3>⚙️ Settings</h3>
+<p>Manage your account settings and preferences.</p>
+</div>
+<div class="spa-section" id="section-saved" style="display: none;">
+<h2>⭐ Saved Deals</h2>
+<div class="deal-cards" id="saved-deals-container"></div>
+<p class="hidden" id="no-saved-message">No saved deals found.</p>
+</div>
+<div class="spa-section" id="section-recent" style="display: none;">
+<h2>🕵️ Recently Viewed</h2>
+<div class="deal-cards" id="recent-deals-container"></div>
+<p class="hidden" id="no-recent-message">No recently viewed deals.</p>
+</div>
+<nav class="pagination" id="pagination" style="display:none"></nav></main>
 </div>
 <script src="spa_switching.js"></script>
 <script src="profile.js"></script>
 <script src="footer.js"></script>
-</body>
-</html>
+<script defer="" src="/bagit/pagination.js"></script></body>
+</meta></html>
