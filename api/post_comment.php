@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/_security.php';
+require_once __DIR__ . '/_bootstrap.php';
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
 require_once __DIR__ . '/require_login.php';
@@ -38,4 +40,8 @@ $stmt = $pdo->prepare("INSERT INTO comments (deal_id, user_id, comment, created_
 $success = $stmt->execute([$deal_id, $user_id, $comment]);
 
 echo json_encode(['success' => $success]);
-?>
+
+
+// Soft security guards
+if (!rate_limit_soft($pdo, 'post_comment', 30, 60)) { http_response_code(429); echo json_encode(['ok'=>false,'error'=>'rate_limited']); exit; }
+/* CSRF soft-check (not breaking old clients) */ if ($_SERVER['REQUEST_METHOD']==='POST') { check_csrf_soft(); }

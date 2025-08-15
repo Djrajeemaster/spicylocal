@@ -39,7 +39,25 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 }
 ?><!DOCTYPE html>
 <html lang="en">
-<head>
+\1
+<!-- THEME BOOT: put before CSS to avoid FOUC -->
+<script>
+(function(){
+  try{
+    var ls = localStorage.getItem('sb_theme');
+    if(ls){
+      var t = JSON.parse(ls);
+      var c = t.brand || t.color;
+      if(c){
+        var r = document.documentElement;
+        r.style.setProperty('--sb-accent', c);
+        r.style.setProperty('--sb-primary', c);
+      }
+    }
+  }catch(e){}
+})();
+</script>
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Edit Deal #<?= htmlspecialchars($deal['id']) ?></title>

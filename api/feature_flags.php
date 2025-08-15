@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/_bootstrap.php';
 // API to get and set feature flags
 // Flags allow super admins to enable/disable parts of the application dynamically.
 
@@ -66,7 +67,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $flags['_role'] = $_SESSION['role'];
             $flags['_is_super_admin'] = ($_SESSION['role'] === 'super_admin');
         }
-        echo json_encode($flags);
+        $json = json_encode($flags);
+$etag = '"'.md5($json).'"';
+header('ETag: ' . $etag);
+header('Cache-Control: public, max-age=300');
+if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && trim($_SERVER['HTTP_IF_NONE_MATCH']) === $etag) { http_response_code(304); exit; }
+echo $json;
     } catch (Exception $e) {
         echo json_encode(['error' => 'Error retrieving feature flags']);
     }

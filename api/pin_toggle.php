@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/_security.php';
+require_once __DIR__ . '/_bootstrap.php';
 require_once __DIR__ . '/../admin/config/auth_check.php';
 require_once __DIR__ . '/config/db.php';
 
@@ -65,3 +67,7 @@ try {
   echo json_encode(['ok'=>false,'error'=>'DB error']);
   exit;
 }
+
+// Soft security guards
+if (!rate_limit_soft($pdo, 'pin_toggle', 30, 60)) { http_response_code(429); echo json_encode(['ok'=>false,'error'=>'rate_limited']); exit; }
+/* CSRF soft-check (not breaking old clients) */ if ($_SERVER['REQUEST_METHOD']==='POST') { check_csrf_soft(); }

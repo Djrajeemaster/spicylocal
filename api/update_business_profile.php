@@ -1,4 +1,18 @@
 <?php
+
+// === Upload hardening ===
+$allowed = ['image/jpeg','image/png','image/webp'];
+if (!empty($_FILES['image']['tmp_name'])) {
+  $finfo = finfo_open(FILEINFO_MIME_TYPE);
+  $mime  = finfo_file($finfo, $_FILES['image']['tmp_name']);
+  finfo_close($finfo);
+  if (!in_array($mime, $allowed, true)) { http_response_code(400); echo json_encode(['ok'=>false,'error'=>'invalid_file_type']); exit; }
+  // Normalize extension
+  $ext = ($mime==='image/png'?'png':($mime==='image/webp'?'webp':'jpg'));
+  $safeName = 'deal_' . time() . '_' . mt_rand(1000,9999) . '.' . $ext;
+  $_FILES['image']['name'] = $safeName;
+}
+
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
 require_once __DIR__ . '/require_login.php';

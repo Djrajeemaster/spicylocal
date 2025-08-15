@@ -113,3 +113,76 @@ Stack trace:
   thrown in F:\localrunner\htdocs\bagit\api\get_business_profile.php on line 25
 [09-Aug-2025 05:55:58 Europe/Berlin] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in F:\localrunner\htdocs\bagit\api\get_my_deals.php on line 6
 [09-Aug-2025 06:42:03 Europe/Berlin] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in F:\localrunner\htdocs\bagit\api\get_my_deals.php on line 6
+[09-Aug-2025 07:10:28 Europe/Berlin] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in F:\localrunner\htdocs\bagit\api\get_business_profile.php on line 11
+[09-Aug-2025 07:10:28 Europe/Berlin] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'business_logo' in 'field list' in F:\localrunner\htdocs\bagit\api\get_business_profile.php:25
+Stack trace:
+#0 F:\localrunner\htdocs\bagit\api\get_business_profile.php(25): PDO->prepare('SELECT id, user...')
+#1 {main}
+  thrown in F:\localrunner\htdocs\bagit\api\get_business_profile.php on line 25
+[09-Aug-2025 23:20:07 Europe/Berlin] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in F:\localrunner\htdocs\bagit\api\get_my_deals.php on line 6
+[11-Aug-2025 01:22:40 Europe/Berlin] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in F:\localrunner\htdocs\bagit\api\get_my_deals.php on line 6
+[11-Aug-2025 01:23:08 Europe/Berlin] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in F:\localrunner\htdocs\bagit\api\get_my_deals.php on line 6
+[11-Aug-2025 03:55:53 Europe/Berlin] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in F:\localrunner\htdocs\bagit\api\get_business_profile.php on line 11
+[11-Aug-2025 03:55:53 Europe/Berlin] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'business_logo' in 'field list' in F:\localrunner\htdocs\bagit\api\get_business_profile.php:25
+Stack trace:
+#0 F:\localrunner\htdocs\bagit\api\get_business_profile.php(25): PDO->prepare('SELECT id, user...')
+#1 {main}
+  thrown in F:\localrunner\htdocs\bagit\api\get_business_profile.php on line 25
+[11-Aug-2025 06:53:29 Europe/Berlin] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in F:\localrunner\htdocs\bagit\api\require_login.php on line 6
+[11-Aug-2025 06:53:38 Europe/Berlin] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in F:\localrunner\htdocs\bagit\api\require_login.php on line 6
+[11-Aug-2025 06:53:38 Europe/Berlin] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in F:\localrunner\htdocs\bagit\api\require_login.php on line 6
+[11-Aug-2025 06:53:40 Europe/Berlin] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in F:\localrunner\htdocs\bagit\api\require_login.php on line 6
+[11-Aug-2025 20:47:03 Europe/Berlin] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in F:\xampp\htdocs\bagit\api\get_business_profile.php on line 11
+[11-Aug-2025 20:47:03 Europe/Berlin] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'business_logo' in 'field list' in F:\xampp\htdocs\bagit\api\get_business_profile.php:25
+Stack trace:
+#0 F:\xampp\htdocs\bagit\api\get_business_profile.php(25): PDO->prepare('SELECT id, user...')
+#1 {main}
+  thrown in F:\xampp\htdocs\bagit\api\get_business_profile.php on line 25
+[11-Aug-2025 20:48:06 Europe/Berlin] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in F:\xampp\htdocs\bagit\api\get_business_profile.php on line 11
+[11-Aug-2025 20:48:06 Europe/Berlin] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'business_logo' in 'field list' in F:\xampp\htdocs\bagit\api\get_business_profile.php:25
+Stack trace:
+#0 F:\xampp\htdocs\bagit\api\get_business_profile.php(25): PDO->prepare('SELECT id, user...')
+#1 {main}
+  thrown in F:\xampp\htdocs\bagit\api\get_business_profile.php on line 25
+[11-Aug-2025 20:48:50 Europe/Berlin] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in F:\xampp\htdocs\bagit\api\get_business_profile.php on line 11
+[11-Aug-2025 20:48:50 Europe/Berlin] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'business_logo' in 'field list' in F:\xampp\htdocs\bagit\api\get_business_profile.php:25
+Stack trace:
+#0 F:\xampp\htdocs\bagit\api\get_business_profile.php(25): PDO->prepare('SELECT id, user...')
+#1 {main}
+  thrown in F:\xampp\htdocs\bagit\api\get_business_profile.php on line 25
+[11-Aug-2025 20:49:03 Europe/Berlin] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in F:\xampp\htdocs\bagit\api\get_business_profile.php on line 11
+[11-Aug-2025 20:49:03 Europe/Berlin] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'business_logo' in 'field list' in F:\xampp\htdocs\bagit\api\get_business_profile.php:25
+Stack trace:
+#0 F:\xampp\htdocs\bagit\api\get_business_profile.php(25): PDO->prepare('SELECT id, user...')
+#1 {main}
+  thrown in F:\xampp\htdocs\bagit\api\get_business_profile.php on line 25
+[11-Aug-2025 20:51:26 Europe/Berlin] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in F:\xampp\htdocs\bagit\api\get_business_profile.php on line 11
+[11-Aug-2025 20:51:26 Europe/Berlin] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'business_logo' in 'field list' in F:\xampp\htdocs\bagit\api\get_business_profile.php:25
+Stack trace:
+#0 F:\xampp\htdocs\bagit\api\get_business_profile.php(25): PDO->prepare('SELECT id, user...')
+#1 {main}
+  thrown in F:\xampp\htdocs\bagit\api\get_business_profile.php on line 25
+[11-Aug-2025 20:55:15 Europe/Berlin] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in F:\xampp\htdocs\bagit\api\get_business_profile.php on line 11
+[11-Aug-2025 20:55:15 Europe/Berlin] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'business_logo' in 'field list' in F:\xampp\htdocs\bagit\api\get_business_profile.php:25
+Stack trace:
+#0 F:\xampp\htdocs\bagit\api\get_business_profile.php(25): PDO->prepare('SELECT id, user...')
+#1 {main}
+  thrown in F:\xampp\htdocs\bagit\api\get_business_profile.php on line 25
+[11-Aug-2025 20:55:20 Europe/Berlin] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in F:\xampp\htdocs\bagit\api\get_business_profile.php on line 11
+[11-Aug-2025 20:55:20 Europe/Berlin] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'business_logo' in 'field list' in F:\xampp\htdocs\bagit\api\get_business_profile.php:25
+Stack trace:
+#0 F:\xampp\htdocs\bagit\api\get_business_profile.php(25): PDO->prepare('SELECT id, user...')
+#1 {main}
+  thrown in F:\xampp\htdocs\bagit\api\get_business_profile.php on line 25
+[11-Aug-2025 23:42:25 Europe/Berlin] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in F:\xampp\htdocs\bagit\api\get_my_deals.php on line 6
+[11-Aug-2025 23:47:31 Europe/Berlin] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in F:\xampp\htdocs\bagit\api\get_my_deals.php on line 6
+[11-Aug-2025 23:48:02 Europe/Berlin] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in F:\xampp\htdocs\bagit\api\get_my_deals.php on line 6
+[13-Aug-2025 03:17:08 Europe/Berlin] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in F:\xampp\htdocs\bagit\api\get_my_deals.php on line 6
+[13-Aug-2025 03:24:31 Europe/Berlin] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in F:\xampp\htdocs\bagit\api\get_my_deals.php on line 6
+[14-Aug-2025 02:56:05 Europe/Berlin] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in F:\xampp\htdocs\bagit\api\get_my_deals.php on line 6
+[14-Aug-2025 03:13:43 Europe/Berlin] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in F:\xampp\htdocs\bagit\api\require_login.php on line 6
+[14-Aug-2025 03:24:01 Europe/Berlin] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in F:\xampp\htdocs\bagit\api\get_my_deals.php on line 6
+[14-Aug-2025 03:38:52 Europe/Berlin] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in F:\xampp\htdocs\bagit\api\get_my_deals.php on line 6
+[14-Aug-2025 03:39:11 Europe/Berlin] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in F:\xampp\htdocs\bagit\api\get_my_deals.php on line 6
+[15-Aug-2025 03:53:26 Europe/Berlin] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in F:\xampp\htdocs\bagit\api\get_my_deals.php on line 6
+[15-Aug-2025 03:59:57 Europe/Berlin] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in F:\xampp\htdocs\bagit\api\get_my_deals.php on line 6

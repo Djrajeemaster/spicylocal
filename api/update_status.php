@@ -1,8 +1,9 @@
 <?php
+ini_set('display_errors', 0);
 require_once __DIR__ . '/config/auth_check.php';
 require_once __DIR__ . '/config/db.php';
 header('Content-Type: application/json');
-session_start();
+if (session_status() !== PHP_SESSION_ACTIVE) { session_start(); }
 if (!isset($_SESSION['role']) || ($_SESSION['role']!=='admin' && $_SESSION['role']!=='super_admin' && $_SESSION['role']!=='moderator')) {
   http_response_code(403); echo json_encode(['ok'=>false,'error'=>'Unauthorized']); exit;
 }

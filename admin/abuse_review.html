@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+
+<html>
+<head><meta charset="utf-8"/><title>Abuse Review</title><link href="/bagit/global.css" rel="stylesheet"/><meta content="Abuse Review - Bagit deals and offers." name="description"/><meta content="Abuse Review" property="og:title"/><meta content="website" property="og:type"/></head>
+<body>
+<h1>Abuse Reports</h1>
+<div id="list"></div>
+<script>
+fetch('/bagit/api/admin_abuse_queue.php', {credentials:'include'}).then(r=>r.json()).then(j=>{
+  if(!j.ok) return;
+  document.getElementById('list').innerHTML = (j.items||[]).map(it => `
+    <div class="card">
+      <div><b>Deal #${it.deal_id}</b> — ${it.category}</div>
+      <div>By: ${it.reported_by_name||it.reported_by}</div>
+      <div>Note: ${it.note||''}</div>
+      <button data-id="${it.id}" data-a="dismiss">Dismiss</button>
+      <button data-id="${it.id}" data-a="flag">Flag Deal</button>
+    </div>
+  `).join('');
+  document.getElementById('list').onclick = e => {
+    var id = e.target && e.target.dataset && e.target.dataset.id;
+    var a = e.target && e.target.dataset && e.target.dataset.a;
+    if(!id || !a) return;
+    fetch('/bagit/api/admin_abuse_action.php', {method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify({id:id, action:a})})
+      .then(r=>r.json()).then(()=>location.reload());
+  };
+});
+</script>
+</body></html>

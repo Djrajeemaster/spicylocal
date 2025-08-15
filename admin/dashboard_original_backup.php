@@ -60,7 +60,25 @@ $deals = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <!DOCTYPE html>
 <html>
-<head>
+\1
+<!-- THEME BOOT: put before CSS to avoid FOUC -->
+<script>
+(function(){
+  try{
+    var ls = localStorage.getItem('sb_theme');
+    if(ls){
+      var t = JSON.parse(ls);
+      var c = t.brand || t.color;
+      if(c){
+        var r = document.documentElement;
+        r.style.setProperty('--sb-accent', c);
+        r.style.setProperty('--sb-primary', c);
+      }
+    }
+  }catch(e){}
+})();
+</script>
+
     <title>Admin Dashboard - SpicyBeats</title>
     <link rel="stylesheet" href="admin_styles.css">
     <style>
@@ -168,8 +186,8 @@ $deals = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <th>Title</th>
                 <th>User</th>
                 <th>Status</th>
-                <th>Votes</th>
-                <th>Feedback</th>
+                <th>Votes / Reports</th>
+                <th>Reports</th>
                 <th>Comments</th>
                 <th>Pin</th>
                 <th>Actions</th>

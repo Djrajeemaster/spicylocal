@@ -1,69 +1,69 @@
 <?php
-// API endpoint to submit abuse reports
-// Accepts POST parameters: deal_id, username, reason
-// Returns JSON with {success: true} or {success: false, error: '...'}
+// report_abuse.php — v7: matches abuse_reports table exactly (id, deal_id, reported_by, reason, created_at)
+@header('Content-Type: application/json; charset=utf-8');
+if (session_status() === PHP_SESSION_NONE) { @session_start(); }
+require_once __DIR__ . '/config/db.php';
 
-header('Content-Type: application/json');
-session_start();
-require_once '../config/db.php';
-
-// Ensure request method is POST
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    echo json_encode(['success' => false, 'error' => 'Invalid request method']);
-    exit;
-}
-
-// Retrieve POST variables
-// Support JSON payload or form data
-if (isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false) {
-    $json = file_get_contents('php://input');
-    $data = json_decode($json, true);
-    $deal_id = isset($data['deal_id']) ? intval($data['deal_id']) : 0;
-    // accept both 'username' and 'reporter' keys for compatibility
-    $username = isset($data['username']) ? trim($data['username']) : (isset($data['reporter']) ? trim($data['reporter']) : '');
-    $reason = isset($data['reason']) ? trim($data['reason']) : '';
-} else {
-    $deal_id = isset($_POST['deal_id']) ? intval($_POST['deal_id']) : 0;
-    $username = isset($_POST['username']) ? trim($_POST['username']) : (isset($_POST['reporter']) ? trim($_POST['reporter']) : '');
-    $reason = isset($_POST['reason']) ? trim($_POST['reason']) : '';
-}
-
-if ($deal_id <= 0 || !$username || !$reason) {
-    echo json_encode(['success' => false, 'error' => 'Missing required fields']);
-    exit;
+function respond($ok, $data=[]) {
+  echo json_encode(array_merge(['ok'=>$ok], $data), JSON_UNESCAPED_UNICODE);
+  exit;
 }
 
 try {
-    // Check if abuse_reports table exists. If not, we create it.
-    $pdo->exec(
-        "CREATE TABLE IF NOT EXISTS abuse_reports (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            deal_id INT NOT NULL,
-            reported_by VARCHAR(255) NOT NULL,
-            reason TEXT,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            reviewed TINYINT(1) DEFAULT 0
-        )"
-    );
+  // Parse input
+  $raw = file_get_contents('php://input');
+  $in = json_decode($raw ?: '[]', true);
+  if (!is_array($in)) $in = [];
+  foreach ($_POST as $k => $v) { $in[$k] = $v; }
 
-    // Prevent duplicate report by same user on same deal
-    $stmt = $pdo->prepare('SELECT COUNT(*) FROM abuse_reports WHERE deal_id = :deal_id AND reported_by = :username');
-    $stmt->execute([':deal_id' => $deal_id, ':username' => $username]);
-    $count = $stmt->fetchColumn();
-    if ($count > 0) {
-        echo json_encode(['success' => false, 'error' => 'You have already reported this deal']);
-        exit;
+  $deal_id = intval($in['deal_id'] ?? $in['dealId'] ?? 0);
+  $reason  = trim((string)($in['reason'] ?? $in['note'] ?? $in['text'] ?? ''));
+  $reported_by = isset($_SESSION['username']) ? trim((string)$_SESSION['username']) : '';
+
+  if ($deal_id <= 0 || $reason === '') {
+    http_response_code(400);
+    respond(false, ['error'=>'Invalid payload']);
+  }
+  if ($reported_by === '') {
+    http_response_code(401);
+    respond(false, ['error'=>'Unauthorized','code'=>'not_logged_in']);
+  }
+
+  // Truncate to DB-safe lengths
+  if (strlen($reason) > 255) $reason = substr($reason, 0, 255);
+  if (strlen($reported_by) > 128) $reported_by = substr($reported_by, 0, 128);
+
+  // One report per (deal_id, reported_by)
+  $pdo->beginTransaction();
+  $pdo->prepare("DELETE FROM abuse_reports WHERE deal_id=? AND reported_by=?")
+      ->execute([$deal_id, $reported_by]);
+  $pdo->prepare("INSERT INTO abuse_reports (deal_id, reported_by, reason, created_at) VALUES (?, ?, ?, NOW())")
+      ->execute([$deal_id, $reported_by, $reason]);
+  $pdo->commit();
+
+  // Update deals.reports if column exists
+  try {
+    $pdo->prepare("UPDATE deals d SET reports=(SELECT COUNT(*) FROM abuse_reports ar WHERE ar.deal_id=d.id) WHERE d.id=?")
+        ->execute([$deal_id]);
+  } catch (Throwable $e) {
+    // ignore if column doesn't exist
+  }
+
+  // Fetch updated counts if possible
+  $counts = ['upvotes'=>0,'downvotes'=>0,'reports'=>0];
+  try {
+    $st = $pdo->prepare("SELECT upvotes, downvotes, reports FROM deals WHERE id=? LIMIT 1");
+    $st->execute([$deal_id]);
+    if ($row = $st->fetch(PDO::FETCH_ASSOC)) {
+      $counts = $row;
     }
+  } catch (Throwable $e) {
+    // ignore if columns missing
+  }
 
-    // Insert report
-    $insert = $pdo->prepare('INSERT INTO abuse_reports (deal_id, reported_by, reason) VALUES (:deal_id, :username, :reason)');
-    $insert->execute([
-        ':deal_id' => $deal_id,
-        ':username' => $username,
-        ':reason' => $reason
-    ]);
-
-    echo json_encode(['success' => true]);
-} catch (PDOException $e) {
-    echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+  respond(true, ['deal_id'=>$deal_id,'counts'=>$counts]);
+} catch (Throwable $e) {
+  if (isset($pdo) && $pdo->inTransaction()) { $pdo->rollBack(); }
+  http_response_code(500);
+  respond(false, ['error'=>'Server error','detail'=>$e->getMessage()]);
 }
