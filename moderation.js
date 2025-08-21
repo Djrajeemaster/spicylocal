@@ -1,4 +1,6 @@
 
+function reportOk(r){ try{ return r && (r.success===true || r.status==='ok' || r.status==='success' || r.message==='ok' || r.error===false); }catch(e){ return false; } }
+
 // moderation.js — front-end queue viewer for reports
 (function(){
   const API_QUEUE = "/bagit/api/moderation_queue.php";       // expects JSON list of reports

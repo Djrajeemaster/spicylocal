@@ -3,6 +3,6 @@ session_start();
 session_unset();
 session_destroy();
 
-header("Location: login_unified.php");
+header("Location: login.php");
 exit;
 ?>

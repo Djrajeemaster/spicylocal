@@ -64,7 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
     logoutLink.addEventListener("click", (e) => {
       e.preventDefault();
       localStorage.clear();
-      window.location.href = "login_unified.php";
+      window.location.href = "login.php";
     });
   }
 

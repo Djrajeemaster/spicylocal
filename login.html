@@ -74,7 +74,7 @@
       const username = document.getElementById('username').value;
       const password = document.getElementById('password').value;
       // Replace with your actual login endpoint
-      fetch('api/auth/login.php', {
+      fetch('login.php', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({username, password})

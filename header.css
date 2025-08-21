@@ -142,3 +142,132 @@ html, body {
 
 /* Sticky bar: mobile only */
 @media (min-width:901px){ #sticky-bar, .deal-sticky{ display:none !important; } }
+
+/* Location control placed inline in the header nav */
+#nav-menu { display: flex; align-items: center; gap: 16px; }
+#nav-menu .nav-location-inline{ display:inline-flex; align-items:center; gap:6px; margin-left: 12px; }
+#nav-menu .sb-loc-select{ padding:3px 8px; border:1px solid #e5e7eb; border-radius:8px; background:#fff; }
+
+
+/* User icon avatar (guest & authed) */
+.avatar-btn{ display:flex; align-items:center; gap:8px; background:transparent; border:0; cursor:pointer; color:inherit; }
+.avatar{ display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:9999px; background:#0b1a4a; color:#fff; font-weight:700; }
+.avatar.guest{ background:#e5e7eb; color:#111; }
+.user-dropdown{ position:absolute; right:0; top:100%; margin-top:8px; background:#fff; color:#111; border:1px solid #e5e7eb; border-radius:12px; padding:8px; min-width:160px; box-shadow:0 6px 20px rgba(0,0,0,0.08); }
+.user-wrap{ position:relative; }
+.user-dropdown a{ display:block; padding:8px 10px; border-radius:8px; text-decoration:none; color:inherit; }
+.user-dropdown a:hover{ background:#f3f4f6; }
+
+
+
+/* Utility */
+.hidden{ display:none !important; }
+/* Make sure the dropdown overlays other elements */
+.user-dropdown{ z-index: 1000; }
+
+
+
+/* Ensure header sits above content */
+.global-header{ position: relative; z-index: 20; }
+.user-wrap{ position: relative; z-index: 30; }
+.user-dropdown{ position: absolute; right:0; top:100%; margin-top:8px; }
+/* Safety: hidden utility */
+.hidden{ display:none !important; }
+
+
+
+/* === Mockup alignment patch (non-destructive) ===============================
+   Goal: tighten spacing, align controls in one row, improve contrast/size,
+         and keep responsive behavior without rewriting markup.
+============================================================================= */
+
+/* Header container: tighter, flatter look */
+.global-header{
+  border-radius: 10px;
+  padding: 10px 12px;
+  gap: 12px;
+}
+
+/* Logo: slightly larger text, better vertical align */
+.global-header .logo{
+  gap:10px; font-size: 16px; line-height: 1; letter-spacing: .2px;
+}
+.global-header .logo-img{ width:28px; height:28px;}
+
+/* Nav: turn into a flexible tools row, allow wrapping on small screens */
+#nav-menu{
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+}
+
+/* Controls inside header (location, near-me, search, sort) */
+#nav-menu select, #nav-menu input[type="search"], #nav-menu input[type="text"]{
+  height:34px; padding: 6px 10px; border-radius: 10px; border:1px solid #e5e7eb;
+  outline: none; background:#fff; min-width: 140px;
+}
+#nav-menu .sb-loc-select{ min-width: 160px; }
+#nav-menu .near-me-chip{
+  display:inline-flex; align-items:center; gap:6px; height:32px; padding:0 10px;
+  border-radius: 9999px; border:1px solid #e5e7eb; background:#fff; cursor:pointer;
+  user-select:none;
+}
+#nav-menu .near-me-chip .dot{ width:8px; height:8px; border-radius:9999px; background:#10b981; }
+
+/* Sort: compact look (no separate "Sort" label needed) */
+#nav-menu .sort-wrap{ display:inline-flex; align-items:center; gap:6px; }
+#nav-menu .sort-wrap select{ min-width: 120px; }
+
+/* User area stays pinned to the right visually */
+.user-wrap{ margin-left:auto; }
+
+/* Dropdown polish */
+.user-dropdown{ box-shadow: 0 10px 30px rgba(0,0,0,.12); border-radius: 12px; }
+.user-dropdown a{ font-size: 14px; }
+
+/* Improve text contrast for secondary bits in header */
+#nav-menu .muted{ color:#4b5563; }
+
+/* Responsive: below 768px make controls wrap nicely, search full width */
+@media (max-width: 768px){
+  .global-header{ padding: 8px; gap:10px; }
+  #nav-menu{ gap:8px; }
+  #nav-menu input[type="search"], #nav-menu input[type="text"]{ flex:1 1 100%; min-width: 0; }
+  .user-wrap{ order: 3; width: 100%; display:flex; justify-content:flex-end; }
+  .global-header .logo{ font-size: 15px; }
+}
+
+/* Optional sticky header (uncomment if needed) */
+/*
+.global-header{ position: sticky; top: 0; }
+*/
+
+
+/* === Toolbar → mockup style ================================================ */
+.deals-toolbar{ max-width:1100px; margin:10px auto 16px; padding:0 12px; }
+.deals-toolbar .toolbar-row{ display:flex; align-items:center; gap:10px; }
+.deals-toolbar .search-wrap{
+  display:flex; align-items:center; gap:10px;
+  background:#fff; border:1px solid #e5e7eb; border-radius:28px;
+  padding:10px 14px; flex:1 1 auto;
+  box-shadow: 0 6px 20px rgba(0,0,0,.04);
+}
+.deals-toolbar .search-wrap input[type="search"],
+.deals-toolbar .search-wrap input[type="text"]{
+  border:0; outline:0; flex:1 1 auto; font-size:16px; background:transparent;
+}
+.deals-toolbar .search-wrap .loc-suffix{ display:inline-flex; gap:8px; align-items:center; padding-left:12px; margin-left:12px; border-left:1px solid #eee; }
+.deals-toolbar .search-wrap .loc-suffix select{ border:0; background:transparent; font-weight:600; }
+.deals-toolbar .search-wrap .icon{ width:18px; height:18px; opacity:.55; }
+
+/* Category pill row */
+.deals-toolbar .cats{ display:flex; gap:14px; align-items:center; margin-top:14px; flex-wrap:wrap; }
+.deals-toolbar .cats .chip{
+  padding:10px 14px; border-radius:12px; border:1px solid #e5e7eb; background:#fff; cursor:pointer;
+}
+.deals-toolbar .cats .chip.active{ background:#0b1a4a; color:#fff; border-color:#0b1a4a; }
+
+/* Mobile */
+@media (max-width: 768px){
+  .deals-toolbar{ padding:0 10px; }
+  .deals-toolbar .toolbar-row{ gap:8px; }
+  .deals-toolbar .search-wrap{ padding:8px 12px; }
+}

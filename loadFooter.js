@@ -9,6 +9,16 @@
       const mountPoint = document.getElementById('global-footer');
       if (mountPoint) mountPoint.innerHTML = html; else document.body.insertAdjacentHTML('beforeend', html);
       document.body.setAttribute(FOOT_ATTR, "1");
+
+      try{
+        const fr = await fetch('/bagit/api/feature_flags.php', {cache:'no-store'});
+        const flags = await fr.json();
+        if (!flags.leaderboard) {
+          const lb = document.querySelector('[data-ff="leaderboard"]');
+          if (lb && lb.parentNode) lb.parentNode.removeChild(lb);
+        }
+      }catch(_e){ /* ignore */ }
+    
     }catch(e){}
   }
   if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();

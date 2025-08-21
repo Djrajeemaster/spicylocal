@@ -1,26 +1,147 @@
+// deals_filters_v3.js — responsive: category chips on desktop, dropdown on mobile; grid removed
 (function(){
   'use strict';
-  function log(){ try{ console.log.apply(console, arguments); }catch(e){} }
-  function debounce(fn, wait){ var t=null; return function(){ var self=this, args=arguments; clearTimeout(t); t=setTimeout(function(){ fn.apply(self,args); }, wait||80); }; }
-  var safeBoot = debounce(function(){ try{ if (typeof window.boot === 'function') window.boot(); }catch(e){ log('[sb] boot error', e); } }, 80);
-  function ensureSB(){ if (!window.SB) window.SB = { page:1, limit:10, category:'', sort:'views', q:'' }; if (!window.__sbLimitSet) { window.SB.limit = 20; window.__sbLimitSet = true; } return window.SB; }
-  function applyGridState(bar){ var list=document.getElementById('deal-list'); var saved=null; try{ saved=localStorage.getItem('sb_grid'); }catch(e){} var wanted=(saved==='1'); if(list&&list.classList){ if(wanted) list.classList.add('grid-mode'); else list.classList.remove('grid-mode'); } var cb=bar?bar.querySelector('#sb-grid'):null; if(cb) cb.checked=wanted; }
-  function renderToolbar(){
-    var bar=document.getElementById('deals-toolbar');
-    if(!bar){ var sb=document.getElementById('search-bar'); bar=document.createElement('div'); bar.id='deals-toolbar'; bar.className='deals-toolbar'; if(sb&&sb.parentNode) sb.parentNode.insertBefore(bar, sb.nextElementSibling); else document.body.insertBefore(bar, document.body.firstChild); }
-    var SB=ensureSB();
-    var CATS=[{key:'',label:'All Deals'},{key:'Electronics',label:'Electronics'},{key:'Entertainment',label:'Entertainment'},{key:'Food',label:'Food'},{key:'Fashion',label:'Fashion'},{key:'Beauty',label:'Beauty'},{key:'Groceries',label:'Groceries'},{key:'Travel',label:'Travel'}];
-    var tabs='',i; for(i=0;i<CATS.length;i++){ var c=CATS[i]; var act=(String(SB.category||'')===c.key)?' active':''; tabs+='<button class="tab'+act+'" data-cat="'+c.key+'">'+c.label+'</button>'; }
-    var sorts=[{key:'views',label:'Newest'},{key:'heat',label:'Trending'}], j, opts=''; for(j=0;j<sorts.length;j++){ var s=sorts[j]; var sel=(String(SB.sort||'views')===s.key)?' selected':''; opts+='<option value="'+s.key+'"'+sel+'>'+s.label+'</option>'; }
-    var gridChecked=''; try{ gridChecked=(localStorage.getItem('sb_grid')==='1')?' checked':''; }catch(e){}
-    bar.innerHTML='<div class="tabs">'+tabs+'</div><div class="spacer"></div><label class="sort">Sort <select id="sb-sort">'+opts+'</select></label><label class="grid-tog"><input type="checkbox" id="sb-grid"'+gridChecked+'> Grid</label>';
-    if(bar.__wired){ applyGridState(bar); return; }
-    bar.__wired=true;
-    bar.addEventListener('click', function(evt){ var t=evt.target; while(t&&t!==bar&&(!t.classList||!t.classList.contains('tab'))){ t=t.parentNode; } if(!t||t===bar) return; var SB=ensureSB(); SB.category=t.getAttribute('data-cat')||''; SB.page=1; renderToolbar(); safeBoot(); });
-    var sel=bar.querySelector('#sb-sort'); if(sel){ sel.addEventListener('change', function(){ var SB=ensureSB(); SB.sort=sel.value||'views'; SB.page=1; safeBoot(); }); }
-    var grid=bar.querySelector('#sb-grid'); if(grid){ grid.addEventListener('change', function(){ var list=document.getElementById('deal-list'); if(list&&list.classList){ if(grid.checked) list.classList.add('grid-mode'); else list.classList.remove('grid-mode'); } try{ localStorage.setItem('sb_grid', grid.checked?'1':'0'); }catch(e){} }); }
-    applyGridState(bar);
+
+  function SBget(){
+    if (!window.SB) window.SB = { page:1, limit:24, category:'', sort:'heat', q:'' };
+    if (typeof window.SB.limit !== 'number' || window.SB.limit <= 0) window.SB.limit = 24;
+    if (!('category' in window.SB)) window.SB.category = '';
+    if (!('sort' in window.SB)) window.SB.sort = 'heat';
+    return window.SB;
   }
-  function init(){ renderToolbar(); }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
+
+  function forceRefetch(){
+    var SB = SBget();
+    SB.page = 1; SB.__append = false; SB.hasMore = true;
+    window.__sbLastQS = null; window.__sbFetchBusy = false;
+    try{ if (typeof window.boot==='function') window.boot(); else if (typeof window.safeBoot==='function') window.safeBoot(); }catch(e){}
+  }
+
+  var CATS = [
+    {key:'', label:'All Deals'},
+    {key:'Electronics', label:'Electronics'},
+    {key:'Entertainment', label:'Entertainment'},
+    {key:'Food', label:'Food'},
+    {key:'Fashion', label:'Fashion'},
+    {key:'Beauty', label:'Beauty'},
+    {key:'Groceries', label:'Groceries'},
+    {key:'Travel', label:'Travel'}
+  ];
+
+  var SORTS = [
+    {key:'new',   label:'Newest'},
+    {key:'heat',  label:'Top'},
+    {key:'price', label:'Price (Low → High)'}
+  ];
+
+  function isMobile(){ return window.matchMedia && window.matchMedia('(max-width: 640px)').matches; }
+
+  function render(){
+    var bar = document.getElementById('deals-toolbar');
+    if (!bar) return;
+    var SB = SBget();
+
+    var sortsOpts = SORTS.map(function(s){
+      var sel = (String(SB.sort||'heat') === s.key) ? ' selected' : '';
+      return '<option value="'+s.key+'"'+sel+'>'+s.label+'</option>';
+    }).join('');
+
+    var catsMarkup;
+    if (isMobile()){
+      // compact dropdown for category on small screens
+      var catOptions = CATS.map(function(c){
+        var sel = (String(SB.category||'') === c.key) ? ' selected' : '';
+        return '<option value="'+c.key+'"'+sel+'>'+c.label+'</option>';
+      }).join('');
+      catsMarkup =
+        '<div class="filter-row">' +
+          '<label class="lbl">Category</label>' +
+          '<select id="sb-cat" class="select full">'+catOptions+'</select>' +
+        '</div>';
+    } else {
+      // desktop: pill tabs
+      var tabs = CATS.map(function(c){
+        var active = (String(SB.category||'') === c.key) ? ' is-active' : '';
+        return '<button type="button" class="tab'+active+'" data-cat="'+c.key+'">'+c.label+'</button>';
+      }).join('');
+      catsMarkup = '<div class="tabs">'+tabs+'</div>';
+    }
+
+    bar.innerHTML =
+      catsMarkup +
+      '<div class="sort"><label>Sort ' +
+      '<select id="sb-sort">'+sortsOpts+'</select></label>' +
+      '</div>';
+
+    // minimal styles for mobile select
+    if (!document.getElementById('sb-filters-inline-style')){
+      var st = document.createElement('style');
+      st.id = 'sb-filters-inline-style';
+      st.textContent = '' +
+      '.filter-row{display:flex;gap:.5rem;align-items:center;margin:.25rem 0 .5rem}' +
+      '.filter-row .lbl{font-size:.875rem;color:#374151}' +
+      '.select.full{width:100%;max-width:16rem;padding:.35rem .5rem;border:1px solid #d1d5db;border-radius:.5rem;background:#fff}' +
+      '.tabs{display:flex;flex-wrap:wrap;gap:.5rem;margin:.25rem 0 .5rem}' +
+      '.tab{padding:.35rem .6rem;border:1px solid #e5e7eb;border-radius:999px;background:#fff;font-size:.875rem}' +
+      '.tab.is-active{background:#111827;color:#fff;border-color:#111827}' +
+      '.sort{margin:.25rem 0 .5rem}';
+      document.head.appendChild(st);
+    }
+  }
+
+  function bind(){
+    var bar = document.getElementById('deals-toolbar');
+    if (!bar) return;
+    // clear previous wiring flag so we can re-bind after re-render on resize
+    if (bar.__wired) bar.__wired = false;
+    if (bar.__wired) return;
+    bar.__wired = true;
+
+    // tabs (desktop)
+    bar.addEventListener('click', function(ev){
+      var t = ev.target; if (!t || !t.matches('.tab')) return;
+      var SB = SBget();
+      var cat = t.getAttribute('data-cat') || '';
+      if (String(SB.category||'') === String(cat)) return;
+      SB.category = cat; SB.page = 1;
+      bar.querySelectorAll('.tab').forEach(function(x){ x.classList.toggle('is-active', x === t); });
+      forceRefetch();
+    });
+
+    // category select (mobile)
+    var catSel = bar.querySelector('#sb-cat');
+    if (catSel){
+      catSel.addEventListener('change', function(){
+        var SB = SBget();
+        var v = catSel.value || '';
+        if (String(SB.category||'') === String(v)) return;
+        SB.category = v; SB.page = 1;
+        forceRefetch();
+      });
+    }
+
+    // sort select
+    var sel = bar.querySelector('#sb-sort');
+    if (sel){
+      sel.addEventListener('change', function(){
+        var SB = SBget();
+        var v = sel.value || 'heat';
+        if (SB.sort === v) return;
+        SB.sort = v; SB.page = 1;
+        forceRefetch();
+      });
+    }
+  }
+
+  function init(){ render(); bind(); }
+
+  // re-render on viewport change (mobile <-> desktop)
+  var mq = (window.matchMedia && window.matchMedia('(max-width: 640px)')) || null;
+  if (mq){
+    // addEventListener is supported in modern browsers; fallback to addListener
+    (mq.addEventListener || mq.addListener).call(mq,'change',function(){ init(); });
+  }
+  window.addEventListener('resize', function(){ init(); });
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();

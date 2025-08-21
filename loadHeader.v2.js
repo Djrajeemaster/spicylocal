@@ -38,7 +38,7 @@
     } else {
       document.body.insertAdjacentHTML("afterbegin", html);
     }
-    document.body.setAttribute(HEADER_MOUNTED_ATTR, "1");
+    document.body.setAttribute(HEADER_MOUNTED_ATTR, "1"); window.__SB_HEADER_MOUNTED__=true;
     sanitizeGlobalHeader();
   }
 
@@ -48,7 +48,7 @@
     return p.endsWith('/login.html')
         || p.endsWith('/signup.html')
         || p.endsWith('/register.php')
-        || p.endsWith('/login_unified.php');
+        || p.endsWith('/login.php');
   }
 
   function normalizeHeaderDom(){
@@ -79,7 +79,7 @@
       const isLoginLink = txt === 'login'
         || a.classList.contains('login-link')
         || href.endsWith('login.html')
-        || href.endsWith('login_unified.php');
+        || href.endsWith('login.php');
       if (!insideHeader && isLoginLink) a.remove();
     });
     // Remove legacy dropdowns not in header
@@ -88,30 +88,45 @@
     });
   }
 
-  function buildGuestNav() {
-    const nav = byId('nav-menu');
+  
+function buildGuestNav() {
+    const nav = document.getElementById('nav-menu');
     if (!nav) return;
     nav.innerHTML = [
-      `<a href="${BASE}index.html" class="nav-link nav-home">${t('home')==='home'?'Home':t('home')}</a>`,
-      isAuthPage() ? '' : `<a href="${BASE}login_unified.php" class="nav-link login-link">Login</a>`,
-      isAuthPage() ? '' : `<a href="${BASE}signup.html" class="nav-link signup-link">Signup</a>`
-    ].filter(Boolean).join('');
-    const um = byId('user-menu');
-    if (um) um.classList.add('hidden');
+      `<a href="${BASE}index.html" class="nav-link nav-home">Home</a>`
+    ].join('');
+
+    const um = document.getElementById('user-menu');
+    if (um) {
+      um.classList.remove('hidden');
+      const dd = document.getElementById('user-dropdown');
+      if (dd) dd.innerHTML = [
+        `<a href="${BASE}login.php" id="dd-login" role="menuitem">Login</a>`,
+        `<a href="${BASE}signup.html" id="dd-signup" role="menuitem">Signup</a>`
+      ].join('');
+      const av = document.getElementById('user-avatar');
+      if (av) { av.textContent = '👤'; av.classList.add('guest'); }
+    }
   }
 
-  function buildAuthedNav(me) {
+  
+function buildAuthedNav(me) {
     const nav = byId('nav-menu');
     if (!nav) return;
 
     const links = [];
-    links.push(`<a href="${BASE}index.html" class="nav-link nav-home">${t('home')==='home'?'Home':t('home')}</a>`);
-    // Post Deal (skip if muted)
+    // Optional Home (keep for now)
+    links.push(`<a href="${BASE}index.html" class="nav-link nav-home">Home</a>`);
+
+    // + Post Deal (if not muted)
     const isMuted = localStorage.getItem('is_muted') === '1';
-    if (!isMuted) links.push(`<a href="${BASE}submit_deal.html">${t('post_deal')==='post_deal'?'Post Deal':t('post_deal')}</a>`);
-    // Leaderboard (feature flag)
-    if (featureFlags.leaderboard) links.push(`<a href="${BASE}leaderboard.html">${t('leaderboard')==='leaderboard'?'Leaderboard':t('leaderboard')}</a>`);
+    if (!isMuted) links.push(`<a href="${BASE}submit_deal.html" class="nav-link nav-post">+&nbsp;Post Deal</a>`);
+
+    // Alerts shortcut (placeholder to smart alerts page)
+    links.push(`<a href="${BASE}smart_alerts.html" class="nav-link nav-alerts">○&nbsp;Alerts</a>`);
+
     nav.innerHTML = links.join('');
+
 
     // user menu visible
     const um = byId('user-menu');
@@ -153,6 +168,8 @@
     // 1) Fetch and mount header (absolute to avoid /admin/ path issues)
     const html = await fetch(BASE + "header.html", { cache: "no-store" }).then(r => r.text());
     mountHeader(html);
+    __installGlobalUserMenuDelegate();
+    __wireUserDropdownUniversal();
 
     // 2) Load feature flags & translations (best-effort)
     try {
@@ -189,7 +206,7 @@
       normalizeHeaderDom();
       sanitizeGlobalHeader();
       cleanupStrays();
-      buildMiniHeaderIfAuthPage();
+      buildMiniHeaderIfAuthPage(); __wireUserDropdown();
 
       // Dropdown wiring (inside header)
       (function wireDropdown(){
@@ -204,13 +221,13 @@
           if (withinBtn) {
             e.preventDefault();
             e.stopPropagation();
-            dd.classList.toggle('hidden');
+            if(dd.style.display==='none' || dd.classList.contains('hidden')){ dd.classList.remove('hidden'); dd.style.display='block'; } else { dd.style.display='none'; }
           } else if (!withinDd) {
-            dd.classList.add('hidden');
+            dd.style.display='none';
           }
         });
         document.addEventListener('click', (e)=>{
-          if (!header.contains(e.target)) dd.classList.add('hidden');
+          if (!header.contains(e.target)) dd.style.display='none';
         });
       })();
 
@@ -221,19 +238,76 @@
         try { await fetch(BASE + 'api/auth/logout.php', {method:'POST', credentials:'same-origin'}); } catch {}
         localStorage.clear();
         sessionStorage.clear();
-        location.replace(BASE + 'login_unified.php');
+        location.replace(BASE + 'login.php');
       });
 
     }catch(_){
       buildGuestNav();
       normalizeHeaderDom();
       cleanupStrays();
-      buildMiniHeaderIfAuthPage();
+      buildMiniHeaderIfAuthPage(); __wireUserDropdown();
     }
   }
 
-  // --- Boot ------------------------------------------------------------------
+  
+  // --- Global delegated user menu handler (survives re-mounts) --------------
+  function __installGlobalUserMenuDelegate(){
+    if (window.__SB_USER_MENU_DELEGATE__) return;
+    window.__SB_USER_MENU_DELEGATE__ = true;
+
+    document.addEventListener('click', function(e){
+      const um = document.getElementById('user-menu');
+      const btn = document.getElementById('user-menu-toggle');
+      const dd  = document.getElementById('user-dropdown');
+      if(!um || !btn || !dd) return;
+
+      const target = e.target;
+      const withinBtn = btn.contains(target);
+      const withinDd  = dd.contains(target);
+      const withinUm  = um.contains(target);
+
+      if (withinBtn){
+        e.preventDefault();
+        e.stopPropagation();
+        dd.classList.toggle('hidden');
+        btn.setAttribute('aria-expanded', dd.classList.contains('hidden') ? 'false':'true');
+        return;
+      }
+
+      // Clicked outside entire user menu -> close
+      if (!withinUm){
+        dd.classList.add('hidden');
+      }
+    }, true);
+
+    // Close on ESC no matter what
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape'){
+        const dd = document.getElementById('user-dropdown');
+        if (dd) dd.classList.add('hidden');
+      }
+    });
+  }
+// --- Boot ------------------------------------------------------------------
+  
+function __wireUserDropdown(){
+  try{
+    const btn = document.getElementById('user-menu-toggle');
+    const dd = document.getElementById('user-dropdown');
+    if(!btn || !dd) return;
+    btn.addEventListener('click', (e)=>{
+      e.preventDefault();
+      if(dd.style.display==='none' || dd.classList.contains('hidden')){ dd.classList.remove('hidden'); dd.style.display='block'; } else { dd.style.display='none'; }
+    });
+    document.addEventListener('click', (e)=>{
+      const um = document.getElementById('user-menu');
+      if(um && !um.contains(e.target)) dd.style.display='none';
+    });
+  }catch{}
+}
+__installGlobalUserMenuDelegate();
   document.addEventListener('DOMContentLoaded', init);
+
   window.addEventListener('pageshow', (e) => { if (e.persisted) __refreshHeaderAuth(); });
 })();
 
@@ -255,3 +329,37 @@
 })();
 
 console.log("[SB] loadHeader.v2.js active (ABS paths)");
+
+
+  // --- Universal dropdown wiring (guest or authed) --------------------------
+  function __wireUserDropdownUniversal(){
+    try{
+      const btn = document.getElementById('user-menu-toggle');
+      const dd  = document.getElementById('user-dropdown');
+      const um  = document.getElementById('user-menu');
+      if(!btn || !dd || !um) return;
+
+      // Avoid double-binding
+      if(btn.getAttribute('data-dd-wired') === '1') return;
+      btn.setAttribute('data-dd-wired','1');
+
+      btn.addEventListener('click', (e)=>{
+        e.preventDefault();
+        e.stopPropagation();
+        if(dd.style.display==='none' || dd.classList.contains('hidden')){ dd.classList.remove('hidden'); dd.style.display='block'; } else { dd.style.display='none'; }
+        btn.setAttribute('aria-expanded', dd.classList.contains('hidden') ? 'false' : 'true');
+      });
+
+      // Close when clicking outside
+      document.addEventListener('mousedown', (e)=>{
+        if(!um.contains(e.target)) dd.style.display='none';
+      });
+
+      // Close on Escape
+      btn.addEventListener('keydown', (e)=>{
+        if(e.key === 'Escape') dd.style.display='none';
+        if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); if(dd.style.display==='none' || dd.classList.contains('hidden')){ dd.classList.remove('hidden'); dd.style.display='block'; } else { dd.style.display='none'; } }
+      });
+    }catch{}
+  }
+

@@ -683,3 +683,6 @@ body.dark #deal-list .heat { background: #2a2a2a; }
 
 /* Sticky bar: mobile only */
 @media (min-width:901px){ #sticky-bar, .deal-sticky{ display:none !important; } }
+
+/* image placeholder style */
+.deal-thumb img.thumb--placeholder{object-fit:contain;background:#f9fafb}

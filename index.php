@@ -26,10 +26,12 @@
 <link href="theme.css" rel="stylesheet"/>
 
 <body>
+  <?php include 'header.html'; ?>
+
 <!-- Global Header Loader -->
 <div id="global-header"></div>
-<link href="/bagit/header.css?v=mk2" rel="stylesheet">
-<script defer src="/bagit/loadHeader.js?v=mk2"></script>  
+<link href="header.css" rel="stylesheet"/>
+<script defer="" src="loadHeader.js"></script>
 <!-- Search Bar: visible below the global header -->
 <div class="search-container" id="search-bar">
 

@@ -1,124 +1,98 @@
 <!DOCTYPE html>
-
 <html lang="en">
-<!-- THEME BOOT: put before CSS to avoid FOUC -->
-<script>
-(function(){
-  try{
-    var ls = localStorage.getItem('sb_theme');
-    if(ls){
-      var t = JSON.parse(ls);
-      var c = t.brand || t.color;
-      if(c){
-        var r = document.documentElement;
-        r.style.setProperty('--sb-accent', c);
-        r.style.setProperty('--sb-primary', c);
-      }
-    }
-  }catch(e){}
-})();
-</script>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>SpicyBeats – Signup</title>
-<link href="style.css" rel="stylesheet"/>
-<style>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign Up - SpicyBeats</title>
+  <link rel="stylesheet" href="global.css" />
+  <style>
     body {
+      font-family: Arial, sans-serif;
       background: #f9f9f9;
-      font-family: 'Segoe UI', sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
+      color: #030849;
       margin: 0;
+      padding: 0;
     }
-    .signup-container {
-      background: #fff;
+    .container {
+      max-width: 420px;
+      margin: 40px auto;
       padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-      max-width: 400px;
-      width: 100%;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-    h2 {
+    .header {
       text-align: center;
-      color: #e91e63;
       margin-bottom: 1.5rem;
     }
-    label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-weight: 500;
+    .header img {
+      height: 48px;
+      cursor: pointer;
     }
-    input {
-      width: 100%;
-      padding: 0.6rem;
+    h2 {
+      font-size: 1.5rem;
+      text-align: center;
       margin-bottom: 1rem;
+    }
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin: 0.5rem 0 1rem;
       border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 1rem;
+      border-radius: 4px;
     }
     button {
-      background-color: #e91e63;
-      color: white;
-      padding: 0.75rem;
       width: 100%;
+      background-color: #030849;
+      color: white;
+      padding: 12px;
       border: none;
-      border-radius: 6px;
+      border-radius: 4px;
       font-size: 1rem;
       cursor: pointer;
     }
     button:hover {
-      background-color: #d81b60;
+      opacity: 0.95;
     }
-    .error {
-      color: red;
+    .terms {
       font-size: 0.9rem;
-      margin-bottom: 1rem;
+      margin: 1rem 0;
     }
-    .login-link {
+    .footer {
       text-align: center;
-      margin-top: 1rem;
+      margin-top: 2rem;
+      font-size: 0.9rem;
+    }
+    .footer a {
+      color: #030849;
+      text-decoration: none;
+      margin: 0 8px;
     }
   </style>
-
+</head>
 <body>
-<!-- Global Header Loader -->
-<div id="global-header"></div>
-<link href="global.css" rel="stylesheet"/>
-<script defer="" src="loadHeader.js"></script>
-<div class="signup-container">
-<h2>Create Your Account</h2>
-<form action="register.php" id="signup-form" method="POST">
-<label for="username">Username</label>
-<input id="username" name="username" required="" type="text"/>
-<label for="password">Password</label>
-<input id="password" name="password" required="" type="password"/>
-<label for="password">Password</label>
-<input id="password" name="password" required="" type="password"/>
-<label for="confirm-password">Confirm Password</label>
-<input id="confirm-password" required="" type="password"/>
-<div class="error" id="error-message"></div>
-<button type="submit">Sign Up</button>
-</form>
-<div class="login-link">
-    Already have an account? <a href="login_unified.php">Login</a>
-</div>
-</div>
-<script>
-  document.getElementById("signup-form").addEventListener("submit", function (e) {
-    const pwd = document.getElementById("password").value;
-    const confirm = document.getElementById("confirm-password").value;
-    const errorMsg = document.getElementById("error-message");
-
-    if (pwd !== confirm) {
-      e.preventDefault();
-      errorMsg.textContent = "Passwords do not match.";
-    } else {
-      errorMsg.textContent = "";
-    }
-  });
-</script>
-<script src="footer.js"></script>
+  <div class="container">
+    <div class="header">
+      <a href="index.html"><img src="assets/logo.png" alt="SpicyBeats" /></a>
+    </div>
+    <h2>Create an Account</h2>
+    <form action="register.php" method="POST">
+      <input type="text" name="username" placeholder="Username" required />
+      <input type="email" name="email" placeholder="Email" required />
+      <input type="password" name="password" placeholder="Password" required />
+      <input type="password" name="confirm_password" placeholder="Confirm Password" required />
+      <div class="terms">
+        <input type="checkbox" id="terms" name="terms" required />
+        <label for="terms">I agree to the <a href="terms.html" target="_blank">terms and conditions</a></label>
+      </div>
+      <button type="submit">Register</button>
+    </form>
+    <div class="footer">
+      Already have an account? <a href="login.php">Login</a>
+      <div><a href="support.html">Support</a> | <a href="terms.html">Terms</a></div>
+    </div>
+  </div>
 </body>
 </html>

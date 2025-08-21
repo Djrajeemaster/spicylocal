@@ -2,69 +2,119 @@
 session_start();
 require_once __DIR__ . '/config/db.php';
 
-if (isset($_SESSION['user_id'])) {
-    if ($_SESSION['role'] === 'admin') {
-        header('Location: admin/dashboard.php');
-    } else {
-        header('Location: index.html');
-    }
-    exit;
-}
+// optional but recommended
+$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-$error = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim(filter_input(INPUT_POST, 'username', FILTER_SANITIZE_STRING));
-    $password = trim($_POST['password'] ?? '');
-    if ($username && $password) {
-        $stmt = $pdo->prepare('SELECT id, password, role FROM users WHERE username = ?');
-        $stmt->execute([$username]);
-        $user = $stmt->fetch();
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $input    = trim($_POST['username_or_email'] ?? '');
+    $password = $_POST['password'] ?? '';
+
+    if ($input === '' || $password === '') {
+        $error = "All fields are required.";
+    } else {
+        // ✅ use two placeholders; no HY093
+        $sql  = "SELECT id, username, role, password
+                 FROM users
+                 WHERE username = :u OR email = :e
+                 LIMIT 1";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([':u' => $input, ':e' => $input]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
         if ($user && password_verify($password, $user['password'])) {
-            session_regenerate_id(true);
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['role'] = $user['role'];
-            $_SESSION['username'] = $username;
-            if ($user['role'] === 'admin') {
-                $_SESSION['admin_logged_in'] = true;
-                header('Location: admin/dashboard.php');
-            } else {
-                header('Location: index.html');
-            }
+            $_SESSION['user_id']  = $user['id'];
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['role']     = $user['role'];
+            header("Location: index.html"); // keep your known-good relative redirect
             exit;
         } else {
-            $error = 'Invalid credentials';
+            $error = "Invalid login credentials.";
         }
-    } else {
-        $error = 'All fields are required';
     }
 }
 ?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Login</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - SpicyBeats</title>
+  <link rel="stylesheet" href="global.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    .container {
+      max-width: 400px;
+      margin: 80px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      color: #030849;
+      text-align: center;
+    }
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #030849;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #02063a;
+    }
+    .form-footer {
+      text-align: center;
+      margin-top: 15px;
+    }
+    .form-footer a {
+      color: #030849;
+      text-decoration: none;
+    }
+    .error {
+      color: red;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+  </style>
 </head>
 <body>
-<div class="auth-container">
-    <h2>User Login</h2>
-    <?php if ($error): ?>
-        <p class="error"><?= htmlspecialchars($error) ?></p>
+  <?php include("components/minimal_header.php"); ?>
+  <div class="container">
+    <h2>Login</h2>
+    <?php if (!empty($error)): ?>
+      <div class="error"><?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
-    <form method="post" class="auth-form">
-        <label>Username
-            <input type="text" name="username" required>
-        </label>
-        <label>Password
-            <input type="password" name="password" required>
-        </label>
-        <button type="submit" class="button">Login</button>
+    <form action="login.php" method="POST">
+      <input type="text" name="username_or_email" placeholder="Username or Email" required />
+      <input type="password" name="password" placeholder="Password" required />
+      <button type="submit">Login</button>
+      <p class="mt-3 text-sm text-center">
+        Don't have an account? <a href="signup.html" class="text-blue-600 hover:underline">Register here</a>
+      </p>
     </form>
-    <p class="auth-switch"><a href="register.php">Need an account? Sign up</a></p>
-</div>
+    <div class="form-footer">
+      <a href="forgot_password.php">Forgot Password?</a>
+    </div>
+  </div>
+  <?php include("components/footer.php"); ?>
 </body>
 </html>

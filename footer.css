@@ -10,3 +10,15 @@
 
 /* Sticky bar: mobile only */
 @media (min-width:901px){ #sticky-bar, .deal-sticky{ display:none !important; } }
+
+
+footer.footer {
+  width: 100%;
+  max-width: 100%;
+  padding: 1rem 0;
+  text-align: center;
+  background: transparent;
+  position: relative;
+  bottom: 0;
+  clear: both;
+}

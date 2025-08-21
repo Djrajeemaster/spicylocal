@@ -1,18 +1,123 @@
-<div class="hidden" id="chat-widget">
-<div class="chat-header">
-<select id="chat-room-select">
-<option value="Hot Deals">🔥 Hot Deals</option>
-<option value="Food &amp; Offers">🍔 Food &amp; Offers</option>
-<option value="General Chat">💬 General Chat</option>
-</select>
-<div class="chat-controls">
-<button id="toggle-fullscreen" type="button">⛶</button>
-<button id="close-chat" type="button">✖</button>
+<!doctype html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>spicybeats ai</title>
+<style>
+  :root{--bg:#0b1220;--panel:#0f172a;--text:#e2e8f0;--muted:#94a3b8;--user:#2563eb;--bot:#0b1220;--radius:16px;
+        --g1:#ff7a18;--g2:#af002d;--g3:#319197;}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);
+  font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;display:flex;min-height:100vh;
+  align-items:center;justify-content:center}
+  .wrap{width:min(100%,960px);padding:24px}
+  .brand{display:flex;align-items:flex-end;gap:12px;margin:6px 0 18px}
+  .logo{font-weight:900;letter-spacing:.5px;line-height:1;font-size:clamp(28px,6vw,48px);
+    background:linear-gradient(90deg,var(--g1),var(--g2),var(--g3));background-size:200% 100%;
+    -webkit-background-clip:text;background-clip:text;color:transparent;animation:move 8s linear infinite}
+  .logo small{display:block;font-weight:500;font-size:12px;color:var(--muted);letter-spacing:1.2px;margin-top:4px}
+  @keyframes move{0%{background-position:0%}100%{background-position:200%}}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220);border:1px solid #1f2937;border-radius:24px;overflow:hidden;
+    box-shadow:0 20px 60px #0006,inset 0 1px 0 #fff2}
+  .toolbar{display:flex;gap:8px;align-items:center;padding:12px 14px;border-bottom:1px solid #1f2937}
+  .seg{background:#0b1220;border:1px solid #1f2937;border-radius:999px;display:inline-flex;padding:3px}
+  .seg button{background:transparent;color:#cbd5e1;border:0;padding:8px 12px;border-radius:999px;cursor:pointer}
+  .seg button.active{background:#1f2937;color:#e5e7eb}
+  .log{height:60vh;overflow:auto;padding:20px;display:flex;flex-direction:column;gap:12px}
+  .msg{max-width:75%;padding:12px 14px;border-radius:18px;white-space:pre-wrap;word-wrap:break-word;animation:pop .18s both}
+  .msg.user{align-self:flex-end;background:linear-gradient(180deg,#1d4ed8,#1e40af);color:white;border-bottom-right-radius:6px}
+  .msg.bot{align-self:flex-start;background:#0b1220;border:1px solid #1f2a44;color:#dbeafe;border-bottom-left-radius:6px}
+  @keyframes pop{from{transform:scale(.98);opacity:0}to{transform:scale(1);opacity:1}}
+  .composer{display:flex;gap:10px;padding:14px;border-top:1px solid #1f2937;background:linear-gradient(180deg,#0b1220,#0a1020)}
+  .composer input{flex:1;border:1px solid #1f2937;background:#0b1220;color:var(--text);padding:12px;border-radius:var(--radius);outline:none}
+  .composer button{padding:12px 16px;border-radius:var(--radius);border:1px solid #1f2937;background:#111827;color:#e5e7eb;cursor:pointer}
+  .composer button:hover{transform:translateY(-1px);background:#0f172a}
+</style>
+
+<div class="wrap">
+  <div class="brand">
+    <div class="logo">spicybeats ai<small>local • private • fast</small></div>
+  </div>
+
+  <div class="card">
+    <div class="toolbar">
+      <div class="seg" id="modeSeg">
+        <button data-mode="chat" class="active">Chat (EN)</button>
+        <button data-mode="te">Translate → Telugu</button>
+      </div>
+    </div>
+
+    <div id="log" class="log"></div>
+
+    <form class="composer" onsubmit="event.preventDefault(); send(this.q.value); this.q.value='';">
+      <input name="q" id="q" placeholder="Ask..." autocomplete="off" />
+      <button id="sendBtn" type="submit">Send</button>
+      <button id="stopBtn" type="button" onclick="abortStream()">Stop</button>
+    </form>
+  </div>
 </div>
-</div>
-<div class="chat-messages" id="chat-messages"></div>
-<div class="chat-input">
-<input id="chat-message-input" placeholder="Type your message..." type="text"/>
-<button id="chat-send-btn" type="button">Send</button>
-</div>
-</div>
+
+<script>
+const STREAM_URL = '/bagit/api/ai_stream.php';
+const CHAT_URL   = '/bagit/api/ai_chat.php';
+let ctrl, MODE = 'chat';
+
+document.querySelectorAll('#modeSeg button').forEach(b=>{
+  b.onclick = () => {
+    MODE = b.dataset.mode;
+    document.querySelectorAll('#modeSeg button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById('q').placeholder = (MODE==='te' ? 'Type English; will output Telugu…' : 'Ask…');
+  };
+});
+
+const logEl = document.getElementById('log');
+const qEl = document.getElementById('q');
+function addMsg(role, text=''){
+  const el = document.createElement('div');
+  el.className = 'msg ' + role;
+  el.textContent = text;
+  logEl.appendChild(el);
+  logEl.scrollTop = logEl.scrollHeight;
+  return el;
+}
+
+async function send(text){
+  const q = (text ?? '').trim(); if(!q) return;
+  const sendBtn = document.getElementById('sendBtn'); sendBtn.disabled = true;
+
+  addMsg('user', q);
+  const bot = addMsg('bot', '');
+
+  ctrl = new AbortController();
+  const form = new URLSearchParams();
+  form.append('q', q);
+  form.append('mode', MODE); // 'chat' or 'te'
+  try{
+    const r = await fetch(STREAM_URL, { method:'POST', body:form, signal:ctrl.signal });
+    if(!r.ok || !r.body) throw new Error('stream failed');
+    const reader = r.body.getReader(); const dec = new TextDecoder();
+    while(true){
+      const {value, done} = await reader.read();
+      if(done) break;
+      bot.textContent += dec.decode(value);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+  } catch(e){
+    // fallback
+    const r = await fetch(CHAT_URL, {
+      method:'POST',
+      headers:{'Content-Type':'application/x-www-form-urlencoded'},
+      body: new URLSearchParams({ q, mode: MODE })
+    });
+    const {reply} = await r.json();
+    bot.textContent = reply || '(no reply)';
+  } finally {
+    sendBtn.disabled = false;
+    qEl.focus();
+  }
+}
+function abortStream(){ if (ctrl) ctrl.abort(); }
+
+// greet
+addMsg('bot','Hello! How can I assist you today?');
+qEl.addEventListener('keydown', e => { if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); send(qEl.value); qEl.value=''; }});
+</script>

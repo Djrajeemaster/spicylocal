@@ -1,223 +1,137 @@
+/* === Footer full-width + plain counters (append-only override) — 2025-08-15 === */
+/* Drop this LAST. No HTML changes needed. */
 
-/* Cards enhancement (non-destructive) */
-.metrics--static, .metrics--static * { pointer-events: none; cursor: default; }
-.metric { display:inline-flex !important; align-items:center !important; gap:4px !important; padding:0 !important; background:transparent !important; border:none !important; box-shadow:none !important; }
-.heat-badge { position:absolute; right:6px; top:6px; width:44px; height:44px; border-radius:50%;
-  display:flex; align-items:center; justify-content:center; font-weight:700; color:#fff;
-  text-shadow:0 1px 2px rgba(0,0,0,.25); box-shadow:0 1px 3px rgba(0,0,0,.12) inset; }
-.heat-badge span { font-size:13px; }
-
-.deal-thumb { position: relative; width: 120px; height: 120px; }
-.deal-thumb img { display:block; width:120px; height:120px; object-fit:cover; border-radius:12px; }
-.heat-badge { position: absolute; right: 6px; top: 6px; z-index: 2; pointer-events: none; }
-
-/* Hover-reveal for heat badge */
-.heat-badge {
-  opacity: 0;
-  transform: scale(0.9);
-  transition: opacity 0.2s ease, transform 0.2s ease;
-}
-
-.deal-card:hover .heat-badge {
-  opacity: 1;
-  transform: scale(1);
-}
-
-/* Hover-reveal for heat badge (Option 1) */
-.heat-badge {
-  opacity: 0;
-  transform: scale(0.9);
-  transition: opacity 0.2s ease, transform 0.2s ease;
-}
-.deal-card:hover .heat-badge {
-  opacity: 1;
-  transform: scale(1);
-}
-/* === FINAL OVERRIDES (mockup lock) === */
-
-/* Force grid: image left (96x96), text right */
-.deal-body{
+/* 1) Keep responsive grid like old look */
+#deal-list{
   display:grid !important;
-  grid-template-columns:96px 1fr !important;
-  align-items:center !important;
-  gap:12px !important;
-}
-
-/* Kill the 120x120 earlier declaration */
-.deal-card .deal-thumb{
-  position:relative !important;
-  width:96px !important;
-  height:96px !important;
-  border-radius:12px !important;
-  overflow:hidden !important;
-  background:#f6f6f7 !important;
-}
-.deal-card .deal-thumb img{
+  grid-template-columns:repeat(auto-fit, minmax(320px,1fr)) !important;
+  gap:16px !important;
+  align-items:stretch !important;
   width:100% !important;
-  height:100% !important;
-  object-fit:cover !important;
-  display:block !important;
+  max-width:none !important;
 }
 
-/* Text column stays on the right */
-.deal-text{ grid-column:2 !important; min-width:0 !important; }
-
-/* Title/desc polish */
-.deal-title{ font-size:16px !important; margin:0 0 4px !important; line-height:1.25 !important; }
-.deal-description{
-  margin:0 !important; color:#5b6573 !important; font-size:14px !important;
-  display:-webkit-box !important; -webkit-line-clamp:2 !important; -webkit-box-orient:vertical !important; overflow:hidden !important;
-}
-
-/* One clean hover rule for the heat badge */
-.heat-badge{
-  position:absolute !important; right:6px !important; top:6px !important; z-index:2 !important; pointer-events:none !important;
-  width:44px !important; height:44px !important; border-radius:50% !important;
-  display:flex !important; align-items:center !important; justify-content:center !important;
-  opacity:0 !important; transform:scale(.9) !important; transition:opacity .2s, transform .2s !important;
-}
-.deal-card:hover .heat-badge{ opacity:1 !important; transform:scale(1) !important; }
-
-/* Footer row + pill counters + icons (matches mockup) */
-.deal-footer{ display:flex !important; align-items:center !important; justify-content:space-between !important; gap:12px !important; margin-top:6px !important; }
-.deal-meta-inline{ display:flex !important; align-items:center !important; gap:12px !important; color:#6b7785 !important; font-size:13px !important; }
-.pill{ display:inline-flex !important; align-items:center !important; gap:8px !important; padding:6px 10px !important;
-       border-radius:12px !important; background:#f3f4f6 !important; font-weight:600 !important; font-size:14px !important; }
-.i-like::before{ content:"👍"; }
-.i-fake::before{ content:"🚫"; }
-.i-flag::before{ content:"⚠️"; }
-
-/* Center the list width like the mockup */
-#deal-list{ max-width:980px !important; margin:0 auto !important; padding:0 16px !important; }
-
-/* === FINAL OVERRIDES v2 (mockup lock using current classes) === */
-
-/* Card grid: image left (96x96), content right */
+/* 2) Card internals (thumb left, text right) */
 .deal-card{
+  position:relative !important;
   display:grid !important;
   grid-template-columns:96px 1fr !important;
-  gap:12px !important;
-  padding:12px !important;
-  border-radius:16px !important;
+  column-gap:12px !important;
+  /* reserve just enough space for the footer line (no big gap) */
+  padding-bottom:34px !important;
 }
-
-/* Thumbnail box */
-.deal-card .deal-thumb{
-  position:relative !important;
-  width:96px !important;
-  height:96px !important;
-  border-radius:12px !important;
-  overflow:hidden !important;
-  background:#f6f6f7 !important;
+.deal-thumb, .deal-thumb img{
+  width:96px !important; height:96px !important; object-fit:cover !important; border-radius:12px !important;
 }
-.deal-card .deal-thumb img{
-  width:100% !important;
-  height:100% !important;
-  object-fit:cover !important;
-  display:block !important;
-}
-
-/* Content column */
 .deal-content{
-  min-width:0 !important;
-  display:flex !important;
-  flex-direction:column !important;
-  gap:6px !important;
+  display:flex !important; flex-direction:column !important; min-width:0 !important;
 }
 
-/* Title + description polish */
-.deal-title{ font-size:16px !important; margin:0 0 4px !important; line-height:1.25 !important; }
-.deal-description{
-  margin:0 !important; color:#5b6573 !important; font-size:14px !important;
-  display:-webkit-box !important; -webkit-line-clamp:2 !important; -webkit-box-orient:vertical !important; overflow:hidden !important;
+/* 3) Footer: span FULL card width, pinned at bottom */
+.deal-content > .deal-footer{
+  position:absolute !important;
+  left:12px !important; right:12px !important; bottom:8px !important;
+  display:flex !important; align-items:center !important; justify-content:space-between !important;
+  gap:12px !important; flex-wrap:nowrap !important;
+  background:transparent !important; border:0 !important; padding:0 !important; border-radius:0 !important;
 }
 
-/* Heat badge hover reveal (single source of truth) */
-.heat-badge{
-  position:absolute !important; right:6px !important; top:6px !important; z-index:2 !important; pointer-events:none !important;
-  width:44px !important; height:44px !important; border-radius:50% !important;
-  display:flex !important; align-items:center !important; justify-content:center !important;
-  opacity:0 !important; transform:scale(.9) !important; transition:opacity .2s, transform .2s !important;
+/* 4) Left = price • location (ellipsis-safe) */
+.deal-footer .deal-meta-inline{
+  display:inline-flex !important; align-items:center !important; gap:10px !important;
+  min-width:0 !important; white-space:nowrap !important; overflow:hidden !important; text-overflow:ellipsis !important;
+  font-size:13px !important; color:#6b7785 !important;
+}
+.deal-footer .deal-meta-inline > span + span::before{
+  content:"•"; opacity:.55; margin:0 8px;
+}
+
+/* 5) Right = counters (SMALL, PLAIN, NO PILL) */
+.deal-footer .metrics,
+.deal-footer [class*="metrics"],
+.deal-card .metrics{
+  margin-left:auto !important;
+  display:inline-flex !important; align-items:center !important;
+  font-size:12px !important; line-height:1 !important; gap:6px !important;
+  background:transparent !important; border:0 !important; border-radius:0 !important;
+  padding:0 !important; height:auto !important; box-shadow:none !important;
+}
+.deal-card .metrics .metric{
+  background:transparent !important; border:0 !important; padding:0 !important; box-shadow:none !important;
+}
+.deal-card .metrics .count{
+  font-weight:400 !important;
+}
+.deal-card .metrics > .metric:not(:last-child)::after{
+  content:"·"; opacity:.55; margin:0 6px;
+}
+
+/* 6) Heat visuals: keep corner badge; hide any left strip */
+.heat-strip{ display:none !important; }
+.deal-card .heat-badge{
+  position:absolute !important; right:6px !important; top:6px !important;
+  pointer-events:none !important; opacity:0 !important; transform:scale(.9) !important;
+  transition:opacity .2s, transform .2s !important; z-index:3 !important;
 }
 .deal-card:hover .heat-badge{ opacity:1 !important; transform:scale(1) !important; }
+/* === Toolbar + Heat Animation add-on (append-only) — 2025-08-15 === */
+/* Load this AFTER your current CSS. */
 
-/* Footer row + pill counters + icons */
-.deal-footer{ display:flex !important; align-items:center !important; justify-content:space-between !important; gap:12px !important; margin-top:6px !important; }
-.deal-meta-inline{ display:flex !important; align-items:center !important; gap:12px !important; color:#6b7785 !important; font-size:13px !important; }
-
-/* Make existing .metric look like pills (no JS changes needed) */
-.metrics .metric{ display:inline-flex !important; align-items:center !important; gap:4px !important; padding:0 !important; background:transparent !important; border:none !important; box-shadow:none !important; }
-
-/* Icons */
-.i-like::before{ content:"👍"; }
-.i-fake::before{ content:"🚫"; }
-.i-flag::before{ content:"⚠️"; }
-
-/* Center the list like the mockup */
-#deal-list{ max-width:980px !important; margin:0 auto !important; padding:0 16px !important; }
-
-/* === end FINAL OVERRIDES v2 === */
-
-/* Pager buttons */
-#pagination{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; padding:10px 0; }
-.pg-btn{ border:1px solid #e2e8f0; padding:6px 10px; border-radius:8px; background:#fff; cursor:pointer; min-width:36px; }
-.pg-btn.is-current{ font-weight:700; box-shadow:0 0 0 2px rgba(255,0,122,.15); }
-.pg-btn:disabled{ opacity:.5; cursor:not-allowed; }
-
-/* NEW badge */
-.badge-new{ display:inline-block; margin-left:8px; padding:2px 8px; font-size:11px; font-weight:700; border-radius:999px; background:#10b981; color:#fff; vertical-align:middle; }
-@media (max-width:520px){ .badge-new{ font-size:10px; padding:1px 6px; } }
-
-/* Force anchor heat badge on card corner */
-.deal-card{ position:relative; }
-.deal-card > .heat-badge{ position:absolute; top:6px; right:6px; z-index:3; pointer-events:none; }
-.deal-thumb .heat-badge{ display:none !important; visibility:hidden !important; }
-
-/* List card metrics use same SVG icons as deal page */
-.metrics--static .ic{ display:inline-block; vertical-align:middle; opacity:.75; margin-right:6px; }
-.metrics--static .metric{ display:inline-flex !important; align-items:center !important; gap:4px !important; padding:0 !important; background:transparent !important; border:none !important; box-shadow:none !important; }
-.metrics--static .metric .count{ font-weight:600 !important; margin-left:2px !important; }
-
-/* Role badges next to username */
-.role-badge{ display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:50%; margin-left:6px; }
-.role-badge .ic{ width:12px; height:12px; }
-.is-verified{ background:#e0e7ff; color:#3730a3; } /* indigo */
-.is-biz{ background:#fef3c7; color:#b45309; }      /* amber */
-.ic-user{ margin-right:6px; opacity:.75; }
-.deal-meta{ display:flex; align-items:center; gap:6px; }
-
-/* A11y: visible focus ring */
-:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
-
-
-/* Image: keep full view, no crop */
-.deal-media img{ width:100%; height:auto; max-height:450px; object-fit:contain; }
-
-
-/* Sticky bar: mobile only */
-@media (min-width:901px){ #sticky-bar, .deal-sticky{ display:none !important; } }
-
-
-/* Toolbar */
-.deals-toolbar{ display:flex; align-items:center; gap:12px; margin:10px 12px; }
-.deals-toolbar .tabs{ display:flex; gap:8px; flex-wrap:wrap; }
-.deals-toolbar .spacer{ flex:1; }
-.deals-toolbar .tab{ padding:8px 12px; border:1px solid #e5e7eb; background:#fff; border-radius:999px; cursor:pointer; }
-.deals-toolbar .tab.active{ border-color: var(--sb-primary,#e91e63); box-shadow:0 0 0 2px rgba(233,30,99,.15); }
-.deals-toolbar .sort select{ padding:8px 12px; border:1px solid #e5e7eb; border-radius:10px; background:#fff; }
-.deals-toolbar .grid-tog{ margin-left:8px; font-size:14px; color:#475569; }
-
-/* Grid mode (optional) */
-#deal-list.grid-mode{
-  display:grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px,1fr));
-  gap:16px;
-  align-items:stretch;
+/* -------- Toolbar / Filters / Search -------- */
+.deals-toolbar{
+  display:flex; align-items:center; gap:12px; margin:10px 12px;
 }
-@media (max-width:640px){ #deal-list.grid-mode{ grid-template-columns:1fr; } }
+.deals-toolbar .tabs{
+  display:flex; gap:8px; flex-wrap:wrap;
+}
+.deals-toolbar .tab{
+  padding:8px 12px; border:1px solid #e5e7eb; background:#fff; border-radius:999px;
+  cursor:pointer; color:#334155; font-weight:500; transition:box-shadow .15s, border-color .15s;
+}
+.deals-toolbar .tab:hover{ border-color:#cbd5e1; box-shadow:0 1px 0 rgba(0,0,0,.03); }
+.deals-toolbar .tab.active{
+  border-color: var(--sb-primary,#e91e63);
+  box-shadow:0 0 0 2px color-mix(in oklab, var(--sb-primary,#e91e63) 20%, transparent);
+  color:#0f172a; background:#fff;
+}
+.deals-toolbar .spacer{ flex:1; }
+.deals-toolbar .sort select{
+  padding:8px 12px; border:1px solid #e5e7eb; border-radius:10px; background:#fff; color:#0f172a;
+}
+.deals-toolbar .grid-tog{
+  margin-left:8px; font-size:14px; color:#475569;
+}
 
-.deal-footer .metrics{margin-left:auto;display:inline-flex;align-items:center;gap:6px;height:24px;padding:4px 8px;border-radius:999px;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;font-size:12px;line-height:1;flex-shrink:0}
+/* Search input (generic, in case it isn't inside .deals-toolbar) */
+input[type="search"], .deals-search input{
+  width:100%; max-width:720px; padding:10px 14px; border:1px solid #e5e7eb; border-radius:12px;
+  outline:none; background:#fff; color:#0f172a;
+}
+input[type="search"]::placeholder{ color:#94a3b8; }
 
-.metric:not(:last-child)::after{content:'·';opacity:.55;margin:0 4px}
+/* -------- Heat UI: animated badge (corner), strip stays hidden -------- */
+.heat-strip{ display:none !important; }
 
-.metric .ic{width:14px;height:14px}
+/* Base badge position (keeps your corner placement) */
+.deal-card .heat-badge{
+  position:absolute; right:6px; top:6px; z-index:3;
+  width:44px; height:44px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background: conic-gradient(from 0deg, var(--sb-primary,#ff7a7a) 0 25%, #ffd1d1 25% 50%, #ffecec 50% 75%, #ffffff 75% 100%);
+  color:#222; font-weight:600;
+}
+
+/* Animated ring pulse (subtle) */
+.deal-card .heat-badge::after{
+  content:""; position:absolute; inset:-6px; border-radius:50%;
+  box-shadow:0 0 0 0 rgba(233,30,99,.35);
+  animation: heatPulse 1.8s ease-out infinite;
+}
+@keyframes heatPulse{
+  0%   { box-shadow:0 0 0 0 rgba(233,30,99,.35); opacity:1; }
+  70%  { box-shadow:0 0 0 10px rgba(233,30,99,0); opacity:.7; }
+  100% { box-shadow:0 0 0 0 rgba(233,30,99,0); opacity:0; }
+}
+
+/* Optional hover accent for the badge content itself */
+.deal-card:hover .heat-badge{ filter: saturate(1.1); }

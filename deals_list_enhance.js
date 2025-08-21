@@ -1,3 +1,21 @@
+
+// Lightweight image placeholder (inline SVG) — no external assets
+(function(){
+  if (window.imgFallback) return;
+  window.imgFallback = function(img){
+    if(!img || img.dataset.fallbackApplied) return;
+    img.dataset.fallbackApplied = "1";
+    var label = (img.getAttribute('data-title') || img.alt || 'Deal').slice(0,2).toUpperCase();
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 90">'
+            + '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">'
+            + '<stop offset="0" stop-color="#e5e7eb"/><stop offset="1" stop-color="#ffffff"/></linearGradient></defs>'
+            + '<rect width="100%" height="100%" fill="url(#g)"/>'
+            + '<text x="50%" y="55%" text-anchor="middle" font-family="system-ui,-apple-system,Segoe UI,Roboto,Arial"'
+            + ' font-weight="700" font-size="40" fill="#111827">' + label + '</text></svg>';
+    img.src = "data:image/svg+xml;utf8," + encodeURIComponent(svg);
+    img.classList.add("thumb--placeholder");
+  };
+})();
 // Non-destructive Deal List Enhancements (runs only if #deal-list exists)
 (function(ns){
   if (ns._installed) return; ns._installed = true;
@@ -34,14 +52,14 @@
           <div class="heat"><span style="width:${heatWidthFromViews(views)}%"></span></div>
           <div class="counters">👍 — · 🚫 —</div>
         </div>
-        <div class="deal-thumb"><img loading="lazy" data-src="${thumb}" alt="Deal: ${title}"></div>
+        <div class="deal-thumb"><img loading="lazy" data-src="${thumb}" onerror="imgFallback(this)" data-title="${title}" alt="Deal: ${title}"></div>
       </div>
     </a>`;
   }
   function render(raw){
     const data = normalize(raw);
     listEl.innerHTML = data.items.map(renderDeal).join('') || '<p>No deals found.</p>';
-    const io = new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ const img=e.target; img.src=img.dataset.src; io.unobserve(img);} }),{rootMargin:'200px'});
+    const io = new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ const img=e.target; img.onerror = function(){ imgFallback(img); }; img.src = img.dataset.src; io.unobserve(img);} }),{rootMargin:'200px'});
     listEl.querySelectorAll('img[data-src]').forEach(img=>io.observe(img));
 
     const pager = document.getElementById('pager');
