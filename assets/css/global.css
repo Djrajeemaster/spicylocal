@@ -1,0 +1,29 @@
+/* === SpicyBeats Header & Search Styles === */
+.sb-header{display:flex;align-items:center;justify-content:space-between;background:#030849;color:#fff;padding:.6rem 1rem;position:sticky;top:0;z-index:100;}
+.sb-brand{display:flex;align-items:center;gap:.5rem;}
+.sb-logo img{height:32px;}
+.sb-name{font-weight:700;color:#fff;font-size:18px;}
+.sb-searchwrap{flex:1;display:flex;align-items:center;background:#fff;border-radius:999px;padding:.3rem .6rem;margin:0 1rem;box-shadow:0 2px 6px rgba(0,0,0,.15);}
+.sb-searchinput{flex:1;border:none;outline:none;font-size:15px;padding:.4rem;}
+.sb-locpill{border:none;background:#eef1f7;color:#030849;border-radius:999px;padding:.3rem .7rem;cursor:pointer;margin-left:.4rem;}
+.sb-searchbtn{border:none;background:#030849;color:#fff;border-radius:999px;padding:.4rem .8rem;cursor:pointer;margin-left:.4rem;}
+.sb-actions{display:flex;align-items:center;gap:.6rem;}
+.sb-btn.outline{background:#fff;color:#030849;border:1px solid #030849;padding:.4rem .9rem;border-radius:8px;cursor:pointer;}
+.sb-btn.outline:hover{background:#030849;color:#fff;}
+.sb-cats{display:flex;gap:.5rem;overflow-x:auto;padding:.4rem 1rem;background:#fff;border-bottom:1px solid #e2e5ea;}
+.sb-cats .chip{padding:.35rem .8rem;border-radius:999px;border:1px solid #dce0e6;background:#f7f8fb;cursor:pointer;white-space:nowrap;}
+.sb-cats .chip.active{background:#030849;color:#fff;}
+/* Modal */
+.sb-modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:1000;}
+.sb-modal[aria-hidden="false"]{display:flex;}
+.sb-modalbox{background:#fff;border-radius:12px;padding:1rem;width:min(600px,90%);}
+.sb-modalhdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem;}
+.sb-modaltitle{font-weight:700;font-size:16px;}
+.sb-close{border:none;background:#f1f3f7;border-radius:50%;width:32px;height:32px;cursor:pointer;}
+.sb-locrow{display:flex;gap:.5rem;align-items:center;border:1px solid #e1e4ea;border-radius:999px;padding:.3rem .6rem;margin-bottom:.6rem;}
+#sb-cityinput{flex:1;border:none;outline:none;padding:.4rem;}
+.sb-geo{background:#030849;color:#fff;border:none;padding:.4rem .8rem;border-radius:999px;cursor:pointer;}
+.sb-suggest .item{padding:.4rem;border:1px solid #e2e5ea;border-radius:8px;cursor:pointer;margin-top:.3rem;}
+.sb-modalft{display:flex;justify-content:flex-end;gap:.5rem;margin-top:.6rem;}
+.sb-ghost{background:#fff;border:1px solid #ccc;padding:.4rem .8rem;border-radius:8px;cursor:pointer;}
+.sb-primary{background:#030849;color:#fff;border:none;padding:.4rem .9rem;border-radius:8px;cursor:pointer;}
