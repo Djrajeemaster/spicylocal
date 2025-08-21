@@ -1,7 +1,8 @@
 <?php
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
-require_once __DIR__ . '/require_login.php';
+// Public-read: allow guests to fetch comments
+// require_once __DIR__ . '/require_login.php';
 header('Content-Type: application/json');
 require_once __DIR__ . '/../config/db.php';
 

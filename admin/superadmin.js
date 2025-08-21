@@ -1,21 +1,22 @@
+// SA v-railfix1
 
-// superadmin.js v3 — robust tabs, inline Manage Deals, no redirects
+// superadmin.js v4 — all endpoints under /bagit/api/*
 (function(){
-  console.log('[SA] superadmin.js v3 live');
+  console.log('[SA] superadmin.js v4 live');
   const $  = (s, ctx=document) => ctx.querySelector(s);
   const $$ = (s, ctx=document) => Array.from(ctx.querySelectorAll(s));
 
   const API = {
     flags: '/bagit/api/feature_flags.php',
     audit: '/bagit/api/audit_log.php',
-    usersList: '/bagit/admin/api/users_list.php',
+    usersList: '/bagit/api/users_list.php',
     mute: '/bagit/api/mute_user.php',
-    updateRole: '/bagit/admin/api/update_role.php',
-    verifyBiz: '/bagit/admin/api/verify_business.php',
-    dealsList: '/bagit/admin/api/deals_list.php',
-    statusUpdate: '/bagit/admin/update_status.php',
-    pinToggle: '/bagit/admin/pin_toggle.php',
-    deleteDeal: '/bagit/admin/delete_deal.php',
+    updateRole: '/bagit/api/update_role.php',
+    verifyBiz: '/bagit/api/verify_business.php',
+    dealsList: '/bagit/api/deals_list.php',
+    statusUpdate: '/bagit/api/update_status.php',
+    pinToggle: '/bagit/api/pin_toggle.php',
+    deleteDeal: '/bagit/api/delete_deal.php',
     editDeal: (id) => `/bagit/admin/edit.php?id=${id}`,
     viewComments: (id) => `/bagit/admin/view_comments.php?id=${id}`
   };
@@ -31,8 +32,7 @@
 
   // ---- Features ----
   async function loadFlags(){
-    const tbody = document.getElementById('flags-tbody');
-    if (!tbody) return;
+    const tbody = document.getElementById('flags-tbody'); if (!tbody) return;
     tbody.innerHTML = '<tr><td colspan="2">Loading…</td></tr>';
     try{
       const r = await fetch(API.flags); const flags = await r.json();
@@ -41,10 +41,9 @@
         if (name.startsWith('_')) return;
         const tr = document.createElement('tr');
         tr.innerHTML = `<td>${name}</td><td><input type="checkbox" ${flags[name] ? 'checked' : ''}></td>`;
-        const chk = tr.querySelector('input');
-        chk.addEventListener('change', async () => {
+        tr.querySelector('input').addEventListener('change', async (e) => {
           await fetch(API.flags, {method:'POST', headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({feature_name:name, is_enabled: chk.checked?1:0})});
+            body: JSON.stringify({feature_name:name, is_enabled: e.target.checked?1:0})});
           loadAudit();
         });
         tbody.appendChild(tr);
@@ -52,8 +51,7 @@
     }catch{ tbody.innerHTML = '<tr><td colspan="2">Failed to load flags</td></tr>'; }
   }
   async function loadAudit(){
-    const tbody = document.getElementById('audit-body');
-    if (!tbody) return;
+    const tbody = document.getElementById('audit-body'); if (!tbody) return;
     tbody.innerHTML = '<tr><td colspan="4">Loading…</td></tr>';
     try{
       const r = await fetch(API.audit); const rows = await r.json();
@@ -65,8 +63,7 @@
 
   // ---- Users ----
   async function loadUsers(){
-    const tbody = document.getElementById('users-tbody');
-    if (!tbody) return;
+    const tbody = document.getElementById('users-tbody'); if (!tbody) return;
     tbody.innerHTML = '<tr><td colspan="6">Loading…</td></tr>';
     try{
       const r = await fetch(API.usersList); const rows = await r.json();
@@ -85,7 +82,6 @@
           <td></td>
         </tr>`;
       }).join('');
-
       document.querySelectorAll('#panel-users .role-dd').forEach(dd=>{
         dd.addEventListener('change', async ()=>{
           const username = dd.getAttribute('data-username');
@@ -108,36 +104,27 @@
             body: new URLSearchParams({username, action})});
         });
       });
-    }catch{
-      tbody.innerHTML='<tr><td colspan="6">Failed to load</td></tr>';
-    }
+    }catch{ tbody.innerHTML='<tr><td colspan="6">Failed to load</td></tr>'; }
   }
 
   // ---- Deals ----
   const DP = { page:1, limit:10, status:'approved', category:'', q:'' };
   async function fetchDeals(){
-    const qs = new URLSearchParams({
-      page:String(DP.page), limit:String(DP.limit),
-      status: DP.status||'', category: DP.category||'', q: DP.q||''
-    });
+    const qs = new URLSearchParams({ page:String(DP.page), limit:String(DP.limit),
+      status: DP.status||'', category: DP.category||'', q: DP.q||'' });
     const r = await fetch(`${API.dealsList}?${qs.toString()}`, { cache:'no-store' });
     if (!r.ok) throw new Error('fetch failed');
     return await r.json();
   }
   function renderDealsRows(data){
-    const tb = document.querySelector('#deals-table tbody');
-    if (!tb) return;
+    const tb = document.querySelector('#deals-table tbody'); if (!tb) return;
     const deals = data.deals || [];
-    if (!deals.length){
-      tb.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#6b7280;">No deals found</td></tr>';
-      return;
-    }
+    if (!deals.length){ tb.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#6b7280;">No deals found</td></tr>'; return; }
     tb.innerHTML = deals.map(d => {
-      const dd = (d.description||'').replace(/</g,'&lt;');
       const pinIcon = (String(d.is_pinned||'0')==='1') ? '📌' : '📍';
       return `<tr data-id="${d.id}">
         <td>${d.id}</td>
-        <td title="${dd}">${d.title||''}</td>
+        <td>${d.title||''}</td>
         <td>${d.username||''}</td>
         <td>
           <select class="dd-status">
@@ -158,8 +145,7 @@
   }
   async function loadDeals(init=false){
     if (init){
-      const s = document.getElementById('deals-status');
-      if (s) DP.status = s.value || '';
+      const s = document.getElementById('deals-status'); if (s) DP.status = s.value || '';
       const q = document.getElementById('deals-search'); if (q) DP.q = q.value.trim();
       const c = document.getElementById('deals-category'); if (c) DP.category = c.value||'';
     }
@@ -221,15 +207,15 @@
     });
   }
 
-  // expose for safety
-  window.loadFlags = loadFlags; window.loadAudit = loadAudit;
-  window.loadUsers = loadUsers; window.loadDeals = loadDeals; window.wireDeals = wireDeals;
+  // expose (safety)
+  window.loadDeals = loadDeals; window.wireDeals = wireDeals;
+  window.loadUsers = loadUsers; window.loadFlags = loadFlags; window.loadAudit = loadAudit;
 
   document.addEventListener('DOMContentLoaded', () => {
-    // Close user dropdown overlay
+    // Close possible header dropdown overlay so it won't block clicks
     try{ const dd = document.getElementById('user-dropdown'); if (dd) { dd.classList.add('hidden'); document.addEventListener('click', ()=> dd.classList.add('hidden')); } }catch{}
 
-    // Delegated click handler (buttons or anchors with .sa-link)
+    // Delegated clicks for sidebar (buttons or anchors)
     document.addEventListener('click', (e) => {
       const btn = e.target.closest('.sa-link');
       if (!btn) return;
@@ -242,54 +228,102 @@
     });
 
     // Default
-    setActive('deals');
-    wireDeals(); loadDeals(true);
-
-    // Logout
-    const logout = document.getElementById('logout-btn');
-    if (logout) logout.addEventListener('click', async ()=>{
-      try{ await fetch('/bagit/api/auth/logout.php',{method:'POST', credentials:'same-origin'});}catch{}
-      localStorage.clear(); sessionStorage.clear(); location.href='/bagit/login_unified.php';
-    });
+    setActive('deals'); wireDeals(); loadDeals(true);
   });
 })();
 
-// === No-Flicker Toggle Guard ===
+// === Toggle position fixer ===
+(function(){
+  let btn = document.getElementById('sa-toggle');
+  if (btn && btn.parentElement && btn.parentElement.id === 'panel-deals'){
+    document.body.appendChild(btn);
+  } else if (!btn){
+    btn = document.createElement('button');
+    btn.id = 'sa-toggle';
+    btn.className = 'sa-toggle';
+    btn.setAttribute('aria-label','Toggle menu');
+    btn.textContent = '☰';
+    document.body.appendChild(btn);
+  }
+  btn.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); }, true);
+})();
+// === Sidebar controller: hidden ↔ rail; long-press/Shift+M => expanded overlay ===
 (function(){
   const root = document.documentElement;
-  let anim = false;
-  function setCollapsedSmooth(collapsed){
-    if (anim) return;
-    anim = true;
-    requestAnimationFrame(()=>{
-      if (collapsed){
-        root.classList.add('sa-collapsed');
-        root.classList.remove('sa-has-scrim');
-        localStorage.setItem('saSidebar','collapsed');
-      } else {
-        root.classList.remove('sa-collapsed');
-        root.classList.add('sa-has-scrim');
-        localStorage.setItem('saSidebar','expanded');
+  const KEY  = 'saSidebarState';              // 'hidden' | 'rail' | 'expanded'
+
+  // Make sure the sidebar element has the expected class
+  (function ensureSidebarClass(){
+    if (!document.querySelector('.sa-sidebar')) {
+      const guess = document.querySelector('aside, #leftNav, .left-nav, .sa-left');
+      if (guess) guess.classList.add('sa-sidebar');
+    }
+  })();
+
+  function apply(state){
+    root.classList.remove('sa-hidden','sa-rail','sa-has-scrim');
+    if (state === 'expanded') root.classList.add('sa-has-scrim');
+    else if (state === 'rail') root.classList.add('sa-rail');
+    else root.classList.add('sa-hidden');           // default full-screen deals
+    localStorage.setItem(KEY, state);
+  }
+  const current = () => localStorage.getItem(KEY) || 'hidden';
+  const next    = (s) => (s === 'rail' ? 'hidden' : 'rail');
+
+  // Ensure toggle + scrim exist and live under <body>
+  function ensureUI(){
+    let btn = document.getElementById('sa-toggle');
+    if (!btn){
+      btn = document.createElement('button');
+      btn.id = 'sa-toggle';
+      btn.className = 'sa-toggle';
+      btn.setAttribute('aria-label','Toggle menu');
+      btn.textContent = '☰';
+      document.body.appendChild(btn);
+    } else if (btn.parentElement && btn.parentElement.id === 'panel-deals'){
+      // never inside the panel
+      document.body.appendChild(btn);
+    }
+    let scrim = document.getElementById('sa-scrim');
+    if (!scrim){
+      scrim = document.createElement('div');
+      scrim.id = 'sa-scrim';
+      scrim.className = 'sa-scrim';
+      document.body.appendChild(scrim);
+    }
+    // Don't let toggle clicks bubble into the table
+    btn.addEventListener('click', e => { e.stopPropagation(); }, true);
+  }
+
+  function init(){
+    ensureUI();
+    apply(current());
+
+    // Click: hidden <-> rail
+    document.addEventListener('click', (e)=>{
+      const t = e.target.closest('#sa-toggle');
+      if (t){ e.preventDefault(); apply(next(current())); }
+      if (e.target && e.target.id === 'sa-scrim'){ apply('hidden'); }
+    });
+
+    // Long-press toggle => expanded overlay
+    let pressTimer = null;
+    document.addEventListener('mousedown', (e)=>{
+      if (e.target.closest('#sa-toggle')){
+        pressTimer = setTimeout(()=> apply('expanded'), 400);
       }
-      setTimeout(()=>{ anim = false; }, 260);
+    });
+    ['mouseup','mouseleave'].forEach(ev=>document.addEventListener(ev, ()=>{
+      if (pressTimer){ clearTimeout(pressTimer); pressTimer = null; }
+    }));
+
+    // Keyboard: m toggles hidden<->rail, Shift+M opens overlay
+    window.addEventListener('keydown', (e)=>{
+      if (e.key === 'M' && e.shiftKey) apply('expanded');
+      else if (e.key === 'm' || e.key === 'M') apply(next(current()));
     });
   }
-  // Wire onto existing toggle if present
-  document.addEventListener('click', (e)=>{
-    const t = e.target.closest('#sa-toggle');
-    if (t){
-      e.preventDefault();
-      const collapsed = root.classList.contains('sa-collapsed');
-      setCollapsedSmooth(!collapsed);
-    }
-    if (e.target && e.target.id === 'sa-scrim'){
-      setCollapsedSmooth(true);
-    }
-  });
-  window.addEventListener('keydown', (e)=>{
-    if (e.key === 'm' || e.key === 'M'){
-      const collapsed = root.classList.contains('sa-collapsed');
-      setCollapsedSmooth(!collapsed);
-    }
-  });
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
 })();

@@ -23,8 +23,8 @@ if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role'] ?? '', $allowedR
     // error_log("Unauthorized access attempt by IP: " . $_SERVER['REMOTE_ADDR']);
 
     // Use a relative path to the unified login page rather than login.html to
-    // ensure consistent redirects across the app. login_unified.php manages
+    // ensure consistent redirects across the app. login.php manages
     // role-based sessions and localStorage updates on successful login.
-    header('Location: /bagit/login_unified.php');
+    header('Location: /bagit/login.php');
     exit;
 }

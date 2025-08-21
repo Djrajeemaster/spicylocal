@@ -8,7 +8,25 @@ require_once 'config/db.php';
 ?>
 <!DOCTYPE html>
 <html>
-<head>
+\1
+<!-- THEME BOOT: put before CSS to avoid FOUC -->
+<script>
+(function(){
+  try{
+    var ls = localStorage.getItem('sb_theme');
+    if(ls){
+      var t = JSON.parse(ls);
+      var c = t.brand || t.color;
+      if(c){
+        var r = document.documentElement;
+        r.style.setProperty('--sb-accent', c);
+        r.style.setProperty('--sb-primary', c);
+      }
+    }
+  }catch(e){}
+})();
+</script>
+
   <title>Manage Users</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="../style.css" />

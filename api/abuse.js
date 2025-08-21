@@ -1,4 +1,6 @@
 
+function reportOk(r){ try{ return r && (r.success===true || r.status==='ok' || r.status==='success' || r.message==='ok' || r.error===false); }catch(e){ return false; } }
+
 document.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById("btn-abuse");
   if (!btn) return;

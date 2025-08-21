@@ -1,0 +1,51 @@
+<!doctype html><meta charset="utf-8">
+<style>
+  body{font:14px system-ui,Segoe UI,Arial;margin:20px}
+  form{display:flex;gap:8px}
+  input{flex:1;padding:8px}
+  button{padding:8px 12px}
+  pre{white-space:pre-wrap;border:1px solid #ddd;padding:12px;margin-top:12px;min-height:80px}
+</style>
+
+<form onsubmit="event.preventDefault(); run(this.q.value)">
+  <input name="q" placeholder="Ask..." autofocus>
+  <button id="go">Go</button>
+  <button type="button" id="stop" onclick="stop()">Stop</button>
+</form>
+<pre id="out"></pre>
+
+<script>
+let controller;
+
+async function run(q){
+  const out = document.getElementById('out');
+  const go  = document.getElementById('go');
+  out.textContent = ''; go.disabled = true;
+
+  controller = new AbortController();
+  try{
+    const r = await fetch('/bagit/api/ai_stream.php', {
+      method:'POST',
+      body:new URLSearchParams({ q }),
+      signal: controller.signal
+    });
+    if(!r.body){ out.textContent = '(no stream body)'; return; }
+    const reader = r.body.getReader();
+    const dec = new TextDecoder();
+
+    while(true){
+      const {value, done} = await reader.read();
+      if(done) break;
+      out.textContent += dec.decode(value);
+    }
+  } catch(e){
+    out.textContent += `\n[error] ${e}`;
+  } finally {
+    go.disabled = false;
+  }
+}
+
+function stop(){
+  if(controller) controller.abort();
+}
+</script>

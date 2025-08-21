@@ -18,6 +18,7 @@ $status   = isset($_GET['status'])   ? $_GET['status'] : 'approved';
 $category = isset($_GET['category']) ? trim($_GET['category']) : '';
 $q        = isset($_GET['q'])        ? trim($_GET['q'])        : '';
 $sort     = isset($_GET['sort'])     ? $_GET['sort']           : 'heat';
+$location = isset($_GET['location']) ? trim($_GET['location']) : (isset($_GET['city']) ? trim($_GET['city']) : '');
 
 $page   = max(1, (int)($_GET['page']  ?? 1));
 $limit  = min(50, max(5, (int)($_GET['limit'] ?? 10)));
@@ -36,6 +37,11 @@ if ($q !== '') {
     $params[] = $like;
     $params[] = $like;
 }
+/* __LOC_FILTER__ */
+if ($location !== '') {
+    $where[]  = "LOWER(TRIM(deals.location)) LIKE ?";
+    $params[] = '%' . mb_strtolower(trim($location), 'UTF-8') . '%';
+}
 
 // Sorting using existing fields only
 if ($sort === 'new') {
@@ -45,6 +51,20 @@ if ($sort === 'new') {
 } else {
     // "heat": views then recency
     $order = "deals.views DESC, deals.created_at DESC";
+}
+
+// If a location string is provided, prefer deals with matching location first.
+$paramsSelect = $params;
+if ($location !== '') {
+    $order = "CASE
+        WHEN LOWER(TRIM(deals.location)) = ? THEN 0
+        WHEN LOWER(TRIM(deals.location)) LIKE CONCAT(?, '%') THEN 1
+        WHEN LOWER(TRIM(deals.location)) LIKE CONCAT('%', ?, '%') THEN 2
+        ELSE 9 END, " . $order;
+    $loc = mb_strtolower(trim($location), 'UTF-8');
+    $paramsSelect[] = $loc;                 // exact
+    $paramsSelect[] = $loc;                 // prefix
+    $paramsSelect[] = $loc;                 // substring
 }
 
 // -------- TOTAL (COUNT ONLY) --------
@@ -73,8 +93,26 @@ $sql = "SELECT
         LIMIT $limit OFFSET $offset";
 
 $stmt = $pdo->prepare($sql);
-$stmt->execute($params);
+$stmt->execute(isset($paramsSelect) ? $paramsSelect : $params);
 $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Build image_url with filesystem fallback to avoid 404s
+$imagesDir = realpath(__DIR__ . '/../images');
+$publicPrefix = '/bagit/images/';
+if (is_array($items)) {
+    foreach ($items as &$row) {
+        $thumb = isset($row['thumbnail']) ? basename((string)$row['thumbnail']) : '';
+        $candidate = $thumb ? ($imagesDir . DIRECTORY_SEPARATOR . $thumb) : '';
+        if ($thumb && $imagesDir && file_exists($candidate)) {
+            $row['image_url'] = $publicPrefix . $thumb;
+        } else {
+            $row['image_url'] = $publicPrefix . 'default.jpg';
+        }
+    }
+    unset($row);
+}
+
+
 
 echo json_encode([
     "items" => $items,

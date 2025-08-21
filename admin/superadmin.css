@@ -1,6 +1,6 @@
 
 /* Super Admin Layout */
-:root { --sb-bg:#f6f7fb; --sb-card:#ffffff; --sb-primary:#e91e63; --sb-primary-dark:#c2185b; --sb-text:#222; --sb-muted:#6b7280; --sb-border:#e5e7eb; }
+:root { --sb-bg:#f6f7fb; --sb-card:#ffffff; --sb-primary:var(--sb-primary); --sb-primary-dark:#c2185b; --sb-text:#222; --sb-muted:#6b7280; --sb-border:#e5e7eb; }
 body { background: var(--sb-bg); }
 .sa-wrap { display:grid; grid-template-columns:240px 1fr; gap:16px; max-width:1280px; margin:24px auto; padding:0 16px; }
 .sa-sidebar { background:var(--sb-card); border-radius:16px; box-shadow:0 8px 24px rgba(0,0,0,.06); padding:16px; position:sticky; top:16px; height:fit-content; }
@@ -25,44 +25,342 @@ body { background: var(--sb-bg); }
 .input, select { border:1px solid var(--sb-border); border-radius:10px; padding:8px 10px; }
 .hidden { display:none; }
 
-/* === Fit-to-Screen Behavior (Collapsed) === */
-/* When sidebar is collapsed, let the Manage Deals card stretch to screen width with safe max */
-.sa-collapsed #panel-deals.sa-panel{
-  max-width: min(1400px, calc(100vw - 40px));
-  margin-left: auto !important;
-  margin-right: auto !important;
+
+
+/* === Sidebar Hover-Expand Overlay/Rail (injected) =================== */
+:root { --sb-accent:#ff007a; }
+
+/* ONE-COLUMN base; content full-width by default (overlay sidebar won't reserve space) */
+.sa-wrap { display:grid; grid-template-columns:1fr; gap:16px; max-width:none; margin:24px 0; padding:0; }
+
+/* Deals card should fully stretch under header; states will adjust width */
+#panel-deals.sa-card{ max-width:none; transition:width 0.2s ease, margin 0.2s ease; }
+
+/* Overlay sidebar (default: hidden off-screen) */
+.sa-sidebar{
+  position:fixed !important; left:16px; top:88px; width:280px;
+  max-height:calc(100vh - 108px); overflow:auto; z-index:1000;
+  transform:translateX(-120%); opacity:0; pointer-events:none;
+  transition:transform .22s ease, opacity .12s ease, width .22s ease;
+  will-change:transform,opacity; backface-visibility:hidden;
+  background:var(--sb-card); border-radius:16px; box-shadow:0 8px 24px rgba(0,0,0,.06); padding:16px;
 }
 
-/* Make the table and its container use all available width */
-.sa-collapsed #panel-deals .table,
-.sa-collapsed #panel-deals .sa-card,
-.sa-collapsed #panel-deals .sa-row{
-  width: 100%;
+/* Expanded (overlay) — JS adds .sa-has-scrim */
+.sa-has-scrim .sa-sidebar{ transform:translateX(0); opacity:1; pointer-events:auto; }
+
+/* Hidden — FULL width deals card */
+.sa-hidden #panel-deals.sa-card{
+  width:calc(100vw - 32px); margin:0 16px 16px; padding-left:16px; padding-right:16px;
 }
 
-/* Keep content nicely padded when collapsed */
-.sa-collapsed #panel-deals.sa-panel.sa-card{
-  padding-left: 18px;
-  padding-right: 18px;
+/* Rail (icons-only) — slim sidebar visible; content nearly full */
+.sa-rail .sa-sidebar{
+  transform:translateX(0); opacity:1; pointer-events:auto;
+  width:56px; left:8px; overflow:hidden;
+}
+.sa-rail #panel-deals.sa-card{
+  width:calc(100vw - 104px); /* 72 rail + ~48 gutter */
+  margin-left:88px; margin-right:16px; padding-left:16px; padding-right:16px;
 }
 
-/* Expanded: keep current centered layout with sidebar visible */
-:not(.sa-collapsed) #panel-deals.sa-panel{
-  max-width: 1280px;
-  margin-left: auto;
-  margin-right: auto;
+/* Hover-expand behaviour inside rail — grow width & reveal labels */
+.sa-rail .sa-sidebar:hover{ width:220px; }
+
+/* label reveal animation */
+.item-text{
+  display:inline-block;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  opacity:1; transform:none; transition:opacity .18s ease, transform .18s ease, max-width .18s ease;
+}
+.sa-rail .sa-sidebar .item-text{
+  opacity:0; transform:translateX(-6px); max-width:0; visibility:hidden;
+}
+.sa-rail .sa-sidebar:hover .item-text{
+  opacity:1; transform:none; max-width:180px; visibility:visible;
 }
 
-/* Filters row stays above the table and wraps cleanly */
-#panel-deals .sa-row{
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px 12px;
-}
-#panel-deals .sa-row:first-of-type{ justify-content: space-between; }
-#panel-deals .sa-row select.input,
-#panel-deals .sa-row input.input{ min-width: 180px; }
+/* icons are centered in rail */
+.item-icon{ display:inline-flex; width:20px; height:20px; align-items:center; justify-content:center; }
+.sa-rail .sa-sidebar .item-icon{ width:40px; height:40px; margin:8px 0; }
 
-/* Ensure no layout jump on toggle */
-.sa-main, #panel-deals, .sa-card{ transform: translateZ(0); will-change: transform; }
+/* Scrim visible only in expanded overlay mode (button click) */
+.sa-scrim{ position:fixed; inset:0; background:rgba(0,0,0,.25); z-index:900; opacity:0; pointer-events:none; transition:opacity .12s ease; }
+.sa-has-scrim .sa-scrim{ opacity:1; pointer-events:auto; }
+
+html{ overflow-y:scroll; }
+#panel-deals, .sa-card{ transform:translateZ(0); will-change:transform; }
+
+/* Toggle button pinned outside content */
+.sa-toggle{
+  position: fixed !important;
+  left: 20px;
+  top: 88px;
+  z-index: 1200;
+  border: 0;
+  border-radius: 10px;
+  padding: 8px 12px;
+  background: var(--sb-accent,#ff007a);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(0,0,0,.15);
+}
+#panel-deals .sa-toggle{ display:none !important; }
+
+
+@media (min-width: 901px){
+  .sa-rail .sa-toggle { display:none !important; }
+}
+
+
+
+/* === Compact sidebar sizing & toggle visibility (patch 2025-08-09) === */
+/* Make overlay panel a bit narrower */
+.sa-sidebar{ width:240px; }
+/* Rail (icons-only) width reduced */
+.sa-rail .sa-sidebar{ width:56px; left:8px; }
+/* Hover-expanded rail width reduced */
+.sa-rail .sa-sidebar:hover{ width:220px; }
+/* Adjust content width and left margin to match slimmer rail */
+.sa-rail #panel-deals.sa-card{
+  width:calc(100vw - 104px); /* 56 rail + ~48 gutter */
+  margin-left:88px;          /* 56 rail + 32 gutter */
+  margin-right:16px;
+  padding-left:16px; padding-right:16px;
+}
+/* Smaller icons in rail */
+.sa-rail .sa-sidebar .item-icon{ width:32px; height:32px; margin:6px 0; }
+/* Hide the pink toggle on desktop; keep for mobile */
+@media (min-width: 992px){
+  .sa-toggle{ display:none !important; }
+}
+
+
+
+/* === Patch: rail no-overlap + uniform items + toolbar/actions (2025-08-09) === */
+
+/* Do NOT let the rail overlap main content on any panel */
+.sa-rail .sa-main{ margin-left:88px; margin-right:16px; }
+.sa-rail .sa-card{ margin-left:0; margin-right:0; }
+
+/* Uniform sidebar items (same height active/inactive) */
+.sa-nav .sa-link{
+  display:flex; align-items:center; justify-content:center;
+  height:56px; padding:0; border-radius:16px;
+}
+.sa-nav .sa-link .item-icon{ font-size:18px; line-height:1; }
+.sa-nav .sa-link .item-text{ font-size:0; } /* hide label in rail */
+.sa-rail .sa-sidebar:hover .sa-link .item-text{ font-size:14px; } /* show label on hover only */
+
+/* Active state should not change size */
+.sa-nav .sa-link.active{ box-shadow:none; }
+
+/* Brand: keep compact in rail; expand title only on hover */
+.sa-rail .sa-sidebar .sa-brand{ font-size:12px; padding:8px 0 12px; text-align:center; }
+.sa-rail .sa-sidebar .sa-brand::after{ content:""; display:block; height:0; }
+.sa-rail .sa-sidebar:hover .sa-brand{ font-size:14px; text-align:left; }
+
+/* Top toolbar alignment: keep everything in one row on desktop */
+@media (min-width: 992px){
+  .sa-row.toolbar{ flex-wrap:nowrap; justify-content:space-between; }
+  .sa-row.toolbar .sa-row{ flex-wrap:nowrap; gap:12px; }
+}
+
+/* Table actions: keep buttons in a single row on desktop */
+@media (min-width: 992px){
+  #deals-table td:last-child,
+  .table td:last-child{
+    min-width: 320px;
+    white-space: nowrap;
+  }
+  #deals-table td:last-child > *,
+  .table td:last-child > *{
+    display:inline-flex; vertical-align:middle; margin-right:8px;
+  }
+}
+
+/* Prevent inner horizontal scrollbars caused by oversize cells */
+.sa-card{ overflow-x:hidden; }
+.table{ table-layout:auto; }
+
+
+
+/* === Patch: tighten rail gutter + remove horizontal scroll (2025-08-09) === */
+
+/* In rail mode, reduce left margin so sidebar hugs content */
+.sa-rail .sa-main{
+  margin-left:72px; /* matches rail width + small padding */
+  margin-right:0;
+}
+.sa-rail .sa-card{
+  margin-left:0;
+  margin-right:0;
+  width:auto; /* let it size naturally */
+}
+
+/* Ensure main area and table never overflow viewport */
+.sa-main, .sa-card, .sa-panel{
+  max-width:100%;
+  overflow-x:auto;
+}
+
+/* Make sure table fits container without triggering horizontal scroll unnecessarily */
+.table{
+  table-layout:auto;
+  width:100%;
+  max-width:100%;
+}
+
+
+
+/* === Patch: tighten rail gutter + kill horizontal scroll (2025-08-09b) === */
+
+/* Never allow horizontal overflow */
+html, body { overflow-x: hidden; }
+
+/* In rail mode, reduce left gutter so content hugs the rail */
+.sa-rail .sa-main{ margin-left:72px; margin-right:16px; }
+.sa-rail #panel-deals.sa-card{
+  width:auto;                 /* let it be intrinsic; avoids calc() off-by-1 */
+  margin-left:72px;           /* 56 rail + 16 gutter */
+  margin-right:16px;
+  padding-left:16px; padding-right:16px;
+}
+
+/* Ensure cards don't cause overflow due to inner shadows/borders */
+.sa-card{ max-width:100%; box-sizing:border-box; }
+
+/* Tables respect container width without forcing a horizontal scrollbar */
+.table{ width:100%; table-layout:auto; }
+/* Keep actions inline but allow wrap sooner on narrow screens */
+@media (max-width: 1200px){
+  #deals-table td:last-child, .table td:last-child{ min-width: 260px; }
+}
+
+
+
+/* === Patch: slimmer sidebar (48px rail / 200px hover) === */
+
+/* Rail width */
+.sa-rail .sa-sidebar{
+  width:48px;
+  left:8px;
+}
+
+/* Hover-expanded rail width */
+.sa-rail .sa-sidebar:hover{
+  width:200px;
+}
+
+/* Adjust content margins for new rail width */
+.sa-rail .sa-main{
+  margin-left:64px; /* 48 rail + 16 gutter */
+  margin-right:16px;
+}
+.sa-rail #panel-deals.sa-card{
+  width:auto;
+  margin-left:64px;
+  margin-right:16px;
+  padding-left:16px;
+  padding-right:16px;
+}
+
+/* Adjust icon sizing in rail */
+.sa-rail .sa-sidebar .item-icon{
+  width:28px; height:28px; margin:4px 0;
+  font-size:16px;
+}
+
+/* Keep brand centered in rail */
+.sa-rail .sa-sidebar .sa-brand{
+  font-size:11px;
+  padding:6px 0 10px;
+  text-align:center;
+}
+.sa-rail .sa-sidebar:hover .sa-brand{
+  font-size:14px; text-align:left;
+}
+
+
+
+/* === Patch: tighter vertical spacing in sidebar items === */
+.sa-nav .sa-link{
+  height:48px; /* reduced height */
+  margin-bottom:6px; /* reduced gap */
+}
+.sa-rail .sa-sidebar .item-icon{
+  margin:0;
+}
+.sa-footer{ margin-top:8px; padding-top:8px; }
+
+
+
+/* === Patch: tighter vertical flow; logout right after last menu item === */
+
+/* Remove flex-grow pushing logout to bottom */
+.sa-sidebar .sa-inner{
+  display:block; /* stack naturally */
+}
+
+/* Ensure nav and footer have consistent spacing */
+.sa-nav{ margin-bottom:8px; }
+.sa-footer{ margin-top:0; padding-top:8px; border-top:1px dashed var(--sb-border); }
+
+
+
+/* === Compact Rail Fix (no overlap, logout fits) === */
+/* Narrower rail */
+.sa-rail .sa-sidebar{ width:44px; left:8px; }
+/* Hover width smaller so it doesn't hit the table */
+.sa-rail .sa-sidebar:hover{ width:190px; }
+/* Content offset equals rail + gutter */
+.sa-rail .sa-main{ margin-left:60px; margin-right:16px; } /* 44 + 16 */
+/* Panels inside respect the same offset */
+.sa-rail .sa-card{ margin-left:0; margin-right:0; max-width:100%; box-sizing:border-box; }
+.sa-rail #panel-deals.sa-card{ width:auto; margin-left:60px; margin-right:16px; padding-left:16px; padding-right:16px; }
+/* Sidebar internals tightened */
+.sa-sidebar{ padding:8px 8px 10px; }
+.sa-brand{ margin-bottom:6px; }
+.sa-nav{ gap:4px; margin:0 0 6px; }
+.sa-nav .sa-link{ height:40px; border-radius:12px; }
+.sa-rail .sa-sidebar .item-icon{ width:22px; height:22px; font-size:14px; margin:0; }
+/* Make sidebar scrollable if tall, prevent popping out */
+.sa-sidebar{ overflow-y:auto; max-height:calc(100vh - 96px); }
+
+/* Prevent any horizontal scroll */
+html, body{ overflow-x:hidden; }
+/* —— Normalize Manage Deals spacing (match other tabs) —— */
+.sa-rail #panel-deals.sa-card{
+  width:auto !important;
+  margin-left:0 !important;    /* remove special left margin */
+  margin-right:0 !important;
+  padding-left:16px;           /* same inner padding as others */
+  padding-right:16px;
+  max-width:100%;
+  box-sizing:border-box;
+}
+
+/* Ensure its toolbar doesn’t add an extra indent */
+#panel-deals .sa-row.toolbar{ margin-left:0 !important; margin-right:0 !important; }
+
+/* Let .sa-main control the offset; keep all tabs consistent */
+.sa-rail .sa-main{ margin-left:60px !important; margin-right:16px !important; } /* 44px rail + 16px gutter */
+
+
+
+/* Hide the sidebar toggle on desktop-like inputs even if the viewport is narrow (e.g., DevTools open) */
+@media (hover: hover) and (pointer: fine) {
+  .sa-toggle { display: none !important; }
+}
+
+/* A11y: visible focus ring */
+:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
+
+
+/* Image: keep full view, no crop */
+.deal-media img{ width:100%; height:auto; max-height:450px; object-fit:contain; }
+
+
+/* Sticky bar: mobile only */
+@media (min-width:901px){ #sticky-bar, .deal-sticky{ display:none !important; } }

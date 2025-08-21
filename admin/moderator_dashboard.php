@@ -9,7 +9,7 @@ require_once __DIR__ . '/config/db.php';
 // Check that the user is logged in and has the moderator role or is a super admin
 if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['moderator', 'super_admin'], true)) {
     // If not authorized, redirect to the unified login page instead of echoing plain text
-    header('Location: ../login_unified.php');
+    header('Location: ../login.php');
     exit;
 }
 

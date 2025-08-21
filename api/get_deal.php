@@ -1,7 +1,8 @@
 <?php
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
-require_once __DIR__ . '/require_login.php';
+// Public-read: allow guests to fetch deal
+// require_once __DIR__ . '/require_login.php';
 header('Content-Type: application/json');
 require_once __DIR__ . '/../config/db.php';
 
@@ -47,7 +48,36 @@ try {
     $deal['images'] = $deal['images'] ? array_filter(array_map('trim', explode(',', $deal['images']))) : [];
     // Provide a thumbnail property equal to the first image (if any)
     $deal['thumbnail'] = isset($deal['images'][0]) ? $deal['images'][0] : null;
-    echo json_encode(['success' => true, 'deal' => $deal]);
+    
+        // --- BEGIN added: attach nested author with role flags ---
+    if (!empty($deal['user_id'])) {
+      try {
+        // match your users schema: is_muted, id, username, email, password, is_verified, created_at, role, is_verified_business
+        $stmtAuthor = $pdo->prepare("SELECT id, username, role, is_verified, is_verified_business FROM users WHERE id = :uid LIMIT 1");
+        $stmtAuthor->execute([':uid' => (int)$deal['user_id']]);
+        $author = $stmtAuthor->fetch(PDO::FETCH_ASSOC);
+        if ($author) {
+          $role = strtolower((string)$author['role']);
+          $deal['author'] = [
+            'id' => (int)$author['id'],
+            'username' => $author['username'],
+            'role' => $role,
+            // booleans you already expose; keep consistent types (ints)
+            'is_verified' => (int)$author['is_verified'],
+            'is_verified_business' => (int)$author['is_verified_business'],
+          ];
+          // Back-compat: copy onto top-level if missing so existing frontends keep working
+          if (!isset($deal['username']) || $deal['username'] === null) { $deal['username'] = $author['username']; }
+          if (!isset($deal['role']) || $deal['role'] === null)        { $deal['role'] = $role; }
+          if (!isset($deal['is_verified']) || $deal['is_verified'] === null)                 { $deal['is_verified'] = (int)$author['is_verified']; }
+          if (!isset($deal['is_verified_business']) || $deal['is_verified_business'] === null) { $deal['is_verified_business'] = (int)$author['is_verified_business']; }
+        }
+      } catch (Exception $e) {
+        // do not fail the endpoint on author join issues
+      }
+    }
+    // --- END added ---
+echo json_encode(['success' => true, 'deal' => $deal]);
   } else {
     echo json_encode(['success' => false, 'error' => 'Deal not found']);
   }
