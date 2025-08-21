@@ -99,10 +99,12 @@
 function buildGuestNav() {
     const nav = byId('nav-menu');
     if (!nav) return;
+    // SB mockup start
     nav.innerHTML = [
-      `<a href="${BASE}index.html" class="nav-link nav-home">${t('home')==='home'?'Home':t('home')}</a>`,
-      // keep login/signup links out of nav; they go in user icon menu
-    ].filter(Boolean).join('');
+      `<a href="${BASE}submit_deal.html" class="sb-link">+ Post Deal</a>`,
+      `<a href="${BASE}smart_alerts.html" class="sb-link">Alerts</a>`
+    ].join('');
+    // SB mockup end
 
     // Show user icon with Login/Signup dropdown
     const um = byId('user-menu');
@@ -130,44 +132,13 @@ function buildAuthedNav(me) {
     const nav = byId('nav-menu');
     if (!nav) return;
 
+    // SB mockup start
     const links = [];
-    // Optional Home (keep for now)
-    links.push(`<a href="${BASE}index.html" class="nav-link nav-home">Home</a>`);
-
-    // + Post Deal (if not muted)
     const isMuted = localStorage.getItem('is_muted') === '1';
-    if (!isMuted) links.push(`<a href="${BASE}submit_deal.html" class="nav-link nav-post">+&nbsp;Post Deal</a>`);
-
-    // Alerts shortcut (placeholder to smart alerts page)
-    links.push(`<a href="${BASE}smart_alerts.html" class="nav-link nav-alerts">○&nbsp;Alerts</a>`);
-
+    if (!isMuted) links.push(`<a href="${BASE}submit_deal.html" class="sb-link">+ Post Deal</a>`);
+    links.push(`<a href="${BASE}smart_alerts.html" class="sb-link">Alerts</a>`);
     nav.innerHTML = links.join('');
-
-
-    // Append Location control directly into #nav-menu (robust)
-    try{
-      if(!document.getElementById('sb-header-location')){
-        var navEl = document.getElementById('nav-menu');
-        if(navEl){
-          var wrap = document.createElement('span');
-          wrap.id = 'sb-header-location';
-          wrap.className = 'nav-location-inline';
-          wrap.innerHTML = '<span class="sb-loc-icon" aria-hidden="true">📍</span>' +
-                           '<select id="sb-location-select" class="sb-loc-select" aria-label="Location">' +
-                           '<option value="all">All</option>' +
-                           '<option value="near">Near Me</option>' +
-                           '</select>';
-          navEl.appendChild(wrap);
-          var sel = wrap.querySelector('#sb-location-select');
-          var saved = localStorage.getItem('sb_location_mode') || 'all';
-          sel.value = saved;
-          sel.addEventListener('change', function(){
-            localStorage.setItem('sb_location_mode', this.value);
-            try{ window.dispatchEvent(new CustomEvent('sb:locationFilter', { detail: { mode: this.value } })); }catch(_){}
-          });
-        }
-      }
-    }catch(_){}
+    // SB mockup end
 
 
     // user menu visible
@@ -200,8 +171,93 @@ function buildAuthedNav(me) {
     const um  = byId('user-menu');
     const nav = byId('nav-menu');
     if (um) um.classList.add('hidden');
-    if (nav) nav.innerHTML = `<a href="${BASE}index.html" class="nav-link nav-home">Home</a>`;
+    if (nav) nav.innerHTML = `<a href="${BASE}index.html" class="sb-link">Home</a>`;
   }
+
+  // SB mockup start
+  function setupSBSearch(){
+    const $ = s => document.querySelector(s);
+    const on = (el,ev,fn)=> el && el.addEventListener(ev,fn);
+
+    let loc;
+    try{ loc = JSON.parse(localStorage.getItem('sb.location')||'{}'); }catch(e){ loc = {}; }
+    loc = Object.assign({mode:'country', city:null, lat:null, lng:null, radius_km:25}, loc);
+
+    const q = $('#sb-q');
+    const locPill = $('#sb-locpill');
+    const locLabel = $('#sb-loclabel');
+    const modal = $('#sb-locmodal');
+    const cityInput = $('#sb-cityinput');
+    const catBar = $('#catBar');
+
+    const saveLoc = () => localStorage.setItem('sb.location', JSON.stringify(loc));
+    const renderLoc = () => {
+      let txt = 'India';
+      if (loc.mode === 'city' && loc.city) txt = loc.city;
+      else if (loc.mode === 'geo') txt = 'Near Me';
+      if (locLabel) locLabel.textContent = txt;
+    };
+    renderLoc();
+
+    function closeModal(){ if(modal) modal.setAttribute('aria-hidden','true'); }
+    function openModal(){ if(modal) modal.setAttribute('aria-hidden','false'); }
+    on(locPill,'click',openModal);
+    on($('#sb-locclose'),'click',closeModal);
+    on($('#sb-loccancel'),'click',closeModal);
+    on(modal,'click',e=>{ if(e.target===modal) closeModal(); });
+
+    on($('#sb-locapply'),'click',()=>{
+      const city = (cityInput && cityInput.value.trim());
+      if(city){
+        loc = {mode:'city', city, lat:null, lng:null, radius_km:25};
+        saveLoc(); renderLoc(); closeModal(); triggerSearch();
+      }
+    });
+
+    on($('#sb-usegeo'),'click',()=>{
+      if(!navigator.geolocation) return;
+      navigator.geolocation.getCurrentPosition(pos=>{
+        loc = {mode:'geo', city:null, lat:pos.coords.latitude, lng:pos.coords.longitude, radius_km:25};
+        saveLoc(); renderLoc(); closeModal(); triggerSearch();
+      });
+    });
+
+    function triggerSearch(){
+      const params = new URLSearchParams();
+      const qv = (q && q.value.trim()) || '';
+      if(qv) params.set('q', qv);
+      const cat = window.currentCategory || '';
+      if(cat) params.set('category', cat);
+      if(loc.mode==='city' && loc.city){
+        params.set('city', loc.city);
+      }else if(loc.mode==='geo' && loc.lat && loc.lng){
+        params.set('lat', loc.lat);
+        params.set('lng', loc.lng);
+        params.set('radius_km', loc.radius_km);
+      }
+      if(typeof window.updateDealsUI === 'function'){
+        fetch(BASE + 'api/get_deals.php?' + params.toString())
+          .then(r=>r.json()).then(j=>window.updateDealsUI(j)).catch(()=>{});
+      }else{
+        const url = new URL(location.href);
+        params.forEach((v,k)=> url.searchParams.set(k,v));
+        history.replaceState(null,'',url);
+        try{ window.dispatchEvent(new CustomEvent('sb:search',{detail:params})); }catch(_){ }
+      }
+    }
+
+    on(q,'keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); triggerSearch(); }});
+
+    on(catBar,'click',e=>{
+      const chip = e.target.closest('.chip');
+      if(!chip) return;
+      catBar.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+      chip.classList.add('active');
+      window.currentCategory = chip.dataset.cat || '';
+      triggerSearch();
+    });
+  }
+  // SB mockup end
 
   // --- Main init -------------------------------------------------------------
   async function init() {
@@ -212,6 +268,7 @@ function buildAuthedNav(me) {
     mountHeader(html);
     __installGlobalUserMenuDelegate();
     __wireUserDropdownUniversal();
+    setupSBSearch();
 
     // 2) Load feature flags & translations (best-effort)
     try {
