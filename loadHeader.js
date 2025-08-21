@@ -100,9 +100,9 @@ function buildGuestNav() {
     const nav = byId('nav-menu');
     if (!nav) return;
     nav.innerHTML = [
-      `<a href="${BASE}index.html" class="nav-link nav-home">${t('home')==='home'?'Home':t('home')}</a>`,
-      // keep login/signup links out of nav; they go in user icon menu
-    ].filter(Boolean).join('');
+      `<a href="${BASE}submit_deal.html" class="sb-link">+ Post Deal</a>`,
+      `<a href="${BASE}smart_alerts.html" class="sb-link">Alerts</a>`
+    ].join('');
 
     // Show user icon with Login/Signup dropdown
     const um = byId('user-menu');
@@ -131,43 +131,10 @@ function buildAuthedNav(me) {
     if (!nav) return;
 
     const links = [];
-    // Optional Home (keep for now)
-    links.push(`<a href="${BASE}index.html" class="nav-link nav-home">Home</a>`);
-
-    // + Post Deal (if not muted)
     const isMuted = localStorage.getItem('is_muted') === '1';
-    if (!isMuted) links.push(`<a href="${BASE}submit_deal.html" class="nav-link nav-post">+&nbsp;Post Deal</a>`);
-
-    // Alerts shortcut (placeholder to smart alerts page)
-    links.push(`<a href="${BASE}smart_alerts.html" class="nav-link nav-alerts">○&nbsp;Alerts</a>`);
-
+    if (!isMuted) links.push(`<a href="${BASE}submit_deal.html" class="sb-link">+ Post Deal</a>`);
+    links.push(`<a href="${BASE}smart_alerts.html" class="sb-link">Alerts</a>`);
     nav.innerHTML = links.join('');
-
-
-    // Append Location control directly into #nav-menu (robust)
-    try{
-      if(!document.getElementById('sb-header-location')){
-        var navEl = document.getElementById('nav-menu');
-        if(navEl){
-          var wrap = document.createElement('span');
-          wrap.id = 'sb-header-location';
-          wrap.className = 'nav-location-inline';
-          wrap.innerHTML = '<span class="sb-loc-icon" aria-hidden="true">📍</span>' +
-                           '<select id="sb-location-select" class="sb-loc-select" aria-label="Location">' +
-                           '<option value="all">All</option>' +
-                           '<option value="near">Near Me</option>' +
-                           '</select>';
-          navEl.appendChild(wrap);
-          var sel = wrap.querySelector('#sb-location-select');
-          var saved = localStorage.getItem('sb_location_mode') || 'all';
-          sel.value = saved;
-          sel.addEventListener('change', function(){
-            localStorage.setItem('sb_location_mode', this.value);
-            try{ window.dispatchEvent(new CustomEvent('sb:locationFilter', { detail: { mode: this.value } })); }catch(_){}
-          });
-        }
-      }
-    }catch(_){}
 
 
     // user menu visible
@@ -212,6 +179,7 @@ function buildAuthedNav(me) {
     mountHeader(html);
     __installGlobalUserMenuDelegate();
     __wireUserDropdownUniversal();
+    wireSBHeader();
 
     // 2) Load feature flags & translations (best-effort)
     try {
@@ -362,6 +330,80 @@ function buildAuthedNav(me) {
       }
     });
   }
+
+  // SB mockup start
+  function wireSBHeader(){
+    const $ = (s)=>document.querySelector(s);
+    const on = (el,ev,fn)=>el&&el.addEventListener(ev,fn);
+    const LS_KEY='sb.location';
+    let loc={mode:'country',city:null,lat:null,lng:null,radius_km:25};
+    try{ const saved=JSON.parse(localStorage.getItem(LS_KEY)||'{}'); Object.assign(loc,saved||{}); }catch{}
+    const save=()=>localStorage.setItem(LS_KEY,JSON.stringify(loc));
+    const updateLabel=()=>{
+      const lbl=$('#sb-loclabel');
+      if(!lbl) return;
+      if(loc.mode==='city'&&loc.city) lbl.textContent=loc.city;
+      else if(loc.mode==='geo') lbl.textContent='Near Me';
+      else lbl.textContent='India';
+    };
+    updateLabel();
+    const hideModal=()=>{ const m=$('#sb-locmodal'); if(m) m.setAttribute('aria-hidden','true'); };
+    const showModal=()=>{ const m=$('#sb-locmodal'); if(m) m.setAttribute('aria-hidden','false'); };
+    on($('#sb-locpill'),'click',showModal);
+    on($('#sb-locclose'),'click',hideModal);
+    on($('#sb-loccancel'),'click',hideModal);
+    on($('#sb-locmodal'),'click',e=>{ if(e.target.id==='sb-locmodal') hideModal(); });
+    on($('#sb-locapply'),'click',()=>{
+      const city=($('#sb-cityinput').value||'').trim();
+      if(city){ loc={mode:'city',city,lat:null,lng:null,radius_km:25}; save(); updateLabel(); }
+      hideModal(); triggerSearch();
+    });
+    on($('#sb-usegeo'),'click',()=>{
+      if(!navigator.geolocation) return;
+      navigator.geolocation.getCurrentPosition(pos=>{
+        loc={mode:'geo',city:null,lat:pos.coords.latitude,lng:pos.coords.longitude,radius_km:25};
+        save(); updateLabel(); hideModal(); triggerSearch();
+      });
+    });
+
+    function buildParams(){
+      const p=new URLSearchParams();
+      const q=($('#sb-q').value||'').trim();
+      if(q) p.set('q',q);
+      const cat=window.currentCategory||'';
+      if(cat) p.set('category',cat);
+      if(loc.mode==='city'&&loc.city) p.set('city',loc.city);
+      if(loc.mode==='geo'&&loc.lat&&loc.lng){
+        p.set('lat',loc.lat); p.set('lng',loc.lng); p.set('radius_km',loc.radius_km);
+      }
+      return p;
+    }
+
+    function triggerSearch(){
+      const params=buildParams();
+      if(typeof window.updateDealsUI==='function'){
+        fetch('/bagit/api/get_deals.php?'+params.toString()).then(r=>r.json()).then(j=>{ try{ window.updateDealsUI(j); }catch(_){}});
+      }else{
+        const url=new URL(location.href);
+        url.search=params.toString();
+        history.replaceState(null,'',url);
+        try{ window.dispatchEvent(new CustomEvent('sb:search',{detail:params})); }catch(_){ }
+      }
+    }
+
+    on($('#sb-q'),'keydown',e=>{ if(e.key==='Enter') triggerSearch(); });
+
+    window.currentCategory=document.querySelector('#catBar .chip.active')?.dataset.cat||'';
+    on($('#catBar'),'click',e=>{
+      const chip=e.target.closest('.chip');
+      if(!chip) return;
+      document.querySelector('#catBar .chip.active')?.classList.remove('active');
+      chip.classList.add('active');
+      window.currentCategory=chip.dataset.cat||'';
+      triggerSearch();
+    });
+  }
+  // SB mockup end
 // --- Boot ------------------------------------------------------------------
   __installGlobalUserMenuDelegate();
   document.addEventListener('DOMContentLoaded', init);
@@ -407,78 +449,6 @@ function buildAuthedNav(me) {
     document.head.appendChild(s);
   }
 })();
-
-
-// ===== ROLE-AWARE HEADER START =====
-(function(){
-  try{
-    // Ensure header mount exists
-    var mount = document.getElementById('global-header');
-    if(!mount){
-      mount = document.createElement('div');
-      mount.id = 'global-header';
-      document.body.insertBefore(mount, document.body.firstChild);
-    }
-
-    // Roles from localStorage (string '1' means true)
-    var isAdmin = localStorage.getItem('is_admin') === '1';
-    var isModerator = localStorage.getItem('is_moderator') === '1';
-    var isSuperAdmin = localStorage.getItem('is_superadmin') === '1';
-    var isBiz = localStorage.getItem('is_biz') === '1';
-
-    // Build nav items based on roles
-    function navItem(href, text){
-      return '<a class="gh-link" href="'+href+'">'+text+'</a>';
-    }
-
-    var nav = [
-      navItem('/bagit/index.html','Home'),
-      navItem('/bagit/deals.html','Deals'),
-      navItem('/bagit/post_deal.html','Post Deal')
-    ];
-
-    if (isBiz)       nav.push(navItem('/bagit/business.html','Business'));
-    if (isModerator) nav.push(navItem('/bagit/moderation.html','Moderator'));
-    if (isAdmin)     nav.push(navItem('/bagit/admin/index.html','Admin'));
-    if (isSuperAdmin)nav.push(navItem('/bagit/admin/superadmin.html','Superadmin'));
-
-    // Username if present
-    var username = localStorage.getItem('username') || '';
-    var userBlock = username ? ('<span class="gh-user">Hi, '+username+'</span>') : '';
-
-    var html = ''
-      + '<header class="global-header-wrap">'
-      + '  <div class="gh-inner">'
-      + '    <a class="gh-logo" href="/bagit/index.html">Bagit</a>'
-      + '    <nav class="gh-nav">'+ nav.join('') +'</nav>'
-      + '    <div class="gh-right">'
-      +        userBlock
-      + '    </div>'
-      + '  </div>'
-      + '</header>';
-
-    mount.innerHTML = html;
-
-    // Minimal CSS if header.css missing or lacking classes
-    var styleId = 'gh-inline-style';
-    if (!document.getElementById(styleId)){
-      var s = document.createElement('style');
-      s.id = styleId;
-      s.textContent = [
-        '.global-header-wrap{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid #eee}',
-        '.gh-inner{max-width:1200px;margin:0 auto;padding:10px 12px;display:flex;align-items:center;gap:16px}',
-        '.gh-logo{font-weight:800;text-decoration:none;color:#111}',
-        '.gh-nav{display:flex;gap:12px;flex:1;flex-wrap:wrap}',
-        '.gh-link{color:#374151;text-decoration:none;padding:6px 10px;border-radius:8px}',
-        '.gh-link:hover{background:#f5f5f5}',
-        '.gh-right{display:flex;align-items:center;gap:10px;color:#6b7280}',
-        '@media(max-width:768px){.gh-inner{padding:8px}.gh-nav{gap:8px}}'
-      ].join('');
-      document.head.appendChild(s);
-    }
-  }catch(e){ console.warn('Header inject error', e); }
-})();
-// ===== ROLE-AWARE HEADER END =====
 
 
   // --- Universal dropdown wiring (guest or authed) --------------------------
