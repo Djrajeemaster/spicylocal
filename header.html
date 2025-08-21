@@ -1,30 +1,52 @@
-<!-- Global Header -->
-<div class="global-header" id="sb-header">
-<a class="logo" href="/bagit/index.html">
-<img alt="SpicyBeats" class="logo-img" loading="lazy" src="/bagit/logo.png"/>
-<span>SpicyBeats</span>
-</a>
-<nav class="nav-links" id="nav-menu">
-<!-- Populated by loadHeader.js -->
-<a class="nav-link nav-home" href="/bagit/index.html">Home</a>
-<a class="nav-link login-link" href="/bagit/login.php">Login</a>
-<a class="nav-link signup-link" href="/bagit/signup.html">Signup</a>
-</nav>
-<div class="user-wrap user-menu hidden" id="user-menu">
-<button aria-expanded="false" aria-haspopup="true" class="avatar-btn" id="user-menu-toggle">
-<span class="avatar" id="user-avatar">SB</span>
-<span class="user-name username-label"></span>
-</button>
-<div class="user-dropdown hidden" id="user-dropdown" role="menu">
-<a href="profile.html" id="dd-profile" role="menuitem">Profile</a>
-<a class="hidden" href="/bagit/admin/dashboard.php" id="dd-admin" role="menuitem">Admin Mode</a>
-<a class="hidden" href="/bagit/admin/dashboard.php" id="dd-moderator" role="menuitem">Moderation Mode</a>
-<a class="hidden" href="/bagit/admin/superadmin.php" id="dd-superadmin" role="menuitem">Super Admin Mode</a>
-<a class="hidden" href="/bagit/verified_business_dashboard.html" id="dd-business" role="menuitem">Business Mode</a>
-<a class="hidden" href="/bagit/admin/users.php" id="dd-users" role="menuitem">User Management</a>
-<a href="/bagit/smart_alerts.html" id="dd-smartalerts" role="menuitem">Smart Alerts</a>
-<a href="#" id="dd-logout" role="menuitem">Logout</a>
+<!-- SB mockup start -->
+<div id="sb-header" class="sb-header">
+  <a href="/bagit/index.html" class="sb-brand">
+    <span class="sb-logo">SB</span>
+    <span class="sb-name">SpicyBeats</span>
+  </a>
+  <nav id="nav-menu" class="sb-right">
+    <a href="/bagit/submit_deal.html" class="sb-link">+ Post Deal</a>
+    <a href="/bagit/smart_alerts.html" class="sb-link">Alerts</a>
+  </nav>
+  <div id="user-menu" class="user-wrap hidden">
+    <button id="user-menu-toggle" class="avatar-btn" aria-haspopup="true" aria-expanded="false">
+      <span id="user-avatar" class="avatar">SB</span>
+      <span class="user-name username-label"></span>
+    </button>
+    <div id="user-dropdown" class="user-dropdown hidden" role="menu">
+      <a href="/bagit/profile.html" id="dd-profile" role="menuitem">Profile</a>
+      <a href="/bagit/admin/dashboard.php" id="dd-admin" role="menuitem" class="hidden">Admin Mode</a>
+      <a href="/bagit/admin/dashboard.php" id="dd-moderator" role="menuitem" class="hidden">Moderation Mode</a>
+      <a href="/bagit/admin/superadmin.php" id="dd-superadmin" role="menuitem" class="hidden">Super Admin Mode</a>
+      <a href="/bagit/verified_business_dashboard.html" id="dd-business" role="menuitem" class="hidden">Business Mode</a>
+      <a href="/bagit/admin/users.php" id="dd-users" role="menuitem" class="hidden">User Management</a>
+      <a href="/bagit/smart_alerts.html" id="dd-smartalerts" role="menuitem">Smart Alerts</a>
+      <a href="#" id="dd-logout" role="menuitem">Logout</a>
+    </div>
+  </div>
 </div>
+<div class="sb-searchwrap">
+  <input id="sb-q" class="sb-searchinput" type="search" placeholder="Search deals, coupons, stores, or categories…" />
+  <button id="sb-locpill" class="sb-locpill"><span id="sb-loclabel">India</span><span class="sb-caret">▾</span></button>
 </div>
+<div id="catBar" class="sb-cats">
+  <div class="chip active" data-cat="">All</div>
+  <div class="chip" data-cat="electronics">Electronics</div>
+  <div class="chip" data-cat="food">Food</div>
+  <div class="chip" data-cat="fashion">Fashion</div>
+  <div class="chip" data-cat="travel">Travel</div>
+</div>
+<div id="sb-locmodal" aria-hidden="true" class="sb-locmodal">
+  <div class="sb-locdialog">
+    <button id="sb-locclose" aria-label="Close" class="sb-locclose">&times;</button>
+    <h2>Select Location</h2>
+    <input id="sb-cityinput" type="text" placeholder="Enter city" />
+    <button id="sb-usegeo">Use my location</button>
+    <div class="sb-locactions">
+      <button id="sb-loccancel">Cancel</button>
+      <button id="sb-locapply">Apply</button>
+    </div>
+  </div>
 </div>
 <div class="sponsored hidden" id="sponsored-banner"></div>
+<!-- SB mockup end -->

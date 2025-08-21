@@ -12,6 +12,8 @@
 
   function isTrue(v) { return v === "1" || v === "true"; }
   function byId(id) { return document.getElementById(id); }
+  const $ = (s) => document.querySelector(s);
+  const on = (el, ev, fn) => el && el.addEventListener(ev, fn);
 
   // --- Mount + Sanitize ------------------------------------------------------
   function sanitizeGlobalHeader(){
@@ -100,9 +102,9 @@ function buildGuestNav() {
     const nav = byId('nav-menu');
     if (!nav) return;
     nav.innerHTML = [
-      `<a href="${BASE}index.html" class="nav-link nav-home">${t('home')==='home'?'Home':t('home')}</a>`,
-      // keep login/signup links out of nav; they go in user icon menu
-    ].filter(Boolean).join('');
+      `<a href="${BASE}submit_deal.html" class="sb-link">+ Post Deal</a>`,
+      `<a href="${BASE}smart_alerts.html" class="sb-link">Alerts</a>`
+    ].join('');
 
     // Show user icon with Login/Signup dropdown
     const um = byId('user-menu');
@@ -131,44 +133,10 @@ function buildAuthedNav(me) {
     if (!nav) return;
 
     const links = [];
-    // Optional Home (keep for now)
-    links.push(`<a href="${BASE}index.html" class="nav-link nav-home">Home</a>`);
-
-    // + Post Deal (if not muted)
     const isMuted = localStorage.getItem('is_muted') === '1';
-    if (!isMuted) links.push(`<a href="${BASE}submit_deal.html" class="nav-link nav-post">+&nbsp;Post Deal</a>`);
-
-    // Alerts shortcut (placeholder to smart alerts page)
-    links.push(`<a href="${BASE}smart_alerts.html" class="nav-link nav-alerts">○&nbsp;Alerts</a>`);
-
+    if (!isMuted) links.push(`<a href="${BASE}submit_deal.html" class="sb-link">+ Post Deal</a>`);
+    links.push(`<a href="${BASE}smart_alerts.html" class="sb-link">Alerts</a>`);
     nav.innerHTML = links.join('');
-
-
-    // Append Location control directly into #nav-menu (robust)
-    try{
-      if(!document.getElementById('sb-header-location')){
-        var navEl = document.getElementById('nav-menu');
-        if(navEl){
-          var wrap = document.createElement('span');
-          wrap.id = 'sb-header-location';
-          wrap.className = 'nav-location-inline';
-          wrap.innerHTML = '<span class="sb-loc-icon" aria-hidden="true">📍</span>' +
-                           '<select id="sb-location-select" class="sb-loc-select" aria-label="Location">' +
-                           '<option value="all">All</option>' +
-                           '<option value="near">Near Me</option>' +
-                           '</select>';
-          navEl.appendChild(wrap);
-          var sel = wrap.querySelector('#sb-location-select');
-          var saved = localStorage.getItem('sb_location_mode') || 'all';
-          sel.value = saved;
-          sel.addEventListener('change', function(){
-            localStorage.setItem('sb_location_mode', this.value);
-            try{ window.dispatchEvent(new CustomEvent('sb:locationFilter', { detail: { mode: this.value } })); }catch(_){}
-          });
-        }
-      }
-    }catch(_){}
-
 
     // user menu visible
     const um = byId('user-menu');
@@ -200,8 +168,50 @@ function buildAuthedNav(me) {
     const um  = byId('user-menu');
     const nav = byId('nav-menu');
     if (um) um.classList.add('hidden');
-    if (nav) nav.innerHTML = `<a href="${BASE}index.html" class="nav-link nav-home">Home</a>`;
+    if (nav) nav.innerHTML = `<a href="${BASE}index.html" class="sb-link">Home</a>`;
   }
+
+  // SB mockup start
+  let locState = null;
+  function initLocation(){
+    try{ locState = JSON.parse(localStorage.getItem('sb.location')||'{}') || {}; }
+    catch{ locState = {}; }
+    locState = Object.assign({mode:'country', city:null, lat:null, lng:null, radius_km:25}, locState);
+    updateLocLabel();
+  }
+  function saveLocation(){ localStorage.setItem('sb.location', JSON.stringify(locState)); }
+  function updateLocLabel(){ const lbl = $('#sb-loclabel'); if(!lbl) return; lbl.textContent = locState.mode==='country'?'India':(locState.mode==='city'?locState.city||'India':'Near Me'); }
+  function showLocModal(show){ const m=$('#sb-locmodal'); if(m) m.setAttribute('aria-hidden', show?'false':'true'); }
+  function triggerSearch(){
+    const q = ($('#sb-q')?.value||'').trim();
+    const params = new URLSearchParams();
+    if(q) params.set('q', q);
+    if(window.currentCategory) params.set('category', window.currentCategory);
+    if(locState.mode==='city' && locState.city){ params.set('city', locState.city); }
+    if(locState.mode==='geo' && locState.lat && locState.lng){ params.set('lat', locState.lat); params.set('lng', locState.lng); params.set('radius_km', locState.radius_km); }
+    const qs = params.toString();
+    if(typeof window.updateDealsUI === 'function'){
+      fetch('/bagit/api/get_deals.php?'+qs).then(r=>r.json()).then(d=>{ try{ window.updateDealsUI(d); }catch(_){} });
+    }else{
+      const newUrl = location.pathname + (qs?'?'+qs:'');
+      history.replaceState(null,'',newUrl);
+      try{ window.dispatchEvent(new CustomEvent('sb:search', {detail: params})); }catch(_){ }
+    }
+  }
+  function wireHeaderUI(){
+    initLocation();
+    window.currentCategory = '';
+    on($('#sb-locpill'),'click',()=>showLocModal(true));
+    on($('#sb-locclose'),'click',()=>showLocModal(false));
+    on($('#sb-loccancel'),'click',()=>showLocModal(false));
+    on($('#sb-locmodal'),'click',e=>{ if(e.target===$('#sb-locmodal')) showLocModal(false); });
+    on($('#sb-locapply'),'click',()=>{ const city=$('#sb-cityinput')?.value.trim(); if(city){ locState.mode='city'; locState.city=city; locState.lat=locState.lng=null; saveLocation(); updateLocLabel(); showLocModal(false); triggerSearch(); } });
+    on($('#sb-usegeo'),'click',()=>{ if(navigator.geolocation){ navigator.geolocation.getCurrentPosition(p=>{ locState.mode='geo'; locState.lat=p.coords.latitude; locState.lng=p.coords.longitude; locState.city=null; saveLocation(); updateLocLabel(); showLocModal(false); triggerSearch(); }); } });
+    on($('#sb-q'),'keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); triggerSearch(); }});
+    const catBar = byId('catBar');
+    on(catBar,'click',e=>{ const chip=e.target.closest('.chip'); if(!chip) return; catBar.querySelectorAll('.chip').forEach(c=>c.classList.remove('active')); chip.classList.add('active'); window.currentCategory = chip.dataset.cat || ''; triggerSearch(); });
+  }
+  // SB mockup end
 
   // --- Main init -------------------------------------------------------------
   async function init() {
@@ -235,6 +245,7 @@ function buildAuthedNav(me) {
 
     // 3) Kick auth refresh which builds nav/UI
     __refreshHeaderAuth();
+    wireHeaderUI();
   }
 
   // --- Auth refresh (server truth) ------------------------------------------
